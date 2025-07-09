@@ -8,13 +8,16 @@ import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import FindRide from './pages/FindRides';
+import OfferRide from './pages/OfferRides';
 
 // Main App Content Component
 function AppContent() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [pendingAction, setPendingAction] = useState(null); // Store the action user wants to do
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
 
   useEffect(() => {
     // Comment out or remove the auto-login check to always show landing page
@@ -31,21 +34,36 @@ function AppContent() {
     setUser(userData);
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
-    navigate('/dashboard');
+    
+    // If there's a pending action, navigate to it
+    if (pendingAction) {
+      navigate(pendingAction);
+      setPendingAction(null);
+    } else {
+      navigate('/dashboard', { replace: false });
+    }
   };
 
   const handleRegister = (userData, token) => {
     setUser(userData);
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
-    navigate('/dashboard');
+    
+    // If there's a pending action, navigate to it
+    if (pendingAction) {
+      navigate(pendingAction);
+      setPendingAction(null);
+    } else {
+      navigate('/dashboard', { replace: false });
+    }
   };
 
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    navigate('/');
+    setPendingAction(null);
+    navigate('/', { replace: true });
   };
 
   const handleShowLogin = () => {
@@ -57,7 +75,27 @@ function AppContent() {
   };
 
   const handleCloseModal = () => {
-    navigate('/');
+    setPendingAction(null);
+    navigate(-1);
+  };
+
+  // Handle ride actions
+  const handleFindRide = () => {
+    if (user) {
+      navigate('/find-ride');
+    } else {
+      setPendingAction('/find-ride');
+      navigate('/login');
+    }
+  };
+
+  const handleOfferRide = () => {
+    if (user) {
+      navigate('/offer-ride');
+    } else {
+      setPendingAction('/offer-ride');
+      navigate('/login');
+    }
   };
 
   if (loading) {
@@ -86,7 +124,10 @@ function AppContent() {
                 onShowLogin={handleShowLogin}
                 onShowRegister={handleShowRegister}
               />
-              <LandingPage />
+              <LandingPage 
+                onFindRide={handleFindRide}
+                onOfferRide={handleOfferRide}
+              />
             </div>
           } 
         />
@@ -96,6 +137,15 @@ function AppContent() {
           path="/login" 
           element={
             <div>
+              <LandingNavbar 
+                onShowLogin={handleShowLogin}
+                onShowRegister={handleShowRegister}
+              />
+              <LandingPage 
+                onFindRide={handleFindRide}
+                onOfferRide={handleOfferRide}
+              />
+              
               <div style={{
                 position: 'fixed',
                 top: 0,
@@ -142,6 +192,15 @@ function AppContent() {
           path="/register" 
           element={
             <div>
+              <LandingNavbar 
+                onShowLogin={handleShowLogin}
+                onShowRegister={handleShowRegister}
+              />
+              <LandingPage 
+                onFindRide={handleFindRide}
+                onOfferRide={handleOfferRide}
+              />
+              
               <div style={{
                 position: 'fixed',
                 top: 0,
@@ -189,6 +248,30 @@ function AppContent() {
           element={
             user ? (
               <Dashboard user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          } 
+        />
+
+        {/* Find Ride Route - Protected */}
+        <Route 
+          path="/find-ride" 
+          element={
+            user ? (
+              <FindRide user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          } 
+        />
+
+        {/* Offer Ride Route - Protected */}
+        <Route 
+          path="/offer-ride" 
+          element={
+            user ? (
+              <OfferRide user={user} onLogout={handleLogout} />
             ) : (
               <Navigate to="/" replace />
             )

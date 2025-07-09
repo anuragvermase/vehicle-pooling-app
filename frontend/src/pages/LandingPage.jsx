@@ -4,10 +4,10 @@ import Features from '../components/Features';
 import HowItWorks from '../components/HowItWorks';
 import Footer from '../components/Footer';
 
-const LandingPage = () => {
+const LandingPage = ({ onFindRide, onOfferRide }) => {
   return (
     <div className="landing-page">
-      <Hero />
+      <Hero onFindRide={onFindRide} onOfferRide={onOfferRide} />
       <Features />
       <HowItWorks />
       <Footer />

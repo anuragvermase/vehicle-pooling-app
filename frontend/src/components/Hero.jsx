@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/GlobalStyles.css'; // Fixed import path
 
-const Hero = () => {
+const Hero = ({ onFindRide, onOfferRide }) => {
   const [currentStat, setCurrentStat] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-
+  
   const stats = [
     { number: '50K+', label: 'Happy Riders', icon: '👥' },
     { number: '₹2,50,000', label: 'Money Saved', icon: '💰' },
@@ -121,7 +121,7 @@ const Hero = () => {
             <br />
             Help the Planet{' '}
             <span 
-              style={{ 
+              style={{
                 display: 'inline-block',
                 animation: 'bounce 2s infinite'
               }}
@@ -180,13 +180,14 @@ const Hero = () => {
             ))}
           </div>
           
-          {/* CTA Buttons */}
+          {/* CTA Buttons - Updated with onClick handlers */}
           <div style={{
             display: 'flex',
             gap: '1rem',
             flexWrap: 'wrap'
           }}>
             <button 
+              onClick={onFindRide}
               style={{
                 padding: '1rem 2rem',
                 background: '#26de81',
@@ -207,6 +208,7 @@ const Hero = () => {
             </button>
             
             <button 
+              onClick={onOfferRide}
               style={{
                 padding: '1rem 2rem',
                 background: 'transparent',
@@ -229,7 +231,7 @@ const Hero = () => {
 
         {/* Right Side - Visual Content */}
         <div 
-          className={isVisible ? 'slide-up' : ''} 
+          className={isVisible ? 'slide-up' : ''}
           style={{
             position: 'relative',
             textAlign: 'center'
