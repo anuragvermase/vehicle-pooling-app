@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import FreeMap from '../components/FreeMap';
 import { GoogleMap, LoadScript, Marker, DirectionsRenderer } from '@react-google-maps/api';
 
 const FindRide = ({ user, onLogout }) => {
@@ -407,38 +408,7 @@ const FindRide = ({ user, onLogout }) => {
               {/* Right Panel - Map */}
               <div className="map-panel">
                 <div className="map-container-modern">
-                  <LoadScript googleMapsApiKey="YOUR_GOOGLE_MAPS_API_KEY">
-                    <GoogleMap
-                      mapContainerStyle={mapContainerStyle}
-                      center={{ lat: 12.9716, lng: 77.5946 }}
-                      zoom={12}
-                      options={{
-                        styles: [
-                          {
-                            featureType: 'poi',
-                            elementType: 'labels',
-                            stylers: [{ visibility: 'off' }]
-                          }
-                        ],
-                        disableDefaultUI: false,
-                        zoomControl: true,
-                        streetViewControl: false,
-                        mapTypeControl: false,
-                        fullscreenControl: true
-                      }}
-                    >
-                      {rides.map((ride, index) => (
-                        <Marker
-                          key={ride.id}
-                          position={{
-                            lat: 12.9716 + (Math.random() - 0.5) * 0.02,
-                            lng: 77.5946 + (Math.random() - 0.5) * 0.02
-                          }}
-                          onClick={() => handleRideSelect(ride)}
-                        />
-                      ))}
-                    </GoogleMap>
-                  </LoadScript>
+                  <FreeMap rides={rides} selectedRide={selectedRide}/>
                 </div>
 
                 {selectedRide && (
