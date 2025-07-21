@@ -1,0 +1,8 @@
+# Ignore package.json at any level
+package.json
+
+# Or, ignore only in the root:
+/package.json
+
+# To also ignore in subdirectories:
+**/package.json
