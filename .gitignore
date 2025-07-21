@@ -1,3 +1,6 @@
+# Ignore all node_modules folders
+node_modules/
+
 # Ignore package.json at any level
 package.json
 
