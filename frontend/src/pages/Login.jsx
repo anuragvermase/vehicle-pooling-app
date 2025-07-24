@@ -3,56 +3,58 @@ import Loading from '../components/Loading';
 import API from '../services/api';
 
 const Login = ({ onLogin }) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  // 🛠 THIS FUNCTION MUST EXIST
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-    // Clear error when user starts typing
-    if (error) setError('');
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      // Call API
-      const response = await API.auth.login(formData);
-      
-      // Store token and user data
+  console.log("📤 Form Data:", formData);
+
+  try {
+    const response = await API.auth.login(formData);
+
+    // ✅ Only proceed if response is valid
+    if (response.token && response.user) {
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
-      
-      // Call parent function
-      onLogin(response.user, response.token);
-      
-    } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
-      
-      // For testing without backend
-      if (err.message.includes('fetch')) {
-        // Temporary login for testing
-        const testUser = { 
-          name: 'Test User', 
-          email: formData.email,
-          phone: '+91 9876543210'
-        };
-        onLogin(testUser, 'temp-token');
-      }
-    } finally {
-      setLoading(false);
+      onLogin(response.user, response.token); // ✅ THIS ONLY RUNS IF RESPONSE IS VALID
+    } else {
+      throw new Error('Invalid response from server.');
     }
-  };
+
+  } catch (err) {
+    let message = 'Login failed. Please try again.';
+
+    // ✅ Handle structured backend errors (Axios-style)
+    if (err?.response?.status === 401) {
+      message = 'Invalid email or password';
+    } else if (err?.response?.data?.message) {
+      message = err.response.data.message;
+    } else if (err?.message) {
+      message = err.message;
+    }
+
+    setError(message); // ✅ Show the error to the user
+    console.error(err);
+  } finally {
+    setLoading(false); // ✅ Keep the login form on screen
+  }
+};
+
 
   if (loading) {
     return <Loading message="Signing you in..." />;
@@ -113,9 +115,10 @@ const Login = ({ onLogin }) => {
                 borderRadius: '8px',
                 fontSize: '16px',
                 transition: 'border-color 0.3s ease',
-                outline: 'none'
+                outline: 'none',
+                boxSizing: 'border-box'
               }}
-              onFocus={(e) => {
+                           onFocus={(e) => {
                 e.target.style.borderColor = '#667eea';
                 e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
               }}
@@ -161,7 +164,8 @@ const Login = ({ onLogin }) => {
                 borderRadius: '8px',
                 fontSize: '16px',
                 transition: 'border-color 0.3s ease',
-                outline: 'none'
+                outline: 'none',
+                boxSizing: 'border-box'
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = '#667eea';
@@ -236,6 +240,7 @@ const Login = ({ onLogin }) => {
             Forgot Password?
           </button>
         </div>
+
         <button
           type="submit"
           style={{
@@ -263,6 +268,23 @@ const Login = ({ onLogin }) => {
         >
           🚀 Sign In
         </button>
+
+        <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem' }}>
+        <span style={{ color: '#6b7280' }}>
+          Don’t have an account?{' '}
+        </span>
+        <a 
+          href="/register"
+          style={{
+            color: '#667eea',
+            textDecoration: 'underline',
+            cursor: 'pointer',
+            fontWeight: '500'
+          }}
+        >
+          Register here
+        </a>
+        </div>
       </form>
 
       {/* Demo Credentials */}
