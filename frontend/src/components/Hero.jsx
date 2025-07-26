@@ -62,7 +62,7 @@ const Hero = ({ onFindRide, onOfferRide }) => {
   };
 
   const contentStyle = {
-    maxWidth: '1200px',
+    maxWidth: '100%',
     margin: '0 auto',
     padding: '0 2rem',
     display: 'grid',
@@ -241,10 +241,10 @@ const Hero = ({ onFindRide, onOfferRide }) => {
           <div 
             style={{
               width: '300px',
-              height: '600px',
+              height: '520px',
               background: 'white',
-              borderRadius: '30px',
-              margin: '0 auto',
+              borderRadius: '10px',
+              margin: '10px auto',
               padding: '20px',
               boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
               position: 'relative',
@@ -257,7 +257,7 @@ const Hero = ({ onFindRide, onOfferRide }) => {
               width: '100%',
               height: '100%',
               background: 'linear-gradient(45deg, #f8f9fa, #e9ecef)',
-              borderRadius: '20px',
+              borderRadius: '10px',
               display: 'flex',
               flexDirection: 'column',
               padding: '20px',
@@ -293,13 +293,13 @@ const Hero = ({ onFindRide, onOfferRide }) => {
                   color: '#666',
                   marginBottom: '10px'
                 }}>
-                  📍 From: Koramangala
+                  📍 From: New Delhi
                 </div>
                 <div style={{
                   fontSize: '0.9rem',
                   color: '#666'
                 }}>
-                  📍 To: Electronic City
+                  📍 To: Noida
                 </div>
               </div>
               

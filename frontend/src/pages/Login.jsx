@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Loading from '../components/Loading';
 import API from '../services/api';
+import googleLogo from '../assets/google-logo.png'; 
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -69,7 +70,7 @@ const Login = ({ onLogin }) => {
         fontSize: '1.8rem',
         fontWeight: '600'
       }}>
-        Welcome Back! 👋
+        Welcome Back!
       </h2>
       
       {error && (
@@ -94,6 +95,7 @@ const Login = ({ onLogin }) => {
         <div style={{ marginBottom: '1.5rem' }}>
           <label style={{
             display: 'block',
+            alignItems: 'left',
             marginBottom: '0.5rem',
             color: '#374151',
             fontWeight: '500',
@@ -200,7 +202,7 @@ const Login = ({ onLogin }) => {
                 fontSize: '1.1rem'
               }}
             >
-              {showPassword ? '🙈' : '👁'}
+              {showPassword ? '🙈' : '🙉'}
             </button>
           </div>
         </div>
@@ -266,7 +268,7 @@ const Login = ({ onLogin }) => {
             e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
           }}
         >
-          🚀 Sign In
+          Sign In
         </button>
 
         <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem' }}>
@@ -287,7 +289,7 @@ const Login = ({ onLogin }) => {
         </div>
       </form>
 
-      {/* Demo Credentials */}
+      {/* Demo Credentials
       <div style={{
         marginTop: '2rem',
         padding: '1rem',
@@ -304,7 +306,7 @@ const Login = ({ onLogin }) => {
         </p>
         <p>Email: demo@poolride.com</p>
         <p>Password: demo123</p>
-      </div>
+      </div> */}
 
       {/* Social Login Options */}
       <div style={{
@@ -344,7 +346,18 @@ const Login = ({ onLogin }) => {
             e.target.style.boxShadow = 'none';
           }}
           >
-            <span>🌐</span> Google
+            <img
+  src={googleLogo}
+  alt="Google Logo"
+  style={{
+    width: '15px',
+    height: '15px',
+    objectFit: 'contain',
+    display: 'inline-block',
+    verticalAlign: 'middle'
+  }}
+/> Google
+
           </button>
           
           <button style={{

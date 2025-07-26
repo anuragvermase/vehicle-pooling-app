@@ -151,7 +151,7 @@ const Footer = () => {
           textAlign: 'center',
           color: 'rgba(255,255,255,0.6)'
         }}>
-          <p>© 2024 PoolRide. All rights reserved. | Privacy Policy | Terms of Service</p>
+          <p>© 2025 PoolRide. All rights reserved. | Privacy Policy | Terms of Service</p>
         </div>
       </div>
     </footer>

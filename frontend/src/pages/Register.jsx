@@ -105,7 +105,7 @@ const Register = ({ onRegister }) => {
           fontWeight: '600',
           marginBottom: '0.5rem'
         }}>
-          Join PoolRide! 🎉
+          Join PoolRide!
         </h2>
         <p style={{
           color: '#6b7280',
@@ -409,7 +409,7 @@ const Register = ({ onRegister }) => {
                     fontSize: '1.1rem'
                   }}
                 >
-                  {showPassword ? '🙈' : '👁'}
+                  {showPassword ? '🙈' : '🙉'}
                 </button>
               </div>
             </div>
@@ -559,7 +559,7 @@ const Register = ({ onRegister }) => {
       </form>
 
       {/* Benefits Section */}
-      <div style={{
+      {/* <div style={{
         marginTop: '2rem',
         padding: '1.5rem',
         background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
@@ -606,7 +606,7 @@ const Register = ({ onRegister }) => {
             <div style={{ color: '#6b7280' }}>Find rides instantly</div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

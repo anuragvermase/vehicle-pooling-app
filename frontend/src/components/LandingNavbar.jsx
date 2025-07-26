@@ -155,7 +155,7 @@ const LandingNavbar = ({ onShowLogin, onShowRegister }) => {
               style={{
                 padding: '0.5rem 1.5rem',
                 border: 'none',
-                background: '#667eea',
+                background: '#25D67C',
                 color: 'white',
                 borderRadius: '25px',
                 cursor: 'pointer',
@@ -164,6 +164,7 @@ const LandingNavbar = ({ onShowLogin, onShowRegister }) => {
                 boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
               }}
               className="hover-scale animate-pulse"
+              
             >
               Sign Up Free
             </button>
