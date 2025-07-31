@@ -142,10 +142,13 @@ const Hero = ({ onFindRide, onOfferRide }) => {
           
           {/* Animated Stats Counter */}
           <div style={{
-            display: 'flex',
-            gap: '2rem',
-            marginBottom: '3rem',
-            flexWrap: 'wrap'
+             display: 'flex',
+  gap: '1rem',
+  flexWrap: 'wrap',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginTop: '1.5rem',
+  marginBottom: '3rem',
           }}>
             {stats.map((stat, index) => (
               <div 
@@ -182,9 +185,12 @@ const Hero = ({ onFindRide, onOfferRide }) => {
           
           {/* CTA Buttons - Updated with onClick handlers */}
           <div style={{
-            display: 'flex',
-            gap: '1rem',
-            flexWrap: 'wrap'
+             display: 'flex',
+  gap: '1rem',
+  flexWrap: 'wrap',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginTop: '1.5rem'
           }}>
             <button 
               onClick={onFindRide}

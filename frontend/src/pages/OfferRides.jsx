@@ -628,7 +628,7 @@ Passengers can now find and book your ride!`);
         {/* Header Section */}
         <div className="offer-hero">
           <div className="hero-content">
-            <h1 className="offer-title">Share Your Journey & Earn 🚗💰</h1>
+            <h1 className="offer-title">Share Your Journey & Earn</h1>
             <p className="offer-subtitle">Turn your daily commute into earnings while helping others travel sustainably</p>
             
             <div className="benefits-grid">
