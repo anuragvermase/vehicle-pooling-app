@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Password is required'],
     minLength: [6, 'Password must be at least 6 characters long'],
-    select: false // Don't include password in queries by default
+    select: false
   },
   phone: {
     type: String,
@@ -44,11 +44,17 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  // Enhanced verification
+  verification: {
+    email: { type: Boolean, default: false },
+    phone: { type: Boolean, default: false },
+    identity: { type: Boolean, default: false },
+    driving: { type: Boolean, default: false }
+  },
   rating: {
     average: { type: Number, default: 0, min: 0, max: 5 },
     count: { type: Number, default: 0 }
   },
-  
   // Security fields
   loginAttempts: {
     type: Number,
@@ -60,44 +66,94 @@ const userSchema = new mongoose.Schema({
   lastLogin: {
     type: Date
   },
-  
-  // Preferences
+  // Enhanced preferences
   preferences: {
     notifications: {
       email: { type: Boolean, default: true },
       sms: { type: Boolean, default: false },
-      push: { type: Boolean, default: true }
+      push: { type: Boolean, default: true },
+      marketing: { type: Boolean, default: false }
     },
     privacy: {
       showPhone: { type: Boolean, default: true },
       showEmail: { type: Boolean, default: false },
-      publicProfile: { type: Boolean, default: true }
+      publicProfile: { type: Boolean, default: true },
+      shareLocation: { type: Boolean, default: true }
     },
     ride: {
       autoApprove: { type: Boolean, default: false },
       instantBooking: { type: Boolean, default: true },
       femaleOnly: { type: Boolean, default: false },
-      petFriendly: { type: Boolean, default: false }
+      petFriendly: { type: Boolean, default: false },
+      smokingAllowed: { type: Boolean, default: false },
+      musicPreference: { type: String, enum: ['any', 'no-music', 'soft', 'no-calls'], default: 'any' }
+    },
+    payment: {
+      preferredMethod: { type: String, enum: ['cash', 'upi', 'card', 'wallet'], default: 'cash' },
+      autoPayment: { type: Boolean, default: false }
     }
   },
-  
-  // Vehicle information (if user is a driver)
+  // Enhanced vehicle information
   vehicle: {
     make: String,
     model: String,
     year: Number,
     color: String,
     plateNumber: String,
-    verified: { type: Boolean, default: false }
+    type: { type: String, enum: ['sedan', 'hatchback', 'suv', 'luxury', 'electric'] },
+    verified: { type: Boolean, default: false },
+    amenities: [{
+      type: String,
+      enum: ['ac', 'music', 'charging', 'wifi', 'water', 'snacks', 'sanitizer', 'newspapers']
+    }],
+    insurance: {
+      company: String,
+      policyNumber: String,
+      expiryDate: Date,
+      verified: { type: Boolean, default: false }
+    }
   },
-  
-  // Statistics
+  // Enhanced statistics
   stats: {
     totalRidesOffered: { type: Number, default: 0 },
     totalRidesTaken: { type: Number, default: 0 },
+    totalRidesCompleted: { type: Number, default: 0 },
     totalEarnings: { type: Number, default: 0 },
     totalSpent: { type: Number, default: 0 },
-    totalDistance: { type: Number, default: 0 }
+    totalDistance: { type: Number, default: 0 },
+    co2Saved: { type: Number, default: 0 },
+    avgResponseTime: { type: Number, default: 0 }
+  },
+  // Emergency contacts
+  emergencyContacts: [{
+    name: { type: String, required: true },
+    phone: { type: String, required: true },
+    relationship: { type: String, required: true }
+  }],
+  // Location tracking
+  location: {
+    current: {
+      lat: Number,
+      lng: Number,
+      address: String,
+      timestamp: Date
+    },
+    home: {
+      lat: Number,
+      lng: Number,
+      address: String
+    },
+    work: {
+      lat: Number,
+      lng: Number,
+      address: String
+    }
+  },
+  // Subscription and payments
+  subscription: {
+    plan: { type: String, enum: ['free', 'premium', 'pro'], default: 'free' },
+    expiryDate: Date,
+    features: [String]
   }
 }, {
   timestamps: true
@@ -107,6 +163,7 @@ const userSchema = new mongoose.Schema({
 userSchema.index({ email: 1 });
 userSchema.index({ phone: 1 });
 userSchema.index({ 'rating.average': -1 });
+userSchema.index({ 'location.current': '2dsphere' });
 
 // Virtual for account lock status
 userSchema.virtual('isLocked').get(function() {
@@ -115,11 +172,9 @@ userSchema.virtual('isLocked').get(function() {
 
 // Pre-save middleware to hash password
 userSchema.pre('save', async function(next) {
-  // Only hash the password if it has been modified (or is new)
   if (!this.isModified('password')) return next();
   
   try {
-    // Hash password with cost of 12
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
     next();
@@ -128,14 +183,12 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// Instance method to check password
+// Instance methods
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Instance method to increment login attempts
 userSchema.methods.incLoginAttempts = function() {
-  // If we have a previous lock that has expired, restart at 1
   if (this.lockUntil && this.lockUntil < Date.now()) {
     return this.updateOne({
       $unset: { lockUntil: 1 },
@@ -145,17 +198,15 @@ userSchema.methods.incLoginAttempts = function() {
   
   const updates = { $inc: { loginAttempts: 1 } };
   
-  // Lock account after 5 failed attempts for 2 hours
   if (this.loginAttempts + 1 >= 5 && !this.isLocked) {
     updates.$set = {
-      lockUntil: Date.now() + 2 * 60 * 60 * 1000 // 2 hours
+      lockUntil: Date.now() + 2 * 60 * 60 * 1000
     };
   }
   
   return this.updateOne(updates);
 };
 
-// Instance method to reset login attempts
 userSchema.methods.resetLoginAttempts = function() {
   return this.updateOne({
     $unset: {
@@ -165,7 +216,6 @@ userSchema.methods.resetLoginAttempts = function() {
   });
 };
 
-// Instance method to return safe user object (without sensitive data)
 userSchema.methods.toSafeObject = function() {
   const userObject = this.toObject();
   delete userObject.password;
@@ -174,7 +224,7 @@ userSchema.methods.toSafeObject = function() {
   return userObject;
 };
 
-// Static method to update user rating
+// Static methods
 userSchema.statics.updateRating = async function(userId, newRating) {
   const user = await this.findById(userId);
   if (!user) throw new Error('User not found');
@@ -185,6 +235,16 @@ userSchema.statics.updateRating = async function(userId, newRating) {
   
   await user.save();
   return user.rating;
+};
+
+userSchema.methods.updateLocation = function(lat, lng, address) {
+  this.location.current = {
+    lat,
+    lng,
+    address,
+    timestamp: new Date()
+  };
+  return this.save();
 };
 
 const User = mongoose.model('User', userSchema);

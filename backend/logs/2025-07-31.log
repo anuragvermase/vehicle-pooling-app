@@ -8,3 +8,78 @@
 [2025-07-31T06:07:36.639Z] INFO: Login successful for user: anuragver689@gmail.com
 [2025-07-31T06:07:47.905Z] INFO: Login attempt for email: anuragver689@gmail.com
 [2025-07-31T06:07:48.361Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T18:16:44.094Z] INFO: MongoDB Connected: localhost
+[2025-07-31T18:16:44.097Z] INFO: Database Name: rideshare
+[2025-07-31T18:16:44.106Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-07-31T18:16:44.107Z] INFO: 🔗 Health: http://localhost:5000/api/health
+[2025-07-31T18:16:44.108Z] INFO: 📊 Status: http://localhost:5000/api/status
+[2025-07-31T18:16:44.109Z] INFO: 🔌 WebSocket: Active
+[2025-07-31T18:16:44.110Z] INFO: 🌍 Environment: development
+[2025-07-31T18:19:51.441Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T18:19:51.453Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T18:19:51.499Z] WARN: Login failed - user not found: anuragver689@gmail.com
+[2025-07-31T18:20:32.742Z] INFO: POST /api/auth/register - ::1
+[2025-07-31T18:21:15.433Z] INFO: POST /api/auth/register - ::1
+[2025-07-31T18:21:15.436Z] INFO: Registration attempt for email: anuragver689@gmail.com
+[2025-07-31T18:21:15.804Z] INFO: User registered successfully: anuragver689@gmail.com
+[2025-07-31T18:21:15.869Z] INFO: GET /api/dashboard/stats - ::1
+[2025-07-31T18:21:15.876Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-07-31T18:21:15.939Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-07-31T18:21:15.990Z] INFO: GET /api/dashboard/stats - ::1
+[2025-07-31T18:22:06.463Z] INFO: User connected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-07-31T18:22:11.380Z] INFO: User disconnected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-07-31T18:28:54.928Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T18:28:54.932Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T18:28:55.390Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T18:31:38.649Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T18:31:38.654Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T18:31:39.108Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T18:31:48.399Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T18:31:48.406Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T18:31:48.865Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T18:32:22.738Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T18:32:22.747Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T18:32:23.211Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T18:33:23.423Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T18:33:23.433Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T18:33:23.902Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T18:33:33.347Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T18:33:33.352Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T18:33:33.830Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T18:45:20.904Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T18:45:20.918Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T18:45:21.375Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T18:54:39.138Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T18:54:39.166Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T18:54:39.640Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T18:54:47.562Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T18:54:47.567Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T18:54:48.025Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T18:57:20.061Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T18:57:20.069Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T18:57:20.531Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T18:58:34.017Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T18:58:34.024Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T18:58:34.486Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T18:59:10.985Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T18:59:10.987Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T18:59:11.469Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T19:02:41.768Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T19:02:41.779Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T19:02:42.228Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T19:03:45.002Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T19:03:45.031Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T19:03:45.539Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T19:05:24.543Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T19:05:24.550Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T19:05:25.026Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T19:06:57.556Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T19:06:57.567Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T19:06:58.044Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T19:17:47.972Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T19:17:47.979Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T19:17:48.431Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T19:17:48.484Z] INFO: GET /api/dashboard/stats - ::1
+[2025-07-31T19:17:48.488Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-07-31T19:17:48.510Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-07-31T19:17:48.557Z] INFO: GET /api/dashboard/stats - ::1
