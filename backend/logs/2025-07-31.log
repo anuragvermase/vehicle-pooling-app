@@ -83,3 +83,103 @@
 [2025-07-31T19:17:48.488Z] INFO: GET /api/dashboard/upcoming-rides - ::1
 [2025-07-31T19:17:48.510Z] INFO: GET /api/dashboard/upcoming-rides - ::1
 [2025-07-31T19:17:48.557Z] INFO: GET /api/dashboard/stats - ::1
+[2025-07-31T19:50:44.633Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T19:50:44.651Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T19:50:45.100Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T19:55:17.181Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T19:55:17.208Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T19:55:17.691Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T19:55:35.361Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T19:55:35.366Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T19:55:35.856Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T20:01:10.135Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T20:01:10.145Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T20:01:10.595Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T20:35:55.223Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T20:35:55.225Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T20:35:55.495Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T20:35:55.527Z] INFO: GET /api/dashboard/stats - ::1
+[2025-07-31T20:35:55.531Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-07-31T20:35:55.561Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-07-31T20:35:55.583Z] INFO: GET /api/dashboard/stats - ::1
+[2025-07-31T20:36:25.476Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T20:36:25.477Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T20:36:25.740Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T20:39:20.185Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T20:39:20.188Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T20:39:20.455Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T21:51:33.365Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T21:51:33.376Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T21:51:33.700Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T21:53:56.994Z] INFO: MongoDB Connected: localhost
+[2025-07-31T21:53:56.996Z] INFO: Database Name: rideshare
+[2025-07-31T21:53:57.000Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-07-31T21:53:57.001Z] INFO: 🔗 Health: http://localhost:5000/api/health
+[2025-07-31T21:53:57.002Z] INFO: 📊 Status: http://localhost:5000/api/status
+[2025-07-31T21:53:57.003Z] INFO: 🔌 WebSocket: Active
+[2025-07-31T21:53:57.004Z] INFO: 🌍 Environment: development
+[2025-07-31T22:01:16.279Z] INFO: SIGINT received, shutting down gracefully
+[2025-07-31T22:01:16.282Z] INFO: Server closed
+[2025-07-31T22:10:56.766Z] INFO: MongoDB Connected: localhost
+[2025-07-31T22:10:56.768Z] INFO: Database Name: rideshare
+[2025-07-31T22:10:56.772Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-07-31T22:10:56.774Z] INFO: 🔗 Health: http://localhost:5000/api/health
+[2025-07-31T22:10:56.775Z] INFO: 📊 Status: http://localhost:5000/api/status
+[2025-07-31T22:10:56.775Z] INFO: 🔌 WebSocket: Active
+[2025-07-31T22:10:56.776Z] INFO: 🌍 Environment: development
+[2025-07-31T22:11:07.759Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T22:11:07.766Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T22:11:08.075Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T22:11:08.093Z] INFO: GET /api/dashboard/stats - ::1
+[2025-07-31T22:11:08.100Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-07-31T22:11:08.216Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-07-31T22:11:08.245Z] INFO: GET /api/dashboard/stats - ::1
+[2025-07-31T22:19:38.290Z] INFO: MongoDB Connected: localhost
+[2025-07-31T22:19:38.292Z] INFO: Database Name: rideshare
+[2025-07-31T22:19:38.296Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-07-31T22:19:38.297Z] INFO: 🔗 Health: http://localhost:5000/api/health
+[2025-07-31T22:19:38.297Z] INFO: 📊 Status: http://localhost:5000/api/status
+[2025-07-31T22:19:38.298Z] INFO: 🔌 WebSocket: Active
+[2025-07-31T22:19:38.298Z] INFO: 🌍 Environment: development
+[2025-07-31T22:19:46.170Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T22:19:46.177Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T22:19:46.471Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T22:20:15.688Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T22:20:15.691Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T22:20:15.954Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T22:23:07.505Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T22:23:07.508Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T22:23:07.770Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T22:24:23.037Z] INFO: POST /api/rides/create - ::1
+[2025-07-31T22:24:23.712Z] ERROR: Geocoding error:
+Data: {}
+[2025-07-31T22:24:23.713Z] ERROR: Create ride error:
+Data: {}
+[2025-07-31T22:27:14.577Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T22:27:14.579Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T22:27:14.841Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T22:27:30.195Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T22:27:30.197Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T22:27:30.460Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T22:27:48.240Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T22:27:48.242Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T22:27:48.507Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T22:28:08.172Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T22:28:08.173Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T22:28:08.436Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T22:28:23.891Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T22:28:23.893Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T22:28:24.156Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T22:29:28.012Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T22:29:28.014Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T22:29:28.278Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T22:30:21.014Z] INFO: User connected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-07-31T22:32:33.551Z] INFO: User disconnected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-07-31T22:32:37.937Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T22:32:37.938Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T22:32:38.200Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-07-31T22:32:38.262Z] INFO: User connected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-07-31T22:33:13.140Z] INFO: User disconnected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-07-31T22:43:15.446Z] INFO: POST /api/auth/login - ::1
+[2025-07-31T22:43:15.448Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-07-31T22:43:15.709Z] INFO: Login successful for user: anuragver689@gmail.com
