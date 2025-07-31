@@ -21,8 +21,7 @@ apiClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
-);
+  });
 
 // Handle response errors
 apiClient.interceptors.response.use(
@@ -34,10 +33,9 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      }
+    }
     return Promise.reject(new Error(message));
-  }
-);
+  });
 
 const API = {
   auth: {
@@ -56,7 +54,47 @@ const API = {
       return response;
     }
   },
-  
+
+  dashboard: {
+    getStats: async () => {
+      const response = await apiClient.get('/dashboard/stats');
+      return response;
+    },
+
+    getUpcomingRides: async () => {
+      const response = await apiClient.get('/dashboard/upcoming-rides');
+      return response;
+    },
+
+    getRideHistory: async (page = 1, limit = 10, filter = 'all') => {
+      const response = await apiClient.get(`/dashboard/ride-history?page=${page}&limit=${limit}&filter=${filter}`);
+      return response;
+    },
+
+    getAnalytics: async (timeframe = 'last30days') => {
+      const response = await apiClient.get(`/dashboard/analytics?timeframe=${timeframe}`);
+      return response;
+    }
+  },
+
+  rides: {
+    create: async (rideData) => {
+      const response = await apiClient.post('/rides/create', rideData);
+      return response;
+    },
+
+    search: async (searchParams) => {
+      const queryString = new URLSearchParams(searchParams).toString();
+      const response = await apiClient.get(`/rides/search?${queryString}`);
+      return response;
+    },
+
+    book: async (rideId, bookingData) => {
+      const response = await apiClient.post(`/rides/${rideId}/book`, bookingData);
+      return response;
+    }
+  },
+
   // Health check
   health: async () => {
     const response = await apiClient.get('/health');

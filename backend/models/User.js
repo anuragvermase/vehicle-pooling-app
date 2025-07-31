@@ -1,15 +1,13 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { logger } from '../utils/logger.js';
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Name is required'],
     trim: true,
-    minlength: [2, 'Name must be at least 2 characters'],
-    maxlength: [50, 'Name cannot exceed 50 characters'],
-    match: [/^[a-zA-Z\s]+$/, 'Name can only contain letters and spaces']
+    minLength: [2, 'Name must be at least 2 characters long'],
+    maxLength: [50, 'Name cannot exceed 50 characters']
   },
   email: {
     type: String,
@@ -17,71 +15,41 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
     trim: true,
-    index: true,
     match: [/^\w+([.-]?\w+)@\w+([.-]?\w+)(\.\w{2,3})+$/, 'Please enter a valid email']
   },
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters'],
-    maxlength: [128, 'Password cannot exceed 128 characters'],
+    minLength: [6, 'Password must be at least 6 characters long'],
     select: false // Don't include password in queries by default
   },
   phone: {
     type: String,
     required: [true, 'Phone number is required'],
-    trim: true,
-    match: [/^[\+]?[0-9]{10,15}$/, 'Please enter a valid phone number (10-15 digits)']
+    match: [/^(\+91|91|0)?[6789]\d{9}$/, 'Please enter a valid Indian phone number']
   },
   profilePicture: {
     type: String,
-    default: null,
-    validate: {
-      validator: function(v) {
-        return !v || /^https?:\/\/.+\.(jpg|jpeg|png|gif)$/i.test(v);
-      },
-      message: 'Profile picture must be a valid image URL'
-    }
+    default: null
   },
-  isEmailVerified: {
-    type: Boolean,
-    default: false
-  },
-  isPhoneVerified: {
-    type: Boolean,
-    default: false
+  bio: {
+    type: String,
+    maxLength: [500, 'Bio cannot exceed 500 characters']
   },
   isActive: {
     type: Boolean,
     default: true
   },
-  rides: {
-    offered: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Ride'
-    }],
-    taken: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Ride'
-    }]
+  isVerified: {
+    type: Boolean,
+    default: false
   },
   rating: {
-    average: {
-      type: Number,
-      default: 0,
-      min: [0, 'Rating cannot be less than 0'],
-      max: [5, 'Rating cannot be more than 5']
-    },
-    count: {
-      type: Number,
-      default: 0,
-      min: [0, 'Rating count cannot be negative']
-    }
+    average: { type: Number, default: 0, min: 0, max: 5 },
+    count: { type: Number, default: 0 }
   },
-  lastLogin: {
-    type: Date,
-    default: Date.now
-  },
+  
+  // Security fields
   loginAttempts: {
     type: Number,
     default: 0
@@ -89,89 +57,84 @@ const userSchema = new mongoose.Schema({
   lockUntil: {
     type: Date
   },
-  passwordResetToken: {
-    type: String,
-    select: false
+  lastLogin: {
+    type: Date
   },
-  passwordResetExpires: {
-    type: Date,
-    select: false
+  
+  // Preferences
+  preferences: {
+    notifications: {
+      email: { type: Boolean, default: true },
+      sms: { type: Boolean, default: false },
+      push: { type: Boolean, default: true }
+    },
+    privacy: {
+      showPhone: { type: Boolean, default: true },
+      showEmail: { type: Boolean, default: false },
+      publicProfile: { type: Boolean, default: true }
+    },
+    ride: {
+      autoApprove: { type: Boolean, default: false },
+      instantBooking: { type: Boolean, default: true },
+      femaleOnly: { type: Boolean, default: false },
+      petFriendly: { type: Boolean, default: false }
+    }
+  },
+  
+  // Vehicle information (if user is a driver)
+  vehicle: {
+    make: String,
+    model: String,
+    year: Number,
+    color: String,
+    plateNumber: String,
+    verified: { type: Boolean, default: false }
+  },
+  
+  // Statistics
+  stats: {
+    totalRidesOffered: { type: Number, default: 0 },
+    totalRidesTaken: { type: Number, default: 0 },
+    totalEarnings: { type: Number, default: 0 },
+    totalSpent: { type: Number, default: 0 },
+    totalDistance: { type: Number, default: 0 }
   }
 }, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  timestamps: true
 });
 
-// Indexes for better performance
+// Indexes
 userSchema.index({ email: 1 });
 userSchema.index({ phone: 1 });
-userSchema.index({ createdAt: -1 });
+userSchema.index({ 'rating.average': -1 });
 
 // Virtual for account lock status
 userSchema.virtual('isLocked').get(function() {
   return !!(this.lockUntil && this.lockUntil > Date.now());
 });
 
-// Constants for account locking
-userSchema.statics.maxLoginAttempts = 5;
-userSchema.statics.lockTime = 2 * 60 * 60 * 1000; // 2 hours
-
-// Hash password before saving
+// Pre-save middleware to hash password
 userSchema.pre('save', async function(next) {
-  // Only hash password if it's modified
+  // Only hash the password if it has been modified (or is new)
   if (!this.isModified('password')) return next();
-
+  
   try {
-    const saltRounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
-    const salt = await bcrypt.genSalt(saltRounds);
+    // Hash password with cost of 12
+    const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
-    logger.info(`Password hashed for user: ${this.email}`);
     next();
   } catch (error) {
-    logger.error('Error hashing password:', error);
     next(error);
   }
 });
 
-// Pre-save middleware to handle email uniqueness
-userSchema.pre('save', async function(next) {
-  if (this.isNew || this.isModified('email')) {
-    try {
-      const existingUser = await this.constructor.findOne({ 
-        email: this.email,
-        _id: { $ne: this._id }
-      });
-      
-      if (existingUser) {
-        const error = new Error('Email already exists');
-        error.code = 11000;
-        return next(error);
-      }
-    } catch (error) {
-      return next(error);
-    }
-  }
-  next();
-});
-
-// Compare password method
+// Instance method to check password
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  try {
-    if (!candidatePassword || !this.password) {
-      return false;
-    }
-    const isMatch = await bcrypt.compare(candidatePassword, this.password);
-    logger.info(`Password comparison result for ${this.email}: ${isMatch}`);
-    return isMatch;
-  } catch (error) {
-    logger.error('Error comparing password:', error);
-    return false;
-  }
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Handle failed login attempts
-userSchema.methods.incLoginAttempts = async function() {
+// Instance method to increment login attempts
+userSchema.methods.incLoginAttempts = function() {
   // If we have a previous lock that has expired, restart at 1
   if (this.lockUntil && this.lockUntil < Date.now()) {
     return this.updateOne({
@@ -182,49 +145,47 @@ userSchema.methods.incLoginAttempts = async function() {
   
   const updates = { $inc: { loginAttempts: 1 } };
   
-  // Lock account after max attempts
-  if (this.loginAttempts + 1 >= this.constructor.maxLoginAttempts && !this.isLocked) {
-    updates.$set = { lockUntil: Date.now() + this.constructor.lockTime };
+  // Lock account after 5 failed attempts for 2 hours
+  if (this.loginAttempts + 1 >= 5 && !this.isLocked) {
+    updates.$set = {
+      lockUntil: Date.now() + 2 * 60 * 60 * 1000 // 2 hours
+    };
   }
   
   return this.updateOne(updates);
 };
 
-// Reset login attempts on successful login
-userSchema.methods.resetLoginAttempts = async function() {
+// Instance method to reset login attempts
+userSchema.methods.resetLoginAttempts = function() {
   return this.updateOne({
-    $unset: { loginAttempts: 1, lockUntil: 1 }
+    $unset: {
+      loginAttempts: 1,
+      lockUntil: 1
+    }
   });
 };
 
-// Remove sensitive data when converting to JSON
-userSchema.methods.toJSON = function() {
-  const user = this.toObject();
-  delete user.password;
-  delete user.loginAttempts;
-  delete user.lockUntil;
-  delete user.passwordResetToken;
-  delete user.passwordResetExpires;
-  delete user.__v;
-  return user;
-};
-
-// Create safe user object for responses
+// Instance method to return safe user object (without sensitive data)
 userSchema.methods.toSafeObject = function() {
-  return {
-    id: this._id,
-    name: this.name,
-    email: this.email,
-    phone: this.phone,
-    profilePicture: this.profilePicture,
-    isEmailVerified: this.isEmailVerified,
-    isPhoneVerified: this.isPhoneVerified,
-    isActive: this.isActive,
-    rating: this.rating,
-    lastLogin: this.lastLogin,
-    createdAt: this.createdAt,
-    updatedAt: this.updatedAt
-  };
+  const userObject = this.toObject();
+  delete userObject.password;
+  delete userObject.loginAttempts;
+  delete userObject.lockUntil;
+  return userObject;
 };
 
-export default mongoose.model('User', userSchema);
+// Static method to update user rating
+userSchema.statics.updateRating = async function(userId, newRating) {
+  const user = await this.findById(userId);
+  if (!user) throw new Error('User not found');
+  
+  const totalRating = (user.rating.average * user.rating.count) + newRating;
+  user.rating.count += 1;
+  user.rating.average = totalRating / user.rating.count;
+  
+  await user.save();
+  return user.rating;
+};
+
+const User = mongoose.model('User', userSchema);
+export default User;
