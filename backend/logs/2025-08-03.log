@@ -1,0 +1,10 @@
+[2025-08-03T10:23:20.954Z] INFO: MongoDB Connected: localhost
+[2025-08-03T10:23:20.957Z] INFO: Database Name: rideshare
+[2025-08-03T10:23:20.967Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-03T10:23:20.969Z] INFO: 🔗 Health: http://localhost:5000/api/health
+[2025-08-03T10:23:20.970Z] INFO: 📊 Status: http://localhost:5000/api/status
+[2025-08-03T10:23:20.970Z] INFO: 🔌 WebSocket: Active
+[2025-08-03T10:23:20.971Z] INFO: 🌍 Environment: development
+[2025-08-03T10:24:29.093Z] INFO: POST /api/auth/login - ::1
+[2025-08-03T10:24:29.110Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-03T10:24:29.765Z] INFO: Login successful for user: anuragver689@gmail.com

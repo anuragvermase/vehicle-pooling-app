@@ -10,6 +10,15 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import FindRide from './pages/FindRides';
 import OfferRide from './pages/OfferRides';
+import AboutUs from './pages/AboutUs';
+import OurTeam from './pages/OurTeam';
+import Support from './pages/Support';
+import HelpCenter from './pages/HelpCenter';
+import Safety from './pages/Safety';
+import ContactUs from './pages/ContactUs';
+import FAQ from './pages/FAQ';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 
 // Main App Content Component
 function AppContent() {
@@ -277,6 +286,17 @@ function AppContent() {
             )
           } 
         />
+        
+        {/* Footer Pages */}
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/team" element={<OurTeam />} />
+        <Route path="/support" element={<Support />} />
+        <Route path="/help" element={<HelpCenter />} />
+        <Route path="/safety" element={<Safety />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
         
         {/* Redirect any unknown routes to home */}
         <Route path="*" element={<Navigate to="/" replace />} />

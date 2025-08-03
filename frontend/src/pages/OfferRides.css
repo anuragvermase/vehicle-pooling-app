@@ -225,12 +225,13 @@
 }
 
 .step-item.completed .step-icon::after {
-  content: '✓';
-  position: absolute;
-  top: 0;
-  left: 0;
-  color: white;
-  font-size: 1.2rem;
+    content: '✓';
+    position: absolute;
+    top: 1.4rem;
+    left: 1.8rem;
+    color: green;
+    font-size: 1rem;
+    z-index: 1;
 }
 
 .step-content {
@@ -689,7 +690,7 @@
 
 .amenity-check {
   position: absolute;
-  right: 0.5rem;
+  right: 5rem;
   font-size: 0.8rem;
   font-weight: bold;
 }

@@ -77,17 +77,14 @@ const Footer = () => {
               flexDirection: 'column',
               gap: '0.5rem'
             }}>
-              <a href="#" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
+              <a href="/about" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
                 About Us
               </a>
-              <a href="#" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
+              <a href="/team" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
                 Our Team
               </a>
-              <a href="#" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
-                Careers
-              </a>
-              <a href="#" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
-                Press
+              <a href="/support" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
+                Support
               </a>
             </div>
           </div>
@@ -106,16 +103,16 @@ const Footer = () => {
               flexDirection: 'column',
               gap: '0.5rem'
             }}>
-              <a href="#" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
+              <a href="/help" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
                 Help Center
               </a>
-              <a href="#" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
+              <a href="/safety" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
                 Safety
               </a>
-              <a href="#" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
+              <a href="/contact" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
                 Contact Us
               </a>
-              <a href="#" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
+              <a href="/faq" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
                 FAQs
               </a>
             </div>
@@ -151,8 +148,7 @@ const Footer = () => {
           textAlign: 'center',
           color: 'rgba(255,255,255,0.6)'
         }}>
-          <p>© 2025 PoolRide. All rights reserved. | Privacy Policy | Terms of Service</p>
-        </div>
+<p>© 2025 PoolRide. All rights reserved. | <a href="/privacy" style={{color: 'rgba(255,255,255,0.6)', textDecoration: 'none'}}>Privacy Policy</a> | <a href="/terms" style={{color: 'rgba(255,255,255,0.6)', textDecoration: 'none'}}>Terms of Service</a></p>        </div>
       </div>
     </footer>
   );

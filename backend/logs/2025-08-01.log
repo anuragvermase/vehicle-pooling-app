@@ -1,0 +1,36 @@
+[2025-08-01T04:52:35.336Z] INFO: MongoDB Connected: localhost
+[2025-08-01T04:52:35.339Z] INFO: Database Name: rideshare
+[2025-08-01T04:52:35.346Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-01T04:52:35.347Z] INFO: 🔗 Health: http://localhost:5000/api/health
+[2025-08-01T04:52:35.349Z] INFO: 📊 Status: http://localhost:5000/api/status
+[2025-08-01T04:52:35.350Z] INFO: 🔌 WebSocket: Active
+[2025-08-01T04:52:35.351Z] INFO: 🌍 Environment: development
+[2025-08-01T04:53:55.059Z] INFO: POST /api/auth/login - ::1
+[2025-08-01T04:53:55.072Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-01T04:53:55.590Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-01T04:54:45.089Z] INFO: POST /api/auth/login - ::1
+[2025-08-01T04:54:45.099Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-01T04:54:45.553Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-01T05:03:23.429Z] INFO: POST /api/auth/login - ::1
+[2025-08-01T05:03:23.434Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-01T05:03:23.886Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-01T05:09:28.274Z] INFO: POST /api/auth/login - ::1
+[2025-08-01T05:09:28.278Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-01T05:09:28.725Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-01T05:09:28.859Z] INFO: User connected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-08-01T05:09:32.448Z] INFO: User disconnected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-08-01T05:13:48.641Z] INFO: POST /api/auth/login - ::1
+[2025-08-01T05:13:48.644Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-01T05:13:49.125Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-01T05:13:49.371Z] INFO: User connected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-08-01T05:13:52.013Z] INFO: User disconnected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-08-01T05:16:53.745Z] INFO: POST /api/auth/login - ::1
+[2025-08-01T05:16:53.749Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-01T05:16:54.238Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-01T05:16:56.037Z] INFO: User connected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-08-01T05:16:56.915Z] INFO: User disconnected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-08-01T05:19:02.207Z] INFO: POST /api/auth/login - ::1
+[2025-08-01T05:19:02.218Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-01T05:19:02.690Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-01T05:52:27.014Z] WARN: Mongoose disconnected from MongoDB
+[2025-08-01T05:52:37.249Z] INFO: Mongoose connected to MongoDB
