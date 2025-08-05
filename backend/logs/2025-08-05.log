@@ -1,0 +1,7 @@
+[2025-08-05T17:52:28.079Z] INFO: MongoDB Connected: localhost
+[2025-08-05T17:52:28.081Z] INFO: Database Name: rideshare
+[2025-08-05T17:52:28.088Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-05T17:52:28.089Z] INFO: 🔗 Health: http://localhost:5000/api/health
+[2025-08-05T17:52:28.089Z] INFO: 📊 Status: http://localhost:5000/api/status
+[2025-08-05T17:52:28.090Z] INFO: 🔌 WebSocket: Active
+[2025-08-05T17:52:28.091Z] INFO: 🌍 Environment: development

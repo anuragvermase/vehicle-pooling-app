@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import Loading from '../components/Loading';
 import API from '../services/api';
 import googleLogo from '../assets/google-logo.png'; 
+import hideLogo from '../assets/hide.png';
+import viewLogo from '../assets/view.png';
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -62,7 +64,11 @@ const Login = ({ onLogin }) => {
   }
 
   return (
-    <div style={{ width: '100%' }}>
+    <div style={{ width: '100%',
+      maxHeight: '80vh',    // Show at most 90% of the viewport
+    overflow: 'auto',    // Scroll if content overflows vertically
+    paddingRight: '8px'
+     }}>
       <h2 style={{
         textAlign: 'center',
         color: '#667eea',
@@ -202,7 +208,12 @@ const Login = ({ onLogin }) => {
                 fontSize: '1.1rem'
               }}
             >
-              {showPassword ? '🙈' : '🙉'}
+              <img
+  src={showPassword ? hideLogo : viewLogo}
+  alt={showPassword ? 'Hide password' : 'Show password'}
+  style={{ width: 24, height: 24 }}
+/>
+
             </button>
           </div>
         </div>
