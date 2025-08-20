@@ -1,665 +1,649 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import emailjs from '@emailjs/browser';
 import LiveChat from '../components/LiveChat';
 import CallUs from '../components/CallUs';
 
 const Support = () => {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('submit-ticket');
   const [showLiveChat, setShowLiveChat] = useState(false);
   const [showCallUs, setShowCallUs] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    category: '',
-    priority: 'Medium',
+    issueType: '',
     subject: '',
-    description: ''
+    message: ''
   });
-  
-  const supportTicketRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState({ type: '', message: '' });
 
+  // EmailJS configuration - Replace with your actual keys
+  const EMAILJS_SERVICE_ID = 'service_2310';
+  const EMAILJS_TEMPLATE_ID_SUPPORT = 'template_ip4mkvw';
+  const EMAILJS_PUBLIC_KEY = 'HxzRBZT94MH-PcTzg';
+
+  const issueTypes = [
+    'Account Issues',
+    'Ride Booking Problems',
+    'Payment Issues',
+    'Safety Concerns',
+    'App Technical Issues',
+    'Driver/Rider Complaints',
+    'Refund Request',
+    'Feature Request',
+    'Other'
+  ];
+
+  // Handle Live Chat - Close Call Us if open
   const handleLiveChat = () => {
-    setShowCallUs(false);
-    setShowLiveChat(true);
+    setShowCallUs(false); // Close Call Us popup
+    setShowLiveChat(true); // Open Live Chat
   };
 
+  // Handle Call Us - Close Live Chat if open
   const handleCallUs = () => {
-    setShowLiveChat(false);
-    setShowCallUs(true);
+    setShowLiveChat(false); // Close Live Chat popup
+    setShowCallUs(true); // Open Call Us
   };
 
-  const handleRedirectToSupport = () => {
-    // Scroll to support ticket section
-    if (supportTicketRef.current) {
-      supportTicketRef.current.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setStatus({ type: '', message: '' });
+
+    if (!formData.name || !formData.email || !formData.issueType || !formData.subject || !formData.message) {
+      setStatus({ 
+        type: 'error', 
+        message: 'Please fill in all required fields.' 
       });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        issue_type: formData.issueType,
+        subject: formData.subject,
+        message: formData.message,
+        to_email: 'adhattarwal745@gmail.com',
+        ticket_id: `SUPPORT-${Date.now()}`,
+      };
+
+      const result = await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID_SUPPORT,
+        templateParams,
+        EMAILJS_PUBLIC_KEY
+      );
+
+      if (result.status === 200) {
+        setStatus({ 
+          type: 'success', 
+          message: `Thank you! Your support ticket has been submitted successfully. Ticket ID: SUPPORT-${Date.now()}. We'll get back to you within 24 hours.`
+        });
+        setFormData({ name: '', email: '', issueType: '', subject: '', message: '' });
+      }
+    } catch (error) {
+      console.error('Support email sending failed:', error);
+      setStatus({ 
+        type: 'error', 
+        message: 'Sorry, there was an error submitting your support ticket. Please try again or contact us directly at adhattarwal745@gmail.com' 
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
-    alert('Support ticket submitted successfully! We will get back to you within 24 hours.');
-    setFormData({
-      name: '',
-      email: '',
-      category: '',
-      priority: 'Medium',
-      subject: '',
-      description: ''
-    });
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const supportOptions = [
+    { 
+      icon: '🎫', 
+      title: 'Submit a Ticket', 
+      description: 'Get personalized help for your specific issue',
+      action: () => setActiveTab('submit-ticket')
+    },
+    { 
+      icon: '❓', 
+      title: 'FAQ', 
+      description: 'Find quick answers to common questions',
+      action: () => navigate('/faq')
+    },
+    { 
+      icon: '💬', 
+      title: 'Live Chat', 
+      description: 'Chat with our AI assistant instantly',
+      action: handleLiveChat // Updated to use new handler
+    },
+    { 
+      icon: '📞', 
+      title: 'Call Us', 
+      description: 'Speak directly with our support team',
+      action: handleCallUs // Updated to use new handler
+    }
+  ];
+
+  const quickHelp = [
+    { title: 'How to book a ride?', link: '/help#booking' },
+    { title: 'Payment issues', link: '/help#payment' },
+    { title: 'Account settings', link: '/help#account' },
+    { title: 'Safety guidelines', link: '/safety' },
+    { title: 'Cancellation policy', link: '/help#cancellation' },
+    { title: 'Driver requirements', link: '/help#driver' }
+  ];
 
   return (
     <div style={{ 
-      width: '100%', 
       minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '2rem 1rem'
+      background: 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)',
+      width: '100%',
+      margin: 0,
+      padding: 0
     }}>
+      {/* Header - Full Width */}
       <div style={{ 
-        width: '100%',
-        maxWidth: '1400px', 
-        margin: '0 auto'
+        background: 'rgba(255,255,255,0.95)', 
+        padding: '1rem 0', 
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        width: '100%'
       }}>
-        {/* Header */}
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '3rem',
-          color: 'white'
+        <div style={{ 
+          width: '100%',
+          padding: '0 2rem', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between' 
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '2rem' }}>🚗</span>
+            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2c3e50' }}>PoolRide Support</span>
+          </div>
+          <button 
+            onClick={() => navigate('/')} 
+            style={{ 
+              background: '#74b9ff', 
+              color: 'white', 
+              border: 'none', 
+              padding: '0.5rem 1rem', 
+              borderRadius: '5px', 
+              cursor: 'pointer' 
+            }}
+          >
+            ← Back to Home
+          </button>
+        </div>
+      </div>
+
+      {/* Content - Full Width */}
+      <div style={{ 
+        width: '100%', 
+        padding: '2rem 1rem' // Reduced padding for full width
+      }}>
+        <div style={{ 
+          background: 'white', 
+          borderRadius: '15px', 
+          padding: '2rem', // Reduced padding
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+          width: '100%',
+          maxWidth: 'none' // Remove max-width constraint
         }}>
           <h1 style={{ 
             fontSize: '3rem', 
-            marginBottom: '1rem',
-            fontWeight: 'bold',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+            color: '#2c3e50', 
+            marginBottom: '1rem', 
+            textAlign: 'center' 
           }}>
-            🆘 PoolRide Support Center
+            🆘 Support Center
           </h1>
           <p style={{ 
-            fontSize: '1.3rem', 
-            opacity: 0.9,
-            maxWidth: '600px',
-            margin: '0 auto'
+            fontSize: '1.2rem', 
+            color: '#666', 
+            textAlign: 'center', 
+            marginBottom: '3rem' 
           }}>
             We're here to help! Choose how you'd like to get support.
           </p>
-        </div>
 
-        {/* Support Options */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '2rem',
-          marginBottom: '3rem'
-        }}>
-          {/* Live Chat Option */}
-          <div 
-            onClick={handleLiveChat}
-            style={{
-              background: 'white',
-              borderRadius: '15px',
-              padding: '2rem',
-              textAlign: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-              border: '3px solid transparent'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-10px) scale(1.02)';
-              e.target.style.boxShadow = '0 20px 40px rgba(0,0,0,0.3)';
-              e.target.style.borderColor = '#74b9ff';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0px) scale(1)';
-              e.target.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
-              e.target.style.borderColor = 'transparent';
-            }}
-          >
-            <div style={{
-              width: '80px',
-              height: '80px',
-              background: 'linear-gradient(135deg, #74b9ff, #0984e3)',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1.5rem auto',
-              fontSize: '2.5rem'
-            }}>
-              💬
-            </div>
-            <h3 style={{ 
-              color: '#2c3e50', 
-              marginBottom: '1rem',
-              fontSize: '1.5rem'
-            }}>
-              Live Chat
-            </h3>
-            <p style={{ 
-              color: '#666', 
-              marginBottom: '1.5rem',
-              fontSize: '1rem',
-              lineHeight: '1.6'
-            }}>
-              Get instant help from our AI assistant or connect with a human agent for personalized support.
-            </p>
-            <div style={{
-              background: 'linear-gradient(135deg, #74b9ff, #0984e3)',
-              color: 'white',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '25px',
-              display: 'inline-block',
-              fontWeight: 'bold'
-            }}>
-              Start Chat →
-            </div>
-          </div>
-
-          {/* Phone Support Option */}
-          <div 
-            onClick={handleCallUs}
-            style={{
-              background: 'white',
-              borderRadius: '15px',
-              padding: '2rem',
-              textAlign: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-              border: '3px solid transparent'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-10px) scale(1.02)';
-              e.target.style.boxShadow = '0 20px 40px rgba(0,0,0,0.3)';
-              e.target.style.borderColor = '#00b894';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0px) scale(1)';
-              e.target.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
-              e.target.style.borderColor = 'transparent';
-            }}
-          >
-            <div style={{
-              width: '80px',
-              height: '80px',
-              background: 'linear-gradient(135deg, #00b894, #00a085)',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1.5rem auto',
-              fontSize: '2.5rem'
-            }}>
-              📞
-            </div>
-            <h3 style={{ 
-              color: '#2c3e50', 
-              marginBottom: '1rem',
-              fontSize: '1.5rem'
-            }}>
-              Call Support
-            </h3>
-            <p style={{ 
-              color: '#666', 
-              marginBottom: '1.5rem',
-              fontSize: '1rem',
-              lineHeight: '1.6'
-            }}>
-              Speak directly with our support team. Choose from different departments for specialized help.
-            </p>
-            <div style={{
-              background: 'linear-gradient(135deg, #00b894, #00a085)',
-              color: 'white',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '25px',
-              display: 'inline-block',
-              fontWeight: 'bold'
-            }}>
-              Call Now →
-            </div>
-          </div>
-
-          {/* Email Support Option */}
-          <div 
-            onClick={handleRedirectToSupport}
-            style={{
-              background: 'white',
-              borderRadius: '15px',
-              padding: '2rem',
-              textAlign: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-              border: '3px solid transparent'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-10px) scale(1.02)';
-              e.target.style.boxShadow = '0 20px 40px rgba(0,0,0,0.3)';
-              e.target.style.borderColor = '#e17055';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0px) scale(1)';
-              e.target.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
-              e.target.style.borderColor = 'transparent';
-            }}
-          >
-            <div style={{
-              width: '80px',
-              height: '80px',
-              background: 'linear-gradient(135deg, #e17055, #d63031)',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1.5rem auto',
-              fontSize: '2.5rem'
-            }}>
-              ✉
-            </div>
-            <h3 style={{ 
-              color: '#2c3e50', 
-              marginBottom: '1rem',
-              fontSize: '1.5rem'
-            }}>
-              Submit Ticket
-            </h3>
-            <p style={{ 
-              color: '#666', 
-              marginBottom: '1.5rem',
-              fontSize: '1rem',
-              lineHeight: '1.6'
-            }}>
-              Send us a detailed message about your issue. We'll respond within 24 hours with a solution.
-            </p>
-            <div style={{
-              background: 'linear-gradient(135deg, #e17055, #d63031)',
-              color: 'white',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '25px',
-              display: 'inline-block',
-              fontWeight: 'bold'
-            }}>
-              Submit Ticket →
-            </div>
-          </div>
-        </div>
-
-        {/* Support Ticket Form */}
-        <div 
-          ref={supportTicketRef}
-          style={{
-            background: 'white',
-            borderRadius: '20px',
-            padding: '3rem',
-            boxShadow: '0 15px 35px rgba(0,0,0,0.2)',
-            marginBottom: '3rem'
-          }}
-        >
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <h2 style={{ 
-              color: '#2c3e50', 
-              marginBottom: '1rem',
-              fontSize: '2.2rem'
-            }}>
-              🎫 Submit Support Ticket
-            </h2>
-            <p style={{ 
-              color: '#666', 
-              fontSize: '1.1rem',
-              maxWidth: '600px',
-              margin: '0 auto'
-            }}>
-              Fill out the form below and we'll get back to you within 24 hours
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '2rem',
-              marginBottom: '2rem'
-            }}>
-              {/* Name Field */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  color: '#2c3e50',
-                  fontWeight: 'bold',
-                  fontSize: '1rem'
-                }}>
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '1rem',
-                    border: '2px solid #ddd',
-                    borderRadius: '10px',
-                    fontSize: '1rem',
-                    outline: 'none',
-                    transition: 'border-color 0.3s'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#74b9ff'}
-                  onBlur={(e) => e.target.style.borderColor = '#ddd'}
-                  placeholder="Enter your full name"
-                />
-              </div>
-
-              {/* Email Field */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  color: '#2c3e50',
-                  fontWeight: 'bold',
-                  fontSize: '1rem'
-                }}>
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '1rem',
-                    border: '2px solid #ddd',
-                    borderRadius: '10px',
-                    fontSize: '1rem',
-                    outline: 'none',
-                    transition: 'border-color 0.3s'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#74b9ff'}
-                  onBlur={(e) => e.target.style.borderColor = '#ddd'}
-                  placeholder="Enter your email address"
-                />
-              </div>
-
-              {/* Category Field */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  color: '#2c3e50',
-                  fontWeight: 'bold',
-                  fontSize: '1rem'
-                }}>
-                  Category *
-                </label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '1rem',
-                    border: '2px solid #ddd',
-                    borderRadius: '10px',
-                    fontSize: '1rem',
-                    outline: 'none',
-                    transition: 'border-color 0.3s',
-                    background: 'white'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#74b9ff'}
-                  onBlur={(e) => e.target.style.borderColor = '#ddd'}
-                >
-                  <option value="">Select a category</option>
-                  <option value="booking">🚗 Booking Issues</option>
-                  <option value="payment">💳 Payment & Billing</option>
-                  <option value="account">👤 Account Problems</option>
-                  <option value="safety">🛡 Safety Concerns</option>
-                  <option value="driver">👨‍💼 Driver Support</option>
-                  <option value="technical">🔧 Technical Issues</option>
-                  <option value="other">❓ Other</option>
-                </select>
-              </div>
-
-              {/* Priority Field */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  color: '#2c3e50',
-                  fontWeight: 'bold',
-                  fontSize: '1rem'
-                }}>
-                  Priority Level
-                </label>
-                <select
-                  name="priority"
-                  value={formData.priority}
-                  onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '1rem',
-                    border: '2px solid #ddd',
-                    borderRadius: '10px',
-                    fontSize: '1rem',
-                    outline: 'none',
-                    transition: 'border-color 0.3s',
-                    background: 'white'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#74b9ff'}
-                  onBlur={(e) => e.target.style.borderColor = '#ddd'}
-                >
-                  <option value="Low">🟢 Low - General inquiry</option>
-                  <option value="Medium">🟡 Medium - Standard issue</option>
-                  <option value="High">🟠 High - Urgent matter</option>
-                  <option value="Critical">🔴 Critical - Emergency</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Subject Field */}
-            <div style={{ marginBottom: '2rem' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                color: '#2c3e50',
-                fontWeight: 'bold',
-                fontSize: '1rem'
-              }}>
-                Subject *
-              </label>
-              <input
-                type="text"
-                name="subject"
-                value={formData.subject}
-                onChange={handleInputChange}
-                required
+          {/* Support Options - Full Width Grid */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', // Increased min width
+            gap: '2rem', 
+            marginBottom: '3rem',
+            width: '100%'
+          }}>
+            {supportOptions.map((option, index) => (
+              <div 
+                key={index} 
+                onClick={option.action}
                 style={{
-                  width: '100%',
-                  padding: '1rem',
-                  border: '2px solid #ddd',
-                  borderRadius: '10px',
-                  fontSize: '1rem',
-                  outline: 'none',
-                  transition: 'border-color 0.3s'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#74b9ff'}
-                onBlur={(e) => e.target.style.borderColor = '#ddd'}
-                placeholder="Brief description of your issue"
-              />
-            </div>
-
-            {/* Description Field */}
-            <div style={{ marginBottom: '2rem' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                color: '#2c3e50',
-                fontWeight: 'bold',
-                fontSize: '1rem'
-              }}>
-                Description *
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                required
-                rows="6"
-                style={{
-                  width: '100%',
-                  padding: '1rem',
-                  border: '2px solid #ddd',
-                  borderRadius: '10px',
-                  fontSize: '1rem',
-                  outline: 'none',
-                  transition: 'border-color 0.3s',
-                  resize: 'vertical',
-                  fontFamily: 'inherit'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#74b9ff'}
-                onBlur={(e) => e.target.style.borderColor = '#ddd'}
-                placeholder="Please provide detailed information about your issue, including steps to reproduce the problem if applicable..."
-              />
-            </div>
-
-            {/* Submit Button */}
-            <div style={{ textAlign: 'center' }}>
-              <button
-                type="submit"
-                style={{
-                  background: 'linear-gradient(135deg, #e17055, #d63031)',
-                  color: 'white',
-                  border: 'none',
-                  padding: '1.2rem 3rem',
-                  borderRadius: '30px',
-                  fontSize: '1.2rem',
-                  fontWeight: 'bold',
+                  background: activeTab === 'submit-ticket' && option.title === 'Submit a Ticket' 
+                    ? 'linear-gradient(135deg, #74b9ff, #0984e3)' 
+                    : 'linear-gradient(135deg, #f8f9fa, #e9ecef)',
+                  color: activeTab === 'submit-ticket' && option.title === 'Submit a Ticket' ? 'white' : '#2c3e50',
+                  padding: '2rem',
+                  borderRadius: '15px',
                   cursor: 'pointer',
-                  transition: 'all 0.3s',
-                  boxShadow: '0 5px 15px rgba(225, 112, 85, 0.4)'
+                  textAlign: 'center',
+                  transition: 'all 0.3s ease',
+                  border: '2px solid transparent',
+                  width: '100%'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.transform = 'translateY(-3px)';
-                  e.target.style.boxShadow = '0 10px 25px rgba(225, 112, 85, 0.5)';
+                  if (!(activeTab === 'submit-ticket' && option.title === 'Submit a Ticket')) {
+                    e.target.style.transform = 'translateY(-5px)';
+                    e.target.style.boxShadow = '0 5px 20px rgba(0,0,0,0.1)';
+                  }
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.transform = 'translateY(0px)';
-                  e.target.style.boxShadow = '0 5px 15px rgba(225, 112, 85, 0.4)';
+                  e.target.style.boxShadow = 'none';
                 }}
               >
-                🎫 Submit Support Ticket
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* FAQ Section */}
-        <div style={{
-          background: 'white',
-          borderRadius: '20px',
-          padding: '3rem',
-          boxShadow: '0 15px 35px rgba(0,0,0,0.2)'
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <h2 style={{ 
-              color: '#2c3e50', 
-              marginBottom: '1rem',
-              fontSize: '2.2rem'
-            }}>
-              ❓ Frequently Asked Questions
-            </h2>
-            <p style={{ 
-              color: '#666', 
-              fontSize: '1.1rem'
-            }}>
-              Quick answers to common questions
-            </p>
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-            gap: '2rem'
-          }}>
-            {[
-              {
-                question: "How do I book a ride?",
-                answer: "Open the app, enter your pickup and destination, choose your ride type, and confirm your booking. You'll see driver details once matched."
-              },
-              {
-                question: "What payment methods do you accept?",
-                answer: "We accept credit/debit cards, PayPal, Apple Pay, Google Pay, and cash (in select cities). You can manage payment methods in your account settings."
-              },
-              {
-                question: "How do I cancel a ride?",
-                answer: "You can cancel through the app before your driver arrives. Cancellations within 5 minutes are free, after that a small fee may apply."
-              },
-              {
-                question: "What if I left something in the vehicle?",
-                answer: "Contact the driver through the app first. If unsuccessful, use our lost items form in the app or contact support immediately."
-              },
-              {
-                question: "How do I become a driver?",
-                answer: "Visit our driver signup page, meet the requirements (age 21+, valid license, insurance, clean record), and complete the application process."
-              },
-              {
-                question: "Is my ride safe?",
-                answer: "Yes! All drivers undergo background checks, vehicles are inspected, and we provide real-time GPS tracking, emergency buttons, and 24/7 support."
-              }
-            ].map((faq, index) => (
-              <div key={index} style={{
-                background: '#f8f9fa',
-                padding: '1.5rem',
-                borderRadius: '12px',
-                border: '1px solid #eee'
-              }}>
-                <h4 style={{
-                  color: '#2c3e50',
-                  marginBottom: '1rem',
-                  fontSize: '1.1rem'
-                }}>
-                  {faq.question}
-                </h4>
-                <p style={{
-                  color: '#666',
-                  lineHeight: '1.6',
-                  margin: 0,
-                  fontSize: '0.95rem'
-                }}>
-                  {faq.answer}
-                </p>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{option.icon}</div>
+                <h3 style={{ fontSize: '1.3rem', marginBottom: '0.5rem' }}>{option.title}</h3>
+                <p style={{ fontSize: '0.9rem', opacity: 0.8, margin: 0 }}>{option.description}</p>
               </div>
             ))}
+          </div>
+
+          {/* Support Ticket Form - Full Width */}
+          {activeTab === 'submit-ticket' && (
+            <div style={{ 
+              background: '#f8f9fa', 
+              padding: '2rem', 
+              borderRadius: '15px', 
+              marginBottom: '3rem',
+              width: '100%'
+            }}>
+              <h2 style={{ color: '#2c3e50', marginBottom: '2rem', textAlign: 'center' }}>🎫 Submit Support Ticket</h2>
+              
+              {/* Status Message */}
+              {status.message && (
+                <div style={{
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  marginBottom: '1rem',
+                  background: status.type === 'success' ? '#d4edda' : '#f8d7da',
+                  color: status.type === 'success' ? '#155724' : '#721c24',
+                  border: `1px solid ${status.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`,
+                  fontSize: '0.95rem',
+                  width: '100%'
+                }}>
+                  {status.message}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+                  gap: '1rem', 
+                  marginBottom: '1rem',
+                  width: '100%'
+                }}>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Your Full Name *"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                    style={{ 
+                      padding: '1rem', 
+                      border: '2px solid #ddd', 
+                      borderRadius: '8px', 
+                      fontSize: '1rem', 
+                      outline: 'none',
+                      opacity: isLoading ? 0.6 : 1,
+                      transition: 'border-color 0.3s',
+                      borderColor: formData.name ? '#74b9ff' : '#ddd',
+                      width: '100%'
+                    }}
+                  />
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Your Email Address *"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                    style={{ 
+                      padding: '1rem', 
+                      border: '2px solid #ddd', 
+                      borderRadius: '8px', 
+                      fontSize: '1rem', 
+                      outline: 'none',
+                      opacity: isLoading ? 0.6 : 1,
+                      transition: 'border-color 0.3s',
+                      borderColor: formData.email ? '#74b9ff' : '#ddd',
+                      width: '100%'
+                    }}
+                  />
+                </div>
+
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+                  gap: '1rem', 
+                  marginBottom: '1rem',
+                  width: '100%'
+                }}>
+                  <select
+                    name="issueType"
+                    value={formData.issueType}
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                    style={{ 
+                      padding: '1rem', 
+                      border: '2px solid #ddd', 
+                      borderRadius: '8px', 
+                      fontSize: '1rem', 
+                      outline: 'none',
+                      opacity: isLoading ? 0.6 : 1,
+                      transition: 'border-color 0.3s',
+                      borderColor: formData.issueType ? '#74b9ff' : '#ddd',
+                      background: 'white',
+                      width: '100%'
+                    }}
+                  >
+                    <option value="">Select Issue Type *</option>
+                    {issueTypes.map((type, index) => (
+                      <option key={index} value={type}>{type}</option>
+                    ))}
+                  </select>
+
+                  <input
+                    type="text"
+                    name="subject"
+                    placeholder="Subject/Brief Description *"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                    style={{ 
+                      padding: '1rem', 
+                      border: '2px solid #ddd', 
+                      borderRadius: '8px', 
+                      fontSize: '1rem', 
+                      outline: 'none',
+                      opacity: isLoading ? 0.6 : 1,
+                      transition: 'border-color 0.3s',
+                      borderColor: formData.subject ? '#74b9ff' : '#ddd',
+                      width: '100%'
+                    }}
+                  />
+                </div>
+
+                <textarea
+                name="message"
+                  placeholder="Describe your issue in detail *"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  rows="6"
+                  disabled={isLoading}
+                  style={{ 
+                    width: '100%', 
+                    padding: '1rem', 
+                    border: '2px solid #ddd', 
+                    borderRadius: '8px', 
+                    fontSize: '1rem', 
+                    marginBottom: '1rem', 
+                    resize: 'vertical', 
+                    outline: 'none',
+                    opacity: isLoading ? 0.6 : 1,
+                    transition: 'border-color 0.3s',
+                    borderColor: formData.message ? '#74b9ff' : '#ddd',
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
+                  }}
+                />
+
+                <button 
+                  type="submit" 
+                  disabled={isLoading}
+                  style={{
+                    background: isLoading ? '#ccc' : 'linear-gradient(135deg, #74b9ff, #0984e3)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '1rem 2rem',
+                    borderRadius: '8px',
+                    fontSize: '1.1rem',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    fontWeight: 'bold',
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    transition: 'all 0.3s'
+                  }}
+                >
+                  {isLoading ? (
+                    <>
+                      <div style={{ 
+                        width: '20px', 
+                        height: '20px', 
+                        border: '2px solid #fff', 
+                        borderTop: '2px solid transparent', 
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite' 
+                      }}></div>
+                      Submitting Ticket...
+                    </>
+                  ) : (
+                    <>
+                      🎫 Submit Support Ticket
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Quick Help Section - Full Width */}
+          <div style={{ marginBottom: '3rem', width: '100%' }}>
+            <h2 style={{ color: '#2c3e50', marginBottom: '2rem', textAlign: 'center' }}>🚀 Quick Help</h2>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
+              gap: '1rem',
+              width: '100%'
+            }}>
+              {quickHelp.map((item, index) => (
+                <div 
+                  key={index}
+                  onClick={() => navigate(item.link)}
+                  style={{
+                    background: 'linear-gradient(135deg, #fff, #f8f9fa)',
+                    padding: '1rem 1.5rem',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    border: '1px solid #e9ecef',
+                    transition: 'all 0.3s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'linear-gradient(135deg, #74b9ff, #0984e3)';
+                    e.target.style.color = 'white';
+                    e.target.style.transform = 'translateX(5px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'linear-gradient(135deg, #fff, #f8f9fa)';
+                    e.target.style.color = '#2c3e50';
+                    e.target.style.transform = 'translateX(0px)';
+                  }}
+                >
+                  <span style={{ fontSize: '1rem', fontWeight: '500' }}>{item.title}</span>
+                  <span style={{ fontSize: '1.2rem' }}>→</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Emergency Contact - Full Width */}
+          <div style={{ 
+            background: 'linear-gradient(135deg, #fd79a8, #e84393)', 
+            color: 'white', 
+            padding: '2rem',
+            borderRadius: '15px', 
+            textAlign: 'center',
+            marginBottom: '2rem',
+            width: '100%'
+          }}>
+            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>🚨 Emergency Support</h3>
+            <p style={{ marginBottom: '1rem', opacity: 0.9 }}>
+              For urgent issues that require immediate attention
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+              <button 
+                onClick={() => window.open('tel:123457890')}
+                style={{ 
+                  color: 'white', 
+                  textDecoration: 'none', 
+                  background: 'rgba(255,255,255,0.2)', 
+                  padding: '0.5rem 1rem', 
+                  borderRadius: '25px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '1rem'
+                }}
+              >
+                📞 Call: 123-457-890
+              </button>
+              <a 
+                href="mailto:adhattarwal745@gmail.com" 
+                style={{ 
+                  color: 'white', 
+                  textDecoration: 'none', 
+                  background: 'rgba(255,255,255,0.2)', 
+                  padding: '0.5rem 1rem', 
+                  borderRadius: '25px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                ✉ Email: Emergency Support
+              </a>
+            </div>
+          </div>
+
+          {/* Support Statistics - Full Width */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+            gap: '2rem',
+            width: '100%'
+          }}>
+            <div style={{ 
+              background: 'linear-gradient(135deg, #00b894, #00a085)', 
+              color: 'white', 
+              padding: '2rem', 
+              borderRadius: '15px', 
+              textAlign: 'center' 
+            }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>⚡</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>2-4 hrs</div>
+              <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>Average Response Time</div>
+            </div>
+            
+            <div style={{ 
+              background: 'linear-gradient(135deg, #fdcb6e, #e17055)', 
+              color: 'white', 
+              padding: '2rem', 
+              borderRadius: '15px', 
+              textAlign: 'center' 
+            }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>😊</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>98%</div>
+              <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>Customer Satisfaction</div>
+            </div>
+            
+            <div style={{ 
+              background: 'linear-gradient(135deg, #a29bfe, #6c5ce7)', 
+              color: 'white', 
+              padding: '2rem', 
+              borderRadius: '15px', 
+              textAlign: 'center' 
+            }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🏆</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>24/7</div>
+              <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>Support Available</div>
+            </div>
+            
+            <div style={{ 
+              background: 'linear-gradient(135deg, #74b9ff, #0984e3)', 
+              color: 'white', 
+              padding: '2rem', 
+              borderRadius: '15px', 
+              textAlign: 'center' 
+            }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🎯</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>95%</div>
+              <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>First Contact Resolution</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Live Chat Component */}
+      {/* Live Chat Component - Positioned in right middle */}
       <LiveChat 
         isOpen={showLiveChat} 
         onClose={() => setShowLiveChat(false)} 
       />
 
-      {/* Call Us Component */}
+      {/* Call Us Component - Positioned in right middle */}
       <CallUs 
         isOpen={showCallUs} 
-        onClose={() => setShowCallUs(false)}
-        onOpenLiveChat={handleLiveChat}
-        onRedirectToSupport={handleRedirectToSupport}
+        onClose={() => setShowCallUs(false)} 
       />
+
+      {/* Add CSS for animations */}
+      <style>{`
+        * {
+          box-sizing: border-box;
+        }
+        
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes bounce {
+          0%, 80%, 100% {
+            transform: scale(0);
+          } 40% {
+            transform: scale(1);
+          }
+        }
+        
+        input:focus, textarea:focus, select:focus {
+          border-color: #74b9ff !important;
+          box-shadow: 0 0 0 3px rgba(116, 185, 255, 0.1) !important;
+        }
+        
+        button:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(116, 185, 255, 0.4);
+        }
+      `}</style>
     </div>
   );
 };
