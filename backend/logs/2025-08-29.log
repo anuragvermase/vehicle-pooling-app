@@ -1,0 +1,346 @@
+[2025-08-29T17:38:42.478Z] INFO: MongoDB Connected: localhost
+[2025-08-29T17:38:42.480Z] INFO: Database Name: rideshare
+[2025-08-29T17:38:42.490Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-29T17:38:42.491Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-29T17:38:42.491Z] INFO: 📱 Phone Health:  http://192.168.43.59:5000/api/health
+[2025-08-29T17:38:42.492Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-29T17:38:42.493Z] INFO: 🔌 WebSocket: Active
+[2025-08-29T17:38:42.493Z] INFO: 🌍 Environment: development
+[2025-08-29T17:54:30.956Z] INFO: SIGINT received, shutting down gracefully
+[2025-08-29T17:54:30.960Z] INFO: Server closed
+[2025-08-29T17:54:34.536Z] INFO: MongoDB Connected: localhost
+[2025-08-29T17:54:34.538Z] INFO: Database Name: rideshare
+[2025-08-29T17:54:34.546Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-29T17:54:34.547Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-29T17:54:34.548Z] INFO: 📱 Phone Health:  http://192.168.43.59:5000/api/health
+[2025-08-29T17:54:34.549Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-29T17:54:34.549Z] INFO: 🔌 WebSocket: Active
+[2025-08-29T17:54:34.550Z] INFO: 🌍 Environment: development
+[2025-08-29T17:56:49.289Z] INFO: GET /api/health - 192.168.43.6
+[2025-08-29T17:56:49.606Z] INFO: GET /favicon.ico - 192.168.43.6
+[2025-08-29T18:21:57.721Z] INFO: GET /api/health - 192.168.43.6
+[2025-08-29T19:09:21.672Z] INFO: SIGINT received, shutting down gracefully
+[2025-08-29T19:09:21.680Z] INFO: Server closed
+[2025-08-29T19:09:38.465Z] INFO: MongoDB Connected: localhost
+[2025-08-29T19:09:38.467Z] INFO: Database Name: rideshare
+[2025-08-29T19:09:38.476Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-29T19:09:38.476Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-29T19:09:38.477Z] INFO: 📱 Phone Health:  http://192.168.206.193:5000/api/health
+[2025-08-29T19:09:38.478Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-29T19:09:38.479Z] INFO: 🔌 WebSocket: Active
+[2025-08-29T19:09:38.480Z] INFO: 🌍 Environment: development
+[2025-08-29T19:27:16.199Z] INFO: POST /api/auth/register - 192.168.206.117
+[2025-08-29T19:27:28.180Z] INFO: POST /api/auth/register - 192.168.206.117
+[2025-08-29T19:41:03.839Z] INFO: POST /api/auth/register - 192.168.206.117
+[2025-08-29T19:41:03.841Z] INFO: Registration attempt for email: anuragver689@gmail.com
+[2025-08-29T19:41:03.900Z] WARN: Registration failed - email already exists: anuragver689@gmail.com
+[2025-08-29T19:41:37.724Z] INFO: POST /api/auth/register - 192.168.206.117
+[2025-08-29T19:41:37.725Z] INFO: Registration attempt for email: anurag@gmail.com
+[2025-08-29T19:41:37.763Z] ERROR: Registration error:
+Data: {
+  "errors": {
+    "phone": {
+      "name": "ValidatorError",
+      "message": "Please enter a valid Indian phone number",
+      "properties": {
+        "message": "Please enter a valid Indian phone number",
+        "type": "regexp",
+        "regexp": {},
+        "path": "phone",
+        "value": "+19650167069"
+      },
+      "kind": "regexp",
+      "path": "phone",
+      "value": "+19650167069"
+    }
+  },
+  "_message": "User validation failed",
+  "name": "ValidationError",
+  "message": "User validation failed: phone: Please enter a valid Indian phone number"
+}
+[2025-08-29T19:41:37.764Z] ERROR: Unhandled error:
+Data: {
+  "errors": {
+    "phone": {
+      "name": "ValidatorError",
+      "message": "Please enter a valid Indian phone number",
+      "properties": {
+        "message": "Please enter a valid Indian phone number",
+        "type": "regexp",
+        "regexp": {},
+        "path": "phone",
+        "value": "+19650167069"
+      },
+      "kind": "regexp",
+      "path": "phone",
+      "value": "+19650167069"
+    }
+  },
+  "_message": "User validation failed",
+  "name": "ValidationError",
+  "message": "User validation failed: phone: Please enter a valid Indian phone number"
+}
+[2025-08-29T19:41:45.397Z] INFO: POST /api/auth/register - 192.168.206.117
+[2025-08-29T19:41:45.398Z] INFO: Registration attempt for email: anurag@gmail.com
+[2025-08-29T19:41:45.402Z] WARN: Registration failed - phone already exists: anurag@gmail.com
+[2025-08-29T19:41:54.311Z] INFO: POST /api/auth/register - 192.168.206.117
+[2025-08-29T19:41:54.313Z] INFO: Registration attempt for email: anurag@gmail.com
+[2025-08-29T19:41:54.615Z] INFO: User registered successfully: anurag@gmail.com
+[2025-08-29T19:43:45.585Z] INFO: POST /api/auth/register - 192.168.206.117
+[2025-08-29T19:44:14.761Z] INFO: POST /api/auth/register - 192.168.206.117
+[2025-08-29T19:44:14.763Z] INFO: Registration attempt for email: anurag@gmail.com
+[2025-08-29T19:44:14.767Z] WARN: Registration failed - email already exists: anurag@gmail.com
+[2025-08-29T19:44:30.683Z] INFO: POST /api/auth/register - 192.168.206.117
+[2025-08-29T19:44:30.686Z] INFO: Registration attempt for email: anuragreat@gmail.com
+[2025-08-29T19:44:30.691Z] ERROR: Registration error:
+Data: {
+  "errors": {
+    "phone": {
+      "name": "ValidatorError",
+      "message": "Please enter a valid Indian phone number",
+      "properties": {
+        "message": "Please enter a valid Indian phone number",
+        "type": "regexp",
+        "regexp": {},
+        "path": "phone",
+        "value": "2525252525"
+      },
+      "kind": "regexp",
+      "path": "phone",
+      "value": "2525252525"
+    }
+  },
+  "_message": "User validation failed",
+  "name": "ValidationError",
+  "message": "User validation failed: phone: Please enter a valid Indian phone number"
+}
+[2025-08-29T19:44:30.692Z] ERROR: Unhandled error:
+Data: {
+  "errors": {
+    "phone": {
+      "name": "ValidatorError",
+      "message": "Please enter a valid Indian phone number",
+      "properties": {
+        "message": "Please enter a valid Indian phone number",
+        "type": "regexp",
+        "regexp": {},
+        "path": "phone",
+        "value": "2525252525"
+      },
+      "kind": "regexp",
+      "path": "phone",
+      "value": "2525252525"
+    }
+  },
+  "_message": "User validation failed",
+  "name": "ValidationError",
+  "message": "User validation failed: phone: Please enter a valid Indian phone number"
+}
+[2025-08-29T19:44:40.401Z] INFO: POST /api/auth/register - 192.168.206.117
+[2025-08-29T19:44:40.403Z] INFO: Registration attempt for email: anuragreat@gmail.com
+[2025-08-29T19:44:40.407Z] ERROR: Registration error:
+Data: {
+  "errors": {
+    "phone": {
+      "name": "ValidatorError",
+      "message": "Please enter a valid Indian phone number",
+      "properties": {
+        "message": "Please enter a valid Indian phone number",
+        "type": "regexp",
+        "regexp": {},
+        "path": "phone",
+        "value": "2525252530"
+      },
+      "kind": "regexp",
+      "path": "phone",
+      "value": "2525252530"
+    }
+  },
+  "_message": "User validation failed",
+  "name": "ValidationError",
+  "message": "User validation failed: phone: Please enter a valid Indian phone number"
+}
+[2025-08-29T19:44:40.408Z] ERROR: Unhandled error:
+Data: {
+  "errors": {
+    "phone": {
+      "name": "ValidatorError",
+      "message": "Please enter a valid Indian phone number",
+      "properties": {
+        "message": "Please enter a valid Indian phone number",
+        "type": "regexp",
+        "regexp": {},
+        "path": "phone",
+        "value": "2525252530"
+      },
+      "kind": "regexp",
+      "path": "phone",
+      "value": "2525252530"
+    }
+  },
+  "_message": "User validation failed",
+  "name": "ValidationError",
+  "message": "User validation failed: phone: Please enter a valid Indian phone number"
+}
+[2025-08-29T19:44:56.115Z] INFO: POST /api/auth/register - 192.168.206.117
+[2025-08-29T19:44:56.117Z] INFO: Registration attempt for email: anuragreat@gmail.com
+[2025-08-29T19:44:56.379Z] INFO: User registered successfully: anuragreat@gmail.com
+[2025-08-29T20:04:59.632Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T20:04:59.636Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T20:04:59.898Z] WARN: Login failed - invalid password: anuragreat@gmail.com
+[2025-08-29T20:05:35.505Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T20:05:35.507Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T20:05:35.766Z] WARN: Login failed - invalid password: anuragreat@gmail.com
+[2025-08-29T20:05:44.328Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T20:05:44.330Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T20:05:44.596Z] WARN: Login failed - invalid password: anuragreat@gmail.com
+[2025-08-29T20:05:54.116Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T20:05:54.117Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T20:05:54.381Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T20:06:46.036Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T20:06:46.038Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T20:06:46.299Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T20:36:00.731Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T20:36:00.740Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T20:36:01.005Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T20:36:51.763Z] INFO: POST /api/auth/register - 192.168.206.117
+[2025-08-29T20:36:51.765Z] INFO: Registration attempt for email: kannu@gmail.com
+[2025-08-29T20:36:52.037Z] INFO: User registered successfully: kannu@gmail.com
+[2025-08-29T20:37:26.885Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T20:37:26.886Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-29T20:37:27.156Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-29T20:54:50.196Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T20:54:50.197Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-29T20:54:50.461Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-29T20:55:18.491Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T20:55:18.493Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T20:55:18.764Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T20:55:42.117Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T20:55:42.119Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T20:55:42.377Z] WARN: Login failed - invalid password: anuragreat@gmail.com
+[2025-08-29T20:55:53.358Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T20:55:53.360Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T20:55:53.633Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T21:31:33.080Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T21:31:33.084Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T21:31:33.363Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T21:32:21.563Z] INFO: SIGINT received, shutting down gracefully
+[2025-08-29T21:32:21.575Z] INFO: Server closed
+[2025-08-29T21:32:24.357Z] INFO: MongoDB Connected: localhost
+[2025-08-29T21:32:24.359Z] INFO: Database Name: rideshare
+[2025-08-29T21:32:24.367Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-29T21:32:24.368Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-29T21:32:24.368Z] INFO: 📱 Phone Health:  http://192.168.206.193:5000/api/health
+[2025-08-29T21:32:24.369Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-29T21:32:24.370Z] INFO: 🔌 WebSocket: Active
+[2025-08-29T21:32:24.370Z] INFO: 🌍 Environment: development
+[2025-08-29T21:33:00.741Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T21:33:00.747Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T21:33:01.040Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T21:51:07.106Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T21:51:07.116Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T21:51:07.377Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T21:51:18.723Z] INFO: GET /api/rides - 192.168.206.117
+[2025-08-29T21:52:13.011Z] INFO: POST /api/rides - 192.168.206.117
+[2025-08-29T21:53:15.152Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T21:53:15.154Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T21:53:15.414Z] WARN: Login failed - invalid password: anuragreat@gmail.com
+[2025-08-29T21:53:25.014Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T21:53:25.015Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T21:53:25.281Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T21:53:33.830Z] INFO: GET /api/rides - 192.168.206.117
+[2025-08-29T22:02:51.906Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-08-29T22:02:51.915Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-29T22:02:52.233Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-29T22:02:52.570Z] INFO: User connected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-08-29T22:02:58.102Z] INFO: User disconnected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-08-29T22:03:56.722Z] INFO: User connected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-08-29T22:20:00.521Z] INFO: GET /api/rides - 192.168.206.117
+[2025-08-29T22:20:01.315Z] INFO: GET /api/rides - 192.168.206.117
+[2025-08-29T22:20:01.716Z] INFO: GET /api/rides - 192.168.206.117
+[2025-08-29T22:20:02.934Z] INFO: GET /api/rides - 192.168.206.117
+[2025-08-29T22:20:03.375Z] INFO: GET /api/rides - 192.168.206.117
+[2025-08-29T22:20:03.582Z] INFO: GET /api/rides - 192.168.206.117
+[2025-08-29T22:20:03.768Z] INFO: GET /api/rides - 192.168.206.117
+[2025-08-29T22:20:05.276Z] INFO: GET /api/rides - 192.168.206.117
+[2025-08-29T22:20:05.497Z] INFO: GET /api/rides - 192.168.206.117
+[2025-08-29T23:18:22.685Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:18:22.707Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:18:23.062Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T23:18:26.384Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:18:26.387Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:18:26.652Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T23:18:39.879Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:18:39.880Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:18:40.144Z] WARN: Login failed - invalid password: anuragreat@gmail.com
+[2025-08-29T23:18:52.379Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:18:52.380Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:18:52.645Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T23:18:54.017Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:18:54.025Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:18:54.288Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T23:18:56.170Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:18:56.171Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:18:56.437Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T23:19:04.358Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:19:04.359Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:19:04.628Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T23:19:12.194Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:19:12.195Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-29T23:19:12.457Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-29T23:19:21.715Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:19:21.716Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-29T23:19:21.975Z] WARN: Login failed - invalid password: kannu@gmail.com
+[2025-08-29T23:19:24.667Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:19:24.668Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-29T23:19:24.925Z] WARN: Login failed - invalid password: kannu@gmail.com
+[2025-08-29T23:19:35.028Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:19:35.029Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-29T23:19:35.291Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-29T23:20:12.027Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:20:12.028Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-29T23:20:12.296Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-29T23:28:51.280Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:28:51.281Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-29T23:28:51.545Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-29T23:28:51.779Z] INFO: User connected: Kannu (68b20f63c2a38acea9dfb143)
+[2025-08-29T23:28:53.028Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:28:53.030Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-29T23:28:53.376Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-29T23:29:17.345Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:29:17.346Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:29:17.696Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T23:29:21.255Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:29:21.256Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:29:21.519Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T23:30:13.023Z] INFO: POST /api/auth/register - 192.168.206.117
+[2025-08-29T23:30:13.028Z] INFO: Registration attempt for email: kannu@gmail.com
+[2025-08-29T23:30:13.043Z] WARN: Registration failed - email already exists: kannu@gmail.com
+[2025-08-29T23:30:17.129Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:30:17.130Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:30:17.392Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T23:30:19.123Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:30:19.125Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:30:19.394Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T23:41:42.275Z] INFO: User disconnected: Kannu (68b20f63c2a38acea9dfb143)
+[2025-08-29T23:42:36.050Z] INFO: User disconnected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-08-29T23:56:33.975Z] INFO: SIGINT received, shutting down gracefully
+[2025-08-29T23:56:33.989Z] INFO: Server closed
+[2025-08-29T23:56:36.739Z] INFO: MongoDB Connected: localhost
+[2025-08-29T23:56:36.742Z] INFO: Database Name: rideshare
+[2025-08-29T23:56:36.750Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-29T23:56:36.751Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-29T23:56:36.752Z] INFO: 📱 Phone Health:  http://192.168.206.193:5000/api/health
+[2025-08-29T23:56:36.752Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-29T23:56:36.753Z] INFO: 🔌 WebSocket: Active
+[2025-08-29T23:56:36.754Z] INFO: 🌍 Environment: development
+[2025-08-29T23:57:46.227Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:57:46.233Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:57:46.526Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T23:57:46.813Z] INFO: User connected: Anu (68b20338c2a38acea9dfb132)
+[2025-08-29T23:57:51.167Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:57:51.169Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:57:51.430Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-29T23:59:16.218Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-29T23:59:16.220Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-29T23:59:16.550Z] INFO: Login successful for user: anuragreat@gmail.com

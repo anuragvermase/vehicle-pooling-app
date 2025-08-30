@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import './App.css';
 
 // Import components
@@ -24,18 +24,15 @@ import TermsOfService from './pages/TermsOfService';
 function AppContent() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [pendingAction, setPendingAction] = useState(null); // Store the action user wants to do
+  const [pendingAction, setPendingAction] = useState(null); 
   const navigate = useNavigate();
-  // const location = useLocation();
 
   useEffect(() => {
-    // Comment out or remove the auto-login check to always show landing page
-    // const token = localStorage.getItem('token');
-    // const userData = localStorage.getItem('user');
-    
-    // if (token && userData) {
-    //   setUser(JSON.parse(userData));
-    // }
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    if (token && userData) {
+      setUser(JSON.parse(userData));
+    }
     setLoading(false);
   }, []);
 
@@ -43,13 +40,13 @@ function AppContent() {
     setUser(userData);
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
-    
-    // If there's a pending action, navigate to it
+
     if (pendingAction) {
       navigate(pendingAction);
       setPendingAction(null);
     } else {
-      navigate('/dashboard', { replace: false });
+      // ✅ Stay on home after login
+      navigate('/', { replace: true });
     }
   };
 
@@ -57,13 +54,13 @@ function AppContent() {
     setUser(userData);
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
-    
-    // If there's a pending action, navigate to it
+
     if (pendingAction) {
       navigate(pendingAction);
       setPendingAction(null);
     } else {
-      navigate('/dashboard', { replace: false });
+      // ✅ Stay on home after register
+      navigate('/', { replace: true });
     }
   };
 
@@ -88,7 +85,6 @@ function AppContent() {
     navigate(-1);
   };
 
-  // Handle ride actions
   const handleFindRide = () => {
     if (user) {
       navigate('/find-ride');
@@ -124,14 +120,16 @@ function AppContent() {
   return (
     <div className="App">
       <Routes>
-        {/* Landing Page Route */}
+        {/* Landing Page */}
         <Route 
           path="/" 
           element={
             <div>
               <LandingNavbar 
+                user={user}
                 onShowLogin={handleShowLogin}
                 onShowRegister={handleShowRegister}
+                onLogout={handleLogout}
               />
               <LandingPage 
                 onFindRide={handleFindRide}
@@ -141,20 +139,21 @@ function AppContent() {
           } 
         />
         
-        {/* Login Route */}
+        {/* Login Modal */}
         <Route 
           path="/login" 
           element={
             <div>
               <LandingNavbar 
+                user={user}
                 onShowLogin={handleShowLogin}
                 onShowRegister={handleShowRegister}
+                onLogout={handleLogout}
               />
               <LandingPage 
                 onFindRide={handleFindRide}
                 onOfferRide={handleOfferRide}
               />
-              
               <div style={{
                 position: 'fixed',
                 top: 0,
@@ -196,20 +195,21 @@ function AppContent() {
           } 
         />
         
-        {/* Register Route */}
+        {/* Register Modal */}
         <Route 
           path="/register" 
           element={
             <div>
               <LandingNavbar 
+                user={user}
                 onShowLogin={handleShowLogin}
                 onShowRegister={handleShowRegister}
+                onLogout={handleLogout}
               />
               <LandingPage 
                 onFindRide={handleFindRide}
                 onOfferRide={handleOfferRide}
               />
-              
               <div style={{
                 position: 'fixed',
                 top: 0,
@@ -251,40 +251,22 @@ function AppContent() {
           } 
         />
         
-        {/* Dashboard Route - Protected */}
+        {/* Dashboard */}
         <Route 
           path="/dashboard" 
-          element={
-            user ? (
-              <Dashboard user={user} onLogout={handleLogout} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          } 
+          element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />} 
         />
 
-        {/* Find Ride Route - Protected */}
+        {/* Find Ride */}
         <Route 
           path="/find-ride" 
-          element={
-            user ? (
-              <FindRide user={user} onLogout={handleLogout} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          } 
+          element={user ? <FindRide user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />} 
         />
 
-        {/* Offer Ride Route - Protected */}
+        {/* Offer Ride */}
         <Route 
           path="/offer-ride" 
-          element={
-            user ? (
-              <OfferRide user={user} onLogout={handleLogout} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          } 
+          element={user ? <OfferRide user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />} 
         />
         
         {/* Footer Pages */}
@@ -298,14 +280,14 @@ function AppContent() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         
-        {/* Redirect any unknown routes to home */}
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );
 }
 
-// Main App Component with Router
+// Main App
 function App() {
   return (
     <Router>

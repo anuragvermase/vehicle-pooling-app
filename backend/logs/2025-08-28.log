@@ -1,0 +1,25 @@
+[2025-08-28T21:43:23.793Z] INFO: MongoDB Connected: localhost
+[2025-08-28T21:43:23.796Z] INFO: Database Name: rideshare
+[2025-08-28T21:43:23.802Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-28T21:43:23.803Z] INFO: 🔗 Health: http://localhost:5000/api/health
+[2025-08-28T21:43:23.804Z] INFO: 📊 Status: http://localhost:5000/api/status
+[2025-08-28T21:43:23.804Z] INFO: 🔌 WebSocket: Active
+[2025-08-28T21:43:23.805Z] INFO: 🌍 Environment: development
+[2025-08-28T21:43:33.238Z] INFO: POST /api/auth/login - ::1
+[2025-08-28T21:43:33.248Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-28T21:43:33.650Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-28T21:43:33.670Z] INFO: GET /api/dashboard/stats - ::1
+[2025-08-28T21:43:33.676Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-08-28T21:43:33.806Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-08-28T21:43:33.832Z] INFO: GET /api/dashboard/stats - ::1
+[2025-08-28T22:24:32.919Z] INFO: SIGINT received, shutting down gracefully
+[2025-08-28T22:24:32.929Z] INFO: Server closed
+[2025-08-28T22:24:54.320Z] INFO: MongoDB Connected: localhost
+[2025-08-28T22:24:54.322Z] INFO: Database Name: rideshare
+[2025-08-28T22:24:54.327Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-28T22:24:54.327Z] INFO: 🔗 Health: http://localhost:5000/api/health
+[2025-08-28T22:24:54.328Z] INFO: 📊 Status: http://localhost:5000/api/status
+[2025-08-28T22:24:54.329Z] INFO: 🔌 WebSocket: Active
+[2025-08-28T22:24:54.329Z] INFO: 🌍 Environment: development
+[2025-08-28T22:27:50.465Z] INFO: GET / - ::ffff:192.168.206.193
+[2025-08-28T22:27:50.800Z] INFO: GET /favicon.ico - ::ffff:192.168.206.193

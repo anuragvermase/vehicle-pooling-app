@@ -1,8 +1,11 @@
+// backend/server.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import os from 'os';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+
 import connectDB from './config/database.js';
 import authRoutes from './routes/auth.js';
 import dashboardRoutes from './routes/dashboard.js';
@@ -18,14 +21,28 @@ dotenv.config();
 const app = express();
 const server = createServer(app);
 
+const isProd = process.env.NODE_ENV === 'production';
+
+/**
+ * Resolve allowed origins
+ * - In development: allow all (so Expo Go on your phone can call the API)
+ * - In production: use comma-separated FRONTEND_URLS env (e.g. https://web.example.com,https://app.example.com)
+ */
+const frontends =
+  process.env.FRONTEND_URLS?.split(',').map(s => s.trim()).filter(Boolean) ||
+  (process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []);
+
+const expressCorsOrigin = isProd ? frontends : true; // true == reflect request origin
+const socketCorsOrigin = isProd ? frontends : true;
+
 // Initialize Socket.io
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    methods: ["GET", "POST"],
-    credentials: true
+    origin: socketCorsOrigin,
+    methods: ['GET', 'POST'],
+    credentials: true,
   },
-  transports: ['websocket', 'polling']
+  transports: ['websocket', 'polling'],
 });
 
 // Initialize socket handlers
@@ -34,13 +51,14 @@ initializeSocket(io);
 // Make io available to routes
 app.set('socketio', io);
 
-// Enable CORS for all requests
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
-  credentials: true
-}));
+// ---- Middleware
+app.use(
+  cors({
+    origin: expressCorsOrigin,
+    credentials: true,
+  })
+);
 
-// Parse JSON bodies
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -50,18 +68,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check route
+// ---- Health & status
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
     message: 'Server is running',
     timestamp: new Date().toISOString(),
     websocket: 'Connected',
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
   });
 });
 
-// Status route  
 app.get('/api/status', (req, res) => {
   res.json({
     success: true,
@@ -73,12 +90,12 @@ app.get('/api/status', (req, res) => {
       uptime: process.uptime(),
       memory: process.memoryUsage(),
       version: process.version,
-      environment: process.env.NODE_ENV || 'development'
-    }
+      environment: process.env.NODE_ENV || 'development',
+    },
   });
 });
 
-// API Routes
+// ---- API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/rides', rideRoutes);
@@ -89,37 +106,50 @@ app.use('/api/chat', chatRoutes);
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
-    message: `Route ${req.method} ${req.originalUrl} not found`
+    message: `Route ${req.method} ${req.originalUrl} not found`,
   });
 });
 
 // Global error handler
 app.use((error, req, res, next) => {
   logger.error('Unhandled error:', error);
-  
-  // Don't leak error details in production
-  const message = process.env.NODE_ENV === 'production' 
-    ? 'Internal server error' 
-    : error.message;
-
+  const message = isProd ? 'Internal server error' : error.message;
   res.status(error.status || 500).json({
     success: false,
     message,
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    ...(!isProd && { stack: error.stack }),
   });
 });
 
 const PORT = process.env.PORT || 5000;
 
+// helper to get a LAN IP for quick testing on phone
+function getLanIPv4() {
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name] || []) {
+      if (net.family === 'IPv4' && !net.internal) return net.address;
+    }
+  }
+  return 'localhost';
+}
+
 // Start server
 const startServer = async () => {
   try {
     await connectDB();
-    
-    server.listen(PORT, () => {
+
+    // IMPORTANT: bind to 0.0.0.0 so phones on your LAN can reach it
+    server.listen(PORT, '0.0.0.0', () => {
+      const ip = getLanIPv4();
       logger.info(`🚗 RideShare Pro Server running on port ${PORT}`);
-      logger.info(`🔗 Health: http://localhost:${PORT}/api/health`);
-      logger.info(`📊 Status: http://localhost:${PORT}/api/status`);
+      logger.info(`🔗 Local Health:  http://localhost:${PORT}/api/health`);
+      logger.info(`📱 Phone Health:  http://${ip}:${PORT}/api/health`);
+      logger.info(
+        `🌐 Allowed origins: ${
+          expressCorsOrigin === true ? '(any - dev)' : JSON.stringify(frontends)
+        }`
+      );
       logger.info(`🔌 WebSocket: Active`);
       logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
@@ -132,13 +162,10 @@ const startServer = async () => {
 // Graceful shutdown
 const gracefulShutdown = (signal) => {
   logger.info(`${signal} received, shutting down gracefully`);
-  
   server.close(() => {
     logger.info('Server closed');
     process.exit(0);
   });
-  
-  // Force close after 10 seconds
   setTimeout(() => {
     logger.error('Forcing shutdown');
     process.exit(1);
@@ -147,13 +174,10 @@ const gracefulShutdown = (signal) => {
 
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-
-// Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
   logger.error('Uncaught Exception:', error);
   process.exit(1);
 });
-
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);

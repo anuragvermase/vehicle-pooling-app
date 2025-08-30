@@ -1,8 +1,10 @@
+// backend/routes/auth.js
 import express from 'express';
 import User from '../models/User.js';
 import { protect, generateToken } from '../middleware/auth.js';
 import { validateRegistration, validateLogin, handleValidationErrors } from '../middleware/validation.js';
 import { logger } from '../utils/logger.js';
+import { OAuth2Client } from 'google-auth-library';
 
 const router = express.Router();
 
@@ -39,7 +41,7 @@ router.post('/register', validateRegistration, handleValidationErrors, async (re
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password,
-      phone: phone.trim()
+      phone: phone?.trim()
     };
 
     const user = await User.create(userData);
@@ -220,6 +222,77 @@ router.post('/logout', protect, (req, res) => {
     success: true,
     message: 'Logged out successfully'
   });
+});
+
+// ---------- GOOGLE SIGN-IN (ID TOKEN) ----------
+router.post('/google', async (req, res) => {
+  try {
+    const { idToken } = req.body || {};
+    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+
+    if (!GOOGLE_CLIENT_ID) {
+      return res.status(500).json({ success: false, message: 'GOOGLE_CLIENT_ID not configured on server.' });
+    }
+    if (!idToken) {
+      return res.status(400).json({ success: false, message: 'idToken is required.' });
+    }
+
+    const client = new OAuth2Client(GOOGLE_CLIENT_ID);
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    // Fields: sub (google user id), email, email_verified, name, picture
+    const email = (payload.email || '').toLowerCase();
+    const emailVerified = payload.email_verified;
+    const googleId = payload.sub;
+    const name = payload.name || email.split('@')[0];
+    const avatar = payload.picture || null;
+
+    if (!email || !emailVerified) {
+      return res.status(401).json({ success: false, message: 'Google account email not verified.' });
+    }
+
+    // Find or create user
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        avatar,
+        provider: 'google',
+        googleId,
+        // password and phone are optional for Google users
+      });
+    } else {
+      // If existing local user, attach googleId/provider/avatar when missing
+      let changed = false;
+      if (!user.googleId) { user.googleId = googleId; changed = true; }
+      if (!user.provider) { user.provider = 'google'; changed = true; }
+      if (!user.avatar && avatar) { user.avatar = avatar; changed = true; }
+      if (changed) await user.save();
+    }
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Issue JWT
+    const token = generateToken(user._id);
+
+    return res.json({
+      success: true,
+      message: 'Google login successful',
+      token,
+      user: user.toSafeObject()
+    });
+  } catch (err) {
+    logger.error('Google auth error:', err);
+    return res.status(401).json({ success: false, message: 'Invalid Google token.' });
+  }
 });
 
 export default router;

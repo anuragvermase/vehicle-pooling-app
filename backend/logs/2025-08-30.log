@@ -1,0 +1,33 @@
+[2025-08-30T00:00:13.752Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T00:00:13.753Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-30T00:00:14.077Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-30T00:15:26.259Z] INFO: User disconnected: Anu (68b20338c2a38acea9dfb132)
+[2025-08-30T00:15:52.883Z] INFO: GET /api/auth/me - 192.168.206.117
+[2025-08-30T09:49:25.577Z] INFO: MongoDB Connected: localhost
+[2025-08-30T09:49:25.581Z] INFO: Database Name: rideshare
+[2025-08-30T09:49:25.601Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-30T09:49:25.603Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-30T09:49:25.605Z] INFO: 📱 Phone Health:  http://192.168.43.59:5000/api/health
+[2025-08-30T09:49:25.606Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-30T09:49:25.607Z] INFO: 🔌 WebSocket: Active
+[2025-08-30T09:49:25.608Z] INFO: 🌍 Environment: development
+[2025-08-30T09:50:34.235Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-08-30T09:50:34.244Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-30T09:50:34.752Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-30T09:50:46.206Z] INFO: GET /api/dashboard/stats - 127.0.0.1
+[2025-08-30T09:50:46.454Z] INFO: GET /api/dashboard/upcoming-rides - 127.0.0.1
+[2025-08-30T09:50:46.477Z] INFO: GET /api/dashboard/stats - 127.0.0.1
+[2025-08-30T09:50:46.514Z] INFO: GET /api/dashboard/upcoming-rides - 127.0.0.1
+[2025-08-30T09:57:45.996Z] INFO: SIGINT received, shutting down gracefully
+[2025-08-30T09:57:46.000Z] INFO: Server closed
+[2025-08-30T09:57:51.203Z] INFO: MongoDB Connected: localhost
+[2025-08-30T09:57:51.205Z] INFO: Database Name: rideshare
+[2025-08-30T09:57:51.218Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-30T09:57:51.220Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-30T09:57:51.221Z] INFO: 📱 Phone Health:  http://192.168.43.59:5000/api/health
+[2025-08-30T09:57:51.222Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-30T09:57:51.223Z] INFO: 🔌 WebSocket: Active
+[2025-08-30T09:57:51.224Z] INFO: 🌍 Environment: development
+[2025-08-30T09:58:15.272Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-08-30T09:58:15.284Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-30T09:58:15.749Z] INFO: Login successful for user: anuragver689@gmail.com

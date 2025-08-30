@@ -1,0 +1,60 @@
+[2025-08-27T16:20:55.788Z] INFO: MongoDB Connected: localhost
+[2025-08-27T16:20:55.791Z] INFO: Database Name: rideshare
+[2025-08-27T16:20:55.799Z] ERROR: Uncaught Exception:
+Data: {
+  "code": "EADDRINUSE",
+  "errno": -4091,
+  "syscall": "listen",
+  "address": "::",
+  "port": 3000
+}
+[2025-08-27T16:21:06.974Z] INFO: MongoDB Connected: localhost
+[2025-08-27T16:21:06.977Z] INFO: Database Name: rideshare
+[2025-08-27T16:21:06.983Z] ERROR: Uncaught Exception:
+Data: {
+  "code": "EADDRINUSE",
+  "errno": -4091,
+  "syscall": "listen",
+  "address": "::",
+  "port": 3000
+}
+[2025-08-27T16:23:05.196Z] INFO: MongoDB Connected: localhost
+[2025-08-27T16:23:05.199Z] INFO: Database Name: rideshare
+[2025-08-27T16:23:05.206Z] INFO: 🚗 RideShare Pro Server running on port 3000
+[2025-08-27T16:23:05.209Z] INFO: 🔗 Health: http://localhost:3000/api/health
+[2025-08-27T16:23:05.210Z] INFO: 📊 Status: http://localhost:3000/api/status
+[2025-08-27T16:23:05.211Z] INFO: 🔌 WebSocket: Active
+[2025-08-27T16:23:05.212Z] INFO: 🌍 Environment: development
+[2025-08-27T16:35:22.355Z] INFO: SIGINT received, shutting down gracefully
+[2025-08-27T16:35:22.361Z] INFO: Server closed
+[2025-08-27T16:35:26.294Z] INFO: MongoDB Connected: localhost
+[2025-08-27T16:35:26.296Z] INFO: Database Name: rideshare
+[2025-08-27T16:35:26.303Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-27T16:35:26.304Z] INFO: 🔗 Health: http://localhost:5000/api/health
+[2025-08-27T16:35:26.305Z] INFO: 📊 Status: http://localhost:5000/api/status
+[2025-08-27T16:35:26.306Z] INFO: 🔌 WebSocket: Active
+[2025-08-27T16:35:26.307Z] INFO: 🌍 Environment: development
+[2025-08-27T16:35:46.497Z] INFO: POST /api/auth/login - ::1
+[2025-08-27T16:35:46.506Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-27T16:35:47.132Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-27T16:35:47.167Z] INFO: GET /api/dashboard/stats - ::1
+[2025-08-27T16:35:47.176Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-08-27T16:35:47.365Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-08-27T16:35:47.405Z] INFO: GET /api/dashboard/stats - ::1
+[2025-08-27T16:36:16.255Z] INFO: POST /api/auth/login - ::1
+[2025-08-27T16:36:16.268Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-27T16:36:16.732Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-27T16:36:16.830Z] INFO: User connected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-08-27T16:36:21.659Z] INFO: User disconnected: Anurag Verma (688bb41b0bd615de0b886019)
+[2025-08-27T16:48:42.755Z] INFO: POST /api/auth/login - ::1
+[2025-08-27T16:48:42.760Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-27T16:48:43.200Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-27T16:48:43.239Z] INFO: GET /api/dashboard/stats - ::1
+[2025-08-27T16:48:43.243Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-08-27T16:48:43.263Z] INFO: GET /api/dashboard/upcoming-rides - ::1
+[2025-08-27T16:48:43.310Z] INFO: GET /api/dashboard/stats - ::1
+[2025-08-27T16:48:57.867Z] INFO: GET /api/dashboard/ride-history - ::1
+[2025-08-27T16:49:01.641Z] INFO: GET /api/dashboard/ride-history - ::1
+[2025-08-27T16:49:34.228Z] INFO: POST /api/auth/login - ::1
+[2025-08-27T16:49:34.234Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-27T16:49:34.698Z] INFO: Login successful for user: anuragver689@gmail.com

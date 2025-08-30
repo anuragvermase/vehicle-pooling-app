@@ -1,3 +1,4 @@
+// backend/models/User.js
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -17,20 +18,34 @@ const userSchema = new mongoose.Schema({
     trim: true,
     match: [/^\w+([.-]?\w+)@\w+([.-]?\w+)(\.\w{2,3})+$/, 'Please enter a valid email']
   },
+  // Password is OPTIONAL to support OAuth users
   password: {
     type: String,
-    required: [true, 'Password is required'],
     minLength: [6, 'Password must be at least 6 characters long'],
     select: false
   },
+  // Phone is OPTIONAL to support OAuth users without phone
   phone: {
     type: String,
-    required: [true, 'Phone number is required'],
     match: [/^(\+91|91|0)?[6789]\d{9}$/, 'Please enter a valid Indian phone number']
   },
   profilePicture: {
     type: String,
     default: null
+  },
+  avatar: {
+    type: String,
+    default: null
+  },
+  provider: {
+    type: String,
+    enum: ['local', 'google'],
+    default: 'local'
+  },
+  googleId: {
+    type: String,
+    index: true,
+    sparse: true
   },
   bio: {
     type: String,
@@ -162,6 +177,7 @@ const userSchema = new mongoose.Schema({
 // Indexes
 userSchema.index({ email: 1 });
 userSchema.index({ phone: 1 });
+userSchema.index({ googleId: 1 });
 userSchema.index({ 'rating.average': -1 });
 userSchema.index({ 'location.current': '2dsphere' });
 
@@ -170,10 +186,9 @@ userSchema.virtual('isLocked').get(function() {
   return !!(this.lockUntil && this.lockUntil > Date.now());
 });
 
-// Pre-save middleware to hash password
+// Pre-save middleware to hash password (only if present)
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  
+  if (!this.isModified('password') || !this.password) return next();
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
@@ -185,6 +200,7 @@ userSchema.pre('save', async function(next) {
 
 // Instance methods
 userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password) return false; // OAuth-only users don't have a password
   return bcrypt.compare(candidatePassword, this.password);
 };
 
@@ -198,7 +214,7 @@ userSchema.methods.incLoginAttempts = function() {
   
   const updates = { $inc: { loginAttempts: 1 } };
   
-  if (this.loginAttempts + 1 >= 5 && !this.isLocked) {
+  if ((this.loginAttempts || 0) + 1 >= 5 && !this.isLocked) {
     updates.$set = {
       lockUntil: Date.now() + 2 * 60 * 60 * 1000
     };

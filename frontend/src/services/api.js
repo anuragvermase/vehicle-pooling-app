@@ -1,3 +1,4 @@
+// frontend/src/services/api.js
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -49,6 +50,12 @@ const API = {
   auth: {
     login: async (credentials) => {
       const response = await apiClient.post('/auth/login', credentials);
+      return response;
+    },
+
+    // 🔐 Google Sign-in (ID token)
+    loginWithGoogle: async ({ idToken }) => {
+      const response = await apiClient.post('/auth/google', { idToken });
       return response;
     },
     
@@ -144,7 +151,7 @@ const API = {
     },
     
     cancelRide: async (rideId, reason) => {
-      const response = await apiClient.put(`/rides/${rideId}/cancel, { reason }`);
+      const response = await apiClient.put(`/rides/${rideId}/cancel`, { reason });
       return response;
     },
     
@@ -172,7 +179,7 @@ const API = {
     },
     
     cancelBooking: async (bookingId, reason) => {
-      const response = await apiClient.put(`/bookings/${bookingId}/cancel, { reason }`);
+      const response = await apiClient.put(`/bookings/${bookingId}/cancel`, { reason });
       return response;
     },
     
@@ -242,7 +249,7 @@ const API = {
     },
     
     requestRefund: async (paymentId, reason) => {
-      const response = await apiClient.post(`/payments/${paymentId}/refund, { reason }`);
+      const response = await apiClient.post(`/payments/${paymentId}/refund`, { reason });
       return response;
     },
     
@@ -302,7 +309,7 @@ const API = {
     },
     
     reportReview: async (reviewId, reason) => {
-      const response = await apiClient.post(`/reviews/${reviewId}/report, { reason }`);
+      const response = await apiClient.post(`/reviews/${reviewId}/report`, { reason });
       return response;
     },
     
@@ -330,7 +337,7 @@ const API = {
     },
     
     resolveAlert: async (alertId, resolution) => {
-      const response = await apiClient.put(`/emergency/alerts/${alertId}/resolve, { resolution }`);
+      const response = await apiClient.put(`/emergency/alerts/${alertId}/resolve`, { resolution });
       return response;
     }
   },
