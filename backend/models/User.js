@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  avatarUrl: {                 // ✅ added so updates to avatarUrl persist
+    type: String,
+    default: null
+  },
   provider: {
     type: String,
     enum: ['local', 'google'],
@@ -211,15 +215,15 @@ userSchema.methods.incLoginAttempts = function() {
       $set: { loginAttempts: 1 }
     });
   }
-  
+
   const updates = { $inc: { loginAttempts: 1 } };
-  
+
   if ((this.loginAttempts || 0) + 1 >= 5 && !this.isLocked) {
     updates.$set = {
       lockUntil: Date.now() + 2 * 60 * 60 * 1000
     };
   }
-  
+
   return this.updateOne(updates);
 };
 
@@ -244,11 +248,11 @@ userSchema.methods.toSafeObject = function() {
 userSchema.statics.updateRating = async function(userId, newRating) {
   const user = await this.findById(userId);
   if (!user) throw new Error('User not found');
-  
+
   const totalRating = (user.rating.average * user.rating.count) + newRating;
   user.rating.count += 1;
   user.rating.average = totalRating / user.rating.count;
-  
+
   await user.save();
   return user.rating;
 };

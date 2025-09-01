@@ -492,3 +492,238 @@ Data: {
 [2025-09-01T20:35:00.619Z] INFO: POST /api/auth/login - 127.0.0.1
 [2025-09-01T20:35:00.627Z] INFO: Login attempt for email: kannu@gmail.com
 [2025-09-01T20:35:01.051Z] INFO: GET /api/auth/me?_t=1756758901048 - 127.0.0.1
+[2025-09-01T21:31:39.430Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-01T21:31:39.432Z] INFO: Database Name: rideshare
+[2025-09-01T21:31:39.442Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-09-01T21:31:39.443Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-09-01T21:31:39.444Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-09-01T21:31:39.444Z] INFO: 🔌 WebSocket: Active
+[2025-09-01T21:31:39.445Z] INFO: 🌍 Environment: development
+[2025-09-01T21:31:39.445Z] INFO: 🌐 CORS Origins: (any - dev)
+[2025-09-01T21:37:11.907Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T21:37:22.368Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T21:41:34.394Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-09-01T21:41:34.403Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-09-01T21:41:35.940Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T21:41:41.594Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T21:41:54.294Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T21:42:55.280Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T21:43:05.569Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T21:43:29.474Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T21:43:40.366Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T21:43:52.010Z] INFO: PUT /api/auth/profile - 10.170.176.117
+[2025-09-01T21:43:52.146Z] INFO: Profile updated for user: kannu@gmail.com
+[2025-09-01T21:44:08.879Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-09-01T21:44:08.882Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-09-01T21:44:09.526Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T21:44:11.751Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T21:48:38.463Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T21:48:48.773Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T21:54:21.682Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T21:54:32.037Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T22:00:05.029Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T22:00:15.374Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T22:05:48.278Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T22:05:58.595Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T22:09:05.813Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-09-01T22:09:05.815Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-09-01T22:09:07.414Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:09:10.277Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:09:23.402Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:09:45.448Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:09:51.605Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-09-01T22:09:57.523Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:10:24.166Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:10:28.233Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:10:36.579Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:10:41.507Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-09-01T22:10:46.999Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:11:31.480Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T22:11:39.425Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:11:39.743Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T22:11:57.921Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-09-01T22:12:00.940Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:12:12.935Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:12:24.868Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:12:31.936Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:17:12.748Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T22:17:23.059Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T22:22:56.011Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T22:23:06.347Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T22:28:39.296Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T22:28:49.603Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T22:30:06.666Z] INFO: SIGINT received, shutting down gracefully
+[2025-09-01T22:30:06.678Z] INFO: Server closed
+[2025-09-01T22:30:33.723Z] INFO: MongoDB Connected: ac-axtossa-shard-00-01.zdprcoy.mongodb.net
+[2025-09-01T22:30:33.725Z] INFO: Database Name: rideshare
+[2025-09-01T22:30:33.736Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-09-01T22:30:33.737Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-09-01T22:30:33.738Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-09-01T22:30:33.739Z] INFO: 🔌 WebSocket: Active
+[2025-09-01T22:30:33.740Z] INFO: 🌍 Environment: development
+[2025-09-01T22:30:33.740Z] INFO: 🌐 CORS Origins: (any - dev)
+[2025-09-01T22:32:07.828Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-09-01T22:32:07.836Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-09-01T22:32:08.823Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:32:21.753Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-09-01T22:32:24.403Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:32:28.877Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:32:54.762Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-09-01T22:32:54.764Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-09-01T22:32:55.538Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:32:57.772Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:33:08.502Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-09-01T22:33:20.303Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:34:36.925Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:36:41.283Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:44:53.646Z] INFO: SIGINT received, shutting down gracefully
+[2025-09-01T22:44:58.391Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-01T22:44:58.393Z] INFO: Database Name: rideshare
+[2025-09-01T22:44:58.404Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-09-01T22:44:58.405Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-09-01T22:44:58.406Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-09-01T22:44:58.407Z] INFO: 🔌 WebSocket: Active
+[2025-09-01T22:44:58.408Z] INFO: 🌍 Environment: development
+[2025-09-01T22:44:58.408Z] INFO: 🌐 CORS Origins: (any - dev)
+[2025-09-01T22:46:40.475Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-09-01T22:46:40.481Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-09-01T22:46:41.412Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:46:41.473Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:46:48.150Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:46:59.532Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:47:04.650Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-09-01T22:47:04.944Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:47:10.809Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:47:11.817Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:47:23.521Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-09-01T22:47:23.868Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:47:30.926Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:47:45.513Z] INFO: PUT /api/auth/profile - 10.170.176.117
+[2025-09-01T22:47:45.650Z] INFO: Profile updated for user: kannu@gmail.com
+[2025-09-01T22:47:45.782Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:47:47.987Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:47:51.613Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:48:14.120Z] INFO: PUT /api/auth/profile - 10.170.176.117
+[2025-09-01T22:48:14.267Z] INFO: Profile updated for user: kannu@gmail.com
+[2025-09-01T22:48:14.345Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:48:22.252Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:48:51.494Z] INFO: GET /api/auth/me?_t=1756766931165 - 127.0.0.1
+[2025-09-01T22:48:52.963Z] INFO: GET /api/auth/me?_t=1756766931165 - 127.0.0.1
+[2025-09-01T22:48:58.099Z] INFO: GET /api/users/me?_t=1756766938095 - 127.0.0.1
+[2025-09-01T22:49:06.574Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:49:10.845Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:49:15.846Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-09-01T22:49:16.948Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:49:18.511Z] INFO: GET /api/auth/me?_t=1756766958505 - 127.0.0.1
+[2025-09-01T22:49:19.356Z] INFO: GET /api/auth/me?_t=1756766958505 - 127.0.0.1
+[2025-09-01T22:49:21.314Z] INFO: GET /api/users/me?_t=1756766961310 - 127.0.0.1
+[2025-09-01T22:49:26.485Z] INFO: GET /api/users/me?_t=1756766966474 - 127.0.0.1
+[2025-09-01T22:49:26.490Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756766966469&_t=1756766966474 - 127.0.0.1
+[2025-09-01T22:49:26.673Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756766966473&_t=1756766966474 - 127.0.0.1
+[2025-09-01T22:49:26.796Z] INFO: GET /api/users/me?_t=1756766966474 - 127.0.0.1
+[2025-09-01T22:49:26.828Z] INFO: GET /api/rides/user?status=all&_t=1756766966825&_t=1756766966826 - 127.0.0.1
+[2025-09-01T22:49:27.057Z] INFO: GET /api/rides/user?status=all&_t=1756766967049&_t=1756766967049 - 127.0.0.1
+[2025-09-01T22:49:52.657Z] INFO: GET /api/users/me?_t=1756766992653 - 127.0.0.1
+[2025-09-01T22:49:52.844Z] INFO: GET /api/users/me?_t=1756766992653 - 127.0.0.1
+[2025-09-01T22:49:53.015Z] INFO: GET /api/users/me?_t=1756766992653 - 127.0.0.1
+[2025-09-01T22:49:53.256Z] INFO: GET /api/users/me?_t=1756766992653 - 127.0.0.1
+[2025-09-01T22:49:56.213Z] INFO: GET /api/dashboard/stats?_t=1756766996205 - 127.0.0.1
+[2025-09-01T22:49:56.218Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756766996205 - 127.0.0.1
+[2025-09-01T22:49:56.223Z] INFO: GET /api/users/me?_t=1756766996205 - 127.0.0.1
+[2025-09-01T22:49:56.451Z] INFO: GET /api/users/me?_t=1756766996205 - 127.0.0.1
+[2025-09-01T22:49:56.628Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756766996205 - 127.0.0.1
+[2025-09-01T22:49:58.502Z] INFO: GET /api/dashboard/stats?_t=1756766996205 - 127.0.0.1
+[2025-09-01T22:49:58.904Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T22:49:59.284Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T22:50:12.369Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:50:14.630Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:50:22.448Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:50:54.481Z] INFO: PUT /api/auth/profile - 10.170.176.117
+[2025-09-01T22:50:54.616Z] INFO: Profile updated for user: kannu@gmail.com
+[2025-09-01T22:50:54.759Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:50:57.057Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:51:12.993Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:52:47.882Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:53:32.878Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-09-01T22:53:33.235Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T22:53:37.042Z] INFO: GET /api/auth/me?_t=1756767216711 - 127.0.0.1
+[2025-09-01T22:53:37.196Z] INFO: GET /api/auth/me?_t=1756767216711 - 127.0.0.1
+[2025-09-01T22:53:37.216Z] INFO: GET /api/dashboard/stats?_t=1756767217203 - 127.0.0.1
+[2025-09-01T22:53:37.287Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756767217203 - 127.0.0.1
+[2025-09-01T22:53:37.359Z] INFO: GET /api/users/me?_t=1756767217203 - 127.0.0.1
+[2025-09-01T22:53:37.499Z] INFO: GET /api/users/me?_t=1756767217203 - 127.0.0.1
+[2025-09-01T22:53:37.517Z] INFO: GET /api/users/me?_t=1756767217361 - 127.0.0.1
+[2025-09-01T22:53:38.116Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756767217203 - 127.0.0.1
+[2025-09-01T22:53:39.629Z] INFO: GET /api/dashboard/stats?_t=1756767217203 - 127.0.0.1
+[2025-09-01T22:53:44.190Z] INFO: GET /api/users/me?_t=1756767224184 - 127.0.0.1
+[2025-09-01T22:53:44.196Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756767224182&_t=1756767224184 - 127.0.0.1
+[2025-09-01T22:53:44.201Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756767224184&_t=1756767224184 - 127.0.0.1
+[2025-09-01T22:53:44.337Z] INFO: GET /api/users/me?_t=1756767224184 - 127.0.0.1
+[2025-09-01T22:53:44.564Z] INFO: GET /api/rides/user?status=all&_t=1756767224551&_t=1756767224551 - 127.0.0.1
+[2025-09-01T22:53:44.570Z] INFO: GET /api/rides/user?status=all&_t=1756767224565&_t=1756767224565 - 127.0.0.1
+[2025-09-01T22:54:03.242Z] INFO: GET /api/dashboard/stats?_t=1756767242916 - 127.0.0.1
+[2025-09-01T22:54:03.246Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756767242916 - 127.0.0.1
+[2025-09-01T22:54:03.251Z] INFO: GET /api/users/me?_t=1756767242916 - 127.0.0.1
+[2025-09-01T22:54:03.415Z] INFO: GET /api/users/me?_t=1756767242916 - 127.0.0.1
+[2025-09-01T22:54:03.484Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756767242916 - 127.0.0.1
+[2025-09-01T22:54:04.857Z] INFO: GET /api/dashboard/stats?_t=1756767242916 - 127.0.0.1
+[2025-09-01T22:55:32.179Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T22:55:42.549Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T23:01:15.507Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T23:01:25.921Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T23:02:26.915Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-09-01T23:02:26.921Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-09-01T23:02:28.539Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:02:28.573Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:02:32.823Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:02:42.667Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:02:57.455Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:03:01.216Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:03:21.088Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:03:33.877Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:03:34.974Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:03:41.013Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-09-01T23:03:41.270Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:03:48.551Z] INFO: GET /api/auth/me?_t=1756767828237 - 127.0.0.1
+[2025-09-01T23:03:48.696Z] INFO: GET /api/auth/me?_t=1756767828237 - 127.0.0.1
+[2025-09-01T23:03:48.743Z] INFO: GET /api/dashboard/stats?_t=1756767828727 - 127.0.0.1
+[2025-09-01T23:03:48.815Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756767828727 - 127.0.0.1
+[2025-09-01T23:03:48.829Z] INFO: GET /api/users/me?_t=1756767828727 - 127.0.0.1
+[2025-09-01T23:03:48.960Z] INFO: GET /api/users/me?_t=1756767828727 - 127.0.0.1
+[2025-09-01T23:03:49.037Z] INFO: GET /api/users/me?_t=1756767828835 - 127.0.0.1
+[2025-09-01T23:03:49.434Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756767828727 - 127.0.0.1
+[2025-09-01T23:03:50.130Z] INFO: GET /api/dashboard/stats?_t=1756767828727 - 127.0.0.1
+[2025-09-01T23:03:53.956Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:03:55.962Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:04:10.426Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-09-01T23:04:10.429Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-09-01T23:04:11.341Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:04:11.350Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:04:16.555Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:04:29.161Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-09-01T23:04:29.599Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:04:33.507Z] INFO: GET /api/auth/me?_t=1756767873499 - 127.0.0.1
+[2025-09-01T23:04:33.631Z] INFO: GET /api/auth/me?_t=1756767873499 - 127.0.0.1
+[2025-09-01T23:04:33.660Z] INFO: GET /api/dashboard/stats?_t=1756767873643 - 127.0.0.1
+[2025-09-01T23:04:33.760Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756767873643 - 127.0.0.1
+[2025-09-01T23:04:33.962Z] INFO: GET /api/users/me?_t=1756767873643 - 127.0.0.1
+[2025-09-01T23:04:33.970Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756767873643 - 127.0.0.1
+[2025-09-01T23:04:33.976Z] INFO: GET /api/users/me?_t=1756767873764 - 127.0.0.1
+[2025-09-01T23:04:34.145Z] INFO: GET /api/users/me?_t=1756767873643 - 127.0.0.1
+[2025-09-01T23:04:35.036Z] INFO: GET /api/dashboard/stats?_t=1756767873643 - 127.0.0.1
+[2025-09-01T23:04:45.531Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:04:54.349Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:05:00.281Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-09-01T23:05:24.635Z] INFO: GET /api/auth/me?_t=1756767924630 - 127.0.0.1
+[2025-09-01T23:05:24.823Z] INFO: GET /api/auth/me?_t=1756767924630 - 127.0.0.1
+[2025-09-01T23:05:24.852Z] INFO: GET /api/dashboard/stats?_t=1756767924834 - 127.0.0.1
+[2025-09-01T23:05:25.067Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756767924834 - 127.0.0.1
+[2025-09-01T23:05:25.154Z] INFO: GET /api/users/me?_t=1756767924834 - 127.0.0.1
+[2025-09-01T23:05:25.179Z] INFO: GET /api/users/me?_t=1756767925068 - 127.0.0.1
+[2025-09-01T23:05:25.591Z] INFO: GET /api/users/me?_t=1756767924834 - 127.0.0.1
+[2025-09-01T23:05:25.598Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756767924834 - 127.0.0.1
+[2025-09-01T23:05:27.079Z] INFO: GET /api/dashboard/stats?_t=1756767924834 - 127.0.0.1
+[2025-09-01T23:06:58.905Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T23:07:09.515Z] INFO: Mongoose connected to MongoDB
+[2025-09-01T23:12:42.694Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-01T23:12:53.570Z] INFO: Mongoose connected to MongoDB

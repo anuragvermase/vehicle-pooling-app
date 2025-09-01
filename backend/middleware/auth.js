@@ -5,23 +5,16 @@ import { logger } from '../utils/logger.js';
 
 /** Extract JWT from common places (headers, cookies, query) */
 function extractToken(req) {
-  // Standard Authorization header: "Bearer <token>" or just "<token>"
   const auth = req.headers.authorization || req.headers.Authorization;
   if (auth && typeof auth === 'string') {
     const parts = auth.trim().split(' ');
     if (parts.length === 2 && /^Bearer$/i.test(parts[0])) return parts[1];
-    if (parts.length === 1) return parts[0]; // allow raw token
+    if (parts.length === 1) return parts[0];
   }
-  // Alt headers some clients use
   if (req.headers['x-auth-token']) return req.headers['x-auth-token'];
   if (req.headers['x-access-token']) return req.headers['x-access-token'];
-
-  // Optional cookie (if you ever set it)
   if (req.cookies?.token) return req.cookies.token;
-
-  // Optional query param (useful for webviews/sockets if needed)
   if (req.query?.token) return req.query.token;
-
   return null;
 }
 
@@ -37,10 +30,7 @@ export const protect = async (req, res, next) => {
     }
 
     try {
-      // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Support multiple claim names for the user id
       const decodedId = decoded?.id || decoded?._id || decoded?.sub || decoded?.userId;
       if (!decodedId) {
         return res.status(401).json({
@@ -49,9 +39,7 @@ export const protect = async (req, res, next) => {
         });
       }
 
-      // Load user; include flags if they’re excluded by default
       const user = await User.findById(decodedId).select('+isActive +isLocked');
-
       if (!user) {
         return res.status(401).json({
           success: false,
@@ -59,7 +47,6 @@ export const protect = async (req, res, next) => {
         });
       }
 
-      // Business rules you already had
       if (user.isActive === false) {
         return res.status(401).json({
           success: false,
@@ -74,10 +61,9 @@ export const protect = async (req, res, next) => {
         });
       }
 
-      // Attach to request (more convenient for routes)
-      req.user = user;                    // full user doc
-      req.userId = String(user._id);      // plain id
-      req.auth = { token, decoded };      // optional useful context
+      req.user = user;
+      req.userId = String(user._id);
+      req.auth = { token, decoded };
 
       return next();
     } catch (jwtError) {
@@ -124,5 +110,4 @@ export const verifyToken = (token) => {
   }
 };
 
-// Also export default for convenience: `import auth from './middleware/auth.js'`
 export default protect;

@@ -42,11 +42,6 @@ for (const key of ['JWT_SECRET', 'MONGODB_URI']) {
 }
 
 /* ------------------------- CORS origin resolution ------------------------- */
-/**
- * - If FRONTEND_URLS is set: comma-separated list of origins
- * - Else if FRONTEND_URL is set: single origin
- * - Dev: allow all (true) so Expo/localhost variants work
- */
 const frontends =
   process.env.FRONTEND_URLS?.split(',').map(s => s.trim()).filter(Boolean) ||
   (process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []);
@@ -156,10 +151,11 @@ app.get('/api/auth/me', auth, async (req, res, next) => {
 
     const User = (await import('./models/User.js')).default;
     const user = await User.findById(uid).select(
-      'name fullName username firstName lastName email avatarUrl profilePicture'
+      'name fullName username firstName lastName email avatarUrl profilePicture avatar' // include avatar
     );
 
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    res.set('Cache-Control', 'no-store'); // avoid stale caches
     res.json({ user });
   } catch (e) {
     next(e);
@@ -177,9 +173,9 @@ app.post('/api/auth/avatar', auth, uploadAvatar.single('avatar'), async (req, re
     const User = (await import('./models/User.js')).default;
     const user = await User.findByIdAndUpdate(
       uid,
-      { avatarUrl: fileUrl, profilePicture: fileUrl },
+      { avatarUrl: fileUrl, profilePicture: fileUrl, avatar: fileUrl }, // set all three
       { new: true }
-    ).select('name email avatarUrl profilePicture');
+    ).select('name email avatarUrl profilePicture avatar');
 
     res.json({ url: fileUrl, user });
   } catch (e) {

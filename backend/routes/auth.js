@@ -15,13 +15,11 @@ const router = express.Router();
 
 /* ---------- helpers ---------- */
 function normalizeUser(u) {
-  // Convert mongoose doc -> plain object via your safe serializer, then normalize avatar
   const obj = typeof u.toSafeObject === 'function' ? u.toSafeObject() : u.toObject?.() ?? u;
   const url = obj.avatarUrl || obj.profilePicture || obj.avatar || null;
-
   return {
     ...obj,
-    avatarUrl: url,                     // always present if any
+    avatarUrl: url,
     profilePicture: obj.profilePicture ?? url,
     avatar: obj.avatar ?? url,
   };
@@ -76,7 +74,6 @@ router.post('/register', validateRegistration, handleValidationErrors, async (re
       phone: phone?.trim(),
     });
 
-    // last login
     user.lastLogin = new Date();
     await user.save();
 
@@ -108,11 +105,17 @@ router.post('/login', validateLogin, handleValidationErrors, async (req, res, ne
     }
     if (!user.isActive) {
       logger.warn(`Login failed - account deactivated: ${email}`);
-      return res.status(401).json({ success: false, message: 'Account has been deactivated. Please contact support.' });
+      return res.status(401).json({
+        success: false,
+        message: 'Account has been deactivated. Please contact support.'
+      });
     }
     if (user.isLocked) {
       logger.warn(`Login failed - account locked: ${email}`);
-      return res.status(401).json({ success: false, message: 'Account is temporarily locked due to multiple failed login attempts. Please try again later.' });
+      return res.status(401).json({
+        success: false,
+        message: 'Account is temporarily locked due to multiple failed login attempts. Please try again later.'
+      });
     }
 
     const ok = await user.comparePassword(password);
@@ -146,7 +149,7 @@ router.get('/me', protect, async (req, res, next) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-    res.set('Cache-Control', 'no-store');   // <- add this
+    res.set('Cache-Control', 'no-store');
     res.json({ success: true, user: normalizeUser(user) });
   } catch (error) {
     logger.error('Get user error:', error);
@@ -163,7 +166,6 @@ router.put('/profile', protect, async (req, res, next) => {
     if (name) update.name = name.trim();
     if (phone) update.phone = phone.trim();
 
-    // accept any of these fields from client
     const url = avatarUrl || profilePicture || avatar;
     if (url !== undefined) {
       update.profilePicture = url;
@@ -190,9 +192,10 @@ router.post('/avatar', protect, upload.single('avatar'), async (req, res, next) 
 
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { profilePicture: fileUrl, avatarUrl: fileUrl, avatar: fileUrl }, // set all three
+      { profilePicture: fileUrl, avatarUrl: fileUrl, avatar: fileUrl },
       { new: true }
     );
+
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
     return res.json({ success: true, url: fileUrl, user: normalizeUser(user) });

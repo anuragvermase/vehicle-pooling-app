@@ -1,7 +1,7 @@
 // src/screens/Profile.tsx
 import { UserAPI } from "../services/api";
 import { Storage } from "../services/storage";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -13,6 +13,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  DeviceEventEmitter, // 👈 notify Landing to refresh
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Auth } from "../services/auth";
@@ -54,7 +55,7 @@ export default function Profile() {
   useEffect(() => {
     (async () => {
       try {
-        const raw = await Auth.me(); // server or cache
+        const raw = await Auth.me();
         const u =
           (raw?.user as Me) ??
           (raw?.data?.user as Me) ??
@@ -74,11 +75,7 @@ export default function Profile() {
 
   const memberSince = useMemo(() => {
     if (!me?.createdAt) return undefined;
-    try {
-      return new Date(me.createdAt).toLocaleDateString();
-    } catch {
-      return undefined;
-    }
+    try { return new Date(me.createdAt).toLocaleDateString(); } catch { return undefined; }
   }, [me?.createdAt]);
 
   const displayName = getDisplayName(me);
@@ -88,14 +85,10 @@ export default function Profile() {
       const current = await ImagePicker.getMediaLibraryPermissionsAsync();
       if (!current.granted) {
         const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!perm.granted) {
-          Alert.alert("Permission needed", "Allow photo/gallery access to continue.");
-          return;
-        }
+        if (!perm.granted) { Alert.alert("Permission needed", "Allow photo/gallery access to continue."); return; }
       }
-
       const res = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images, // ok on your SDK
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
         quality: 0.9,
       });
@@ -103,20 +96,22 @@ export default function Profile() {
 
       const uri = res.assets[0].uri;
 
-      // 1) Instant local preview
+      // 1) local preview
       setMe((m) => (m ? { ...m, avatarUrl: uri } : m));
 
-      // 2) Persist to server
+      // 2) upload + persist
       const form = new FormData();
       form.append("avatar", { uri, name: "avatar.jpg", type: "image/jpeg" } as any);
       const { url, user } = await UserAPI.uploadAvatar(form);
 
-      // 3) Update state + cache so it survives relogin
+      // 3) update local state + cache + notify Landing
+      const merged = { ...(user ?? {}), avatarUrl: url };
       setMe((m) => (m ? { ...m, avatarUrl: url } : m));
-      await Storage.set?.("me", JSON.stringify(user));
+      await Storage.set?.("me", JSON.stringify(merged));
+      DeviceEventEmitter.emit("user:updated");
+
       Alert.alert("Updated", "Profile photo updated.");
     } catch (e) {
-      console.log("Upload avatar error:", e);
       Alert.alert("Upload failed", "Please try again.");
     }
   };
@@ -127,10 +122,7 @@ export default function Profile() {
       if (name && name !== displayName) body.name = name.trim();
       if (phone !== me?.phone) body.phone = phone.trim();
 
-      if (!body.name && !body.phone) {
-        setEditing(false);
-        return;
-      }
+      if (!body.name && !body.phone) { setEditing(false); return; }
 
       const res = await UserAPI.updateProfile(body);
       const u =
@@ -146,6 +138,7 @@ export default function Profile() {
         const merged = { ...me, ...u, avatarUrl };
         setMe(merged);
         await Storage.set?.("me", JSON.stringify(merged));
+        DeviceEventEmitter.emit("user:updated"); // 👈 greeting updates on Landing
       }
 
       setEditing(false);
@@ -155,132 +148,57 @@ export default function Profile() {
     }
   };
 
-  const onCancel = () => {
-    setName(displayName);
-    setPhone(me?.phone || "");
-    setEditing(false);
-  };
+  const onCancel = () => { setName(displayName); setPhone(me?.phone || ""); setEditing(false); };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0F14" }}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
           {/* Title + Edit controls */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 16,
-            }}
-          >
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <Text style={{ color: "white", fontSize: 28, fontWeight: "900" }}>Profile</Text>
             {!editing ? (
-              <Pressable
-                onPress={() => setEditing(true)}
-                style={{
-                  backgroundColor: "#1a2230",
-                  borderWidth: 1,
-                  borderColor: "#23314a",
-                  paddingHorizontal: 12,
-                  paddingVertical: 8,
-                  borderRadius: 10,
-                }}
-              >
+              <Pressable onPress={() => setEditing(true)} style={{ backgroundColor: "#1a2230", borderWidth: 1, borderColor: "#23314a", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10 }}>
                 <Text style={{ color: "#E5E7EB", fontWeight: "800" }}>Edit</Text>
               </Pressable>
             ) : (
               <View style={{ flexDirection: "row", gap: 8 }}>
-                <Pressable
-                  onPress={onCancel}
-                  style={{
-                    backgroundColor: "#1a2230",
-                    borderWidth: 1,
-                    borderColor: "#23314a",
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    borderRadius: 10,
-                  }}
-                >
+                <Pressable onPress={onCancel} style={{ backgroundColor: "#1a2230", borderWidth: 1, borderColor: "#23314a", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10 }}>
                   <Text style={{ color: "#E5E7EB", fontWeight: "800" }}>Cancel</Text>
                 </Pressable>
-                <Pressable
-                  onPress={onSave}
-                  style={{
-                    backgroundColor: "#3B82F6",
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    borderRadius: 10,
-                  }}
-                >
+                <Pressable onPress={onSave} style={{ backgroundColor: "#3B82F6", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10 }}>
                   <Text style={{ color: "white", fontWeight: "800" }}>Save</Text>
                 </Pressable>
               </View>
             )}
           </View>
 
-          {/* Avatar */}
+          {/* Avatar + Change button */}
           <View style={{ alignItems: "center", gap: 14 }}>
             {me?.avatarUrl ? (
-              <Image
-                source={{ uri: me.avatarUrl }}
-                style={{
-                  width: 140,
-                  height: 140,
-                  borderRadius: 70,
-                  borderWidth: 1,
-                  borderColor: "#23314a",
-                }}
-              />
+              <Image source={{ uri: me.avatarUrl }} style={{ width: 140, height: 140, borderRadius: 70, borderWidth: 1, borderColor: "#23314a" }} />
             ) : (
-              <View
-                style={{
-                  width: 140,
-                  height: 140,
-                  borderRadius: 70,
-                  borderWidth: 1,
-                  borderColor: "#23314a",
-                  backgroundColor: "#1a2230",
-                }}
-              />
+              <View style={{ width: 140, height: 140, borderRadius: 70, borderWidth: 1, borderColor: "#23314a", backgroundColor: "#1a2230" }} />
             )}
             <Pressable
-              style={{
-                backgroundColor: "#1a2230",
-                paddingVertical: 10,
-                paddingHorizontal: 14,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: "#23314a",
-              }}
               onPress={onChangePhoto}
+              style={{ backgroundColor: "#1a2230", paddingVertical: 10, paddingHorizontal: 14, borderRadius: 10, borderWidth: 1, borderColor: "#23314a" }}
             >
               <Text style={{ color: "#E5E7EB", fontWeight: "800" }}>Change photo</Text>
             </Pressable>
           </View>
 
-          {/* Fields */}
+          {/* Details */}
           <View style={{ marginTop: 24, gap: 16 }}>
-            {/* Name (editable) */}
             <View>
               <Text style={{ color: "#9CA3AF", marginBottom: 6 }}>Name</Text>
               {!editing ? (
                 <Text style={{ color: "#E5E7EB", fontWeight: "800" }}>{displayName}</Text>
               ) : (
-                <TextInput
-                  value={name}
-                  onChangeText={setName}
-                  placeholder="Your name"
-                  placeholderTextColor="#6B7280"
-                  style={input}
-                />
+                <TextInput value={name} onChangeText={setName} placeholder="Your name" placeholderTextColor="#6B7280" style={input} />
               )}
             </View>
 
-            {/* Email (read-only) */}
             {me?.email ? (
               <View>
                 <Text style={{ color: "#9CA3AF", marginBottom: 6 }}>Email</Text>
@@ -288,24 +206,15 @@ export default function Profile() {
               </View>
             ) : null}
 
-            {/* Phone (editable) */}
             <View>
               <Text style={{ color: "#9CA3AF", marginBottom: 6 }}>Phone</Text>
               {!editing ? (
                 <Text style={{ color: "#E5E7EB" }}>{me?.phone || "-"}</Text>
               ) : (
-                <TextInput
-                  value={phone}
-                  onChangeText={setPhone}
-                  placeholder="Phone number"
-                  placeholderTextColor="#6B7280"
-                  keyboardType="phone-pad"
-                  style={input}
-                />
+                <TextInput value={phone} onChangeText={setPhone} placeholder="Phone number" placeholderTextColor="#6B7280" keyboardType="phone-pad" style={input} />
               )}
             </View>
 
-            {/* Optional extras */}
             {me?.provider ? (
               <View>
                 <Text style={{ color: "#9CA3AF", marginBottom: 6 }}>Sign-in via</Text>
