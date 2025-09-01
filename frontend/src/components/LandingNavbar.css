@@ -56,6 +56,7 @@
   text-shadow:0 1px 0 rgba(0,0,0,.25);
   transition:transform .18s ease, filter .18s ease;
 }
+/* fix: correct selector for hover */
 .lnav_logo:hover .lnav_brand{ transform:translateY(-1px); filter:brightness(1.05); }
 
 /* ===== Links ===== */
@@ -96,6 +97,7 @@
   border:0; background:linear-gradient(135deg, #10b981, #059669);
   box-shadow:0 6px 20px rgba(16,185,129,.35);
 }
+/* (btn--ghost inherits .btn baseline) */
 
 /* ===== Username trigger / Dropdown ===== */
 .userdd{ position:relative; }
@@ -117,10 +119,18 @@
 .userdd__chev{ transition:transform .18s ease; }
 .userdd__chev.is-open{ transform:rotate(180deg); }
 
+/* NEW: small avatar in the trigger (real-time) */
+.userdd__avatar{
+  display:inline-grid; place-items:center;
+  width:28px; height:28px; border-radius:999px; overflow:hidden;
+  background:#1f2937; /* fallback color when no img */
+}
+.userdd__avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+
 /* Dropdown menu (dark card) */
 .userdd__menu{
   position:absolute; right:0; top:120%;
-  width:min(92vw, 320px);              /* responsive width */
+  width:min(92vw, 320px);
   background:#0b1220;
   border:1px solid rgba(255,255,255,.10);
   color:#e7eeff;
@@ -145,13 +155,13 @@
   color:#fff; line-height:1.1; max-width:100%;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-/* >>> Prevent long emails from overflowing <<< */
+/* Prevent long emails from overflowing */
 .userdd__sub{
   margin:2px 0 0;
   color:#cbd5e1; font-weight:600; letter-spacing:.01em; font-size:.9rem;
   max-width:100%;
-  overflow-wrap:anywhere;     /* wrap super-long emails */
-  word-break:break-word;      /* fallback */
+  overflow-wrap:anywhere;
+  word-break:break-word;
 }
 
 .userdd__sep{ margin:.9rem 0; border:0; height:1px; background:rgba(255,255,255,.10); }

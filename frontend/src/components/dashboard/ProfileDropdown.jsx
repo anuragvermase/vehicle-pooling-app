@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function ProfileDropdown() {
+export default function ProfileDropdown({ user }) {
   const [open, setOpen] = useState(false);
   const nav = useNavigate();
 
@@ -9,6 +9,8 @@ export default function ProfileDropdown() {
     setOpen(false);
     nav(path);
   };
+
+  const avatar = user?.avatarUrl || user?.profilePicture || null;
 
   return (
     <div style={{ position: "relative" }}>
@@ -23,12 +25,15 @@ export default function ProfileDropdown() {
           display: "grid",
           placeItems: "center",
           border: "1px solid #374151",
+          overflow: "hidden",
         }}
         aria-label="Profile menu"
       >
-        <span role="img" aria-hidden>
-          👤
-        </span>
+        {avatar ? (
+          <img src={avatar} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        ) : (
+          <span role="img" aria-hidden>👤</span>
+        )}
       </button>
 
       {open && (

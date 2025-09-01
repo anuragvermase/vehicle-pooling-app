@@ -1,10 +1,11 @@
+// frontend/src/pages/Settings.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom"; // ✅ SPA navigation for dropdown
+import { Link } from "react-router-dom";
 import "./Settings.css";
 import API from "../services/api";
 
 /* =========================================================
-   SMALL UTILS (storage + debounce + theme)
+   SMALL UTILS (debounce + theme)
    ========================================================= */
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -14,30 +15,6 @@ function useDebounced(fn, delay = 600) {
     if (t.current) clearTimeout(t.current);
     t.current = setTimeout(() => fn(...args), delay);
   };
-}
-
-const LS_KEYS = {
-  locale:   "settings.locale",
-  tz:       "settings.timeZone",
-  theme:    "settings.theme",
-  profile:  "account.profile",
-  vehicles: "account.vehicles",
-  emergency:"account.emergency",
-};
-
-function readLS(key, fallback) {
-  try {
-    const v = localStorage.getItem(key);
-    if (v === null || v === undefined) return fallback;
-    try { return JSON.parse(v); } catch { return v; }
-  } catch { return fallback; }
-}
-function writeLS(key, val) {
-  localStorage.setItem(key, typeof val === "string" ? val : JSON.stringify(val));
-}
-function readUserFromStorage() {
-  try { return JSON.parse(localStorage.getItem("user")) || {}; }
-  catch { return {}; }
 }
 
 /** Applies theme immediately; when mode === "system" it follows OS and updates on change */
@@ -155,11 +132,12 @@ export default function SettingsHub() {
   // lock page shell (fixed sidebar) and apply saved theme on mount
   useEffect(() => {
     document.body.classList.add("settings-active");
-    applyTheme(readLS(LS_KEYS.theme, "system"));
+    // default to system; real-time prefs saved server-side under GeneralPanel below
+    applyTheme("system");
     return () => document.body.classList.remove("settings-active");
   }, []);
 
-  // Dropdown (same everywhere)
+  // Dropdown
   const [menuOpen, setMenuOpen] = useState(false);
   const [me, setMe] = useState(null);
   const menuRef = useRef(null);
@@ -167,7 +145,7 @@ export default function SettingsHub() {
   useEffect(() => {
     (async () => {
       const res = await API.users?.me?.().catch(() => null);
-      setMe(res?.user || readUserFromStorage() || null);
+      setMe(res?.user || null);
     })();
   }, []);
 
@@ -186,28 +164,23 @@ export default function SettingsHub() {
   }, [me?.name]);
 
   const [active, setActive] = useState("general");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState({ ok:"", err:"" });
 
-  const storageUser = readUserFromStorage(); // fallback user (from your login)
-  const [user, setUser] = useState({
-    name:    storageUser?.name  || "",
-    email:   storageUser?.email || "",
-    locale:  readLS(LS_KEYS.locale, "en-US"),
-    timeZone:readLS(LS_KEYS.tz, Intl.DateTimeFormat().resolvedOptions().timeZone)
-  });
+  // real-time user (name/email/phone) for Account tab
+  const [user, setUser] = useState({ name:"", email:"", timeZone:"", locale:"" });
 
   useEffect(() => { (async()=>{
+    setLoading(true);
     try{
-      const me = await API.users?.getMe?.().catch(()=>null);
-      const d = me?.data || me || {};
-      setUser(u=>({
-        ...u,
-        name: d.name || d.fullName || storageUser?.name || u.name,
-        email: d.email || storageUser?.email || u.email,
-        locale: d.preferences?.locale || u.locale,
-        timeZone: d.preferences?.timeZone || u.timeZone,
-      }));
+      const r = await API.users.me();
+      const u = r?.user || {};
+      setUser({
+        name: u.name || u.fullName || "",
+        email: u.email || "",
+        locale: u.preferences?.locale || "",
+        timeZone: u.preferences?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+      });
     } finally { setLoading(false); }
   })(); }, []);
 
@@ -237,7 +210,7 @@ export default function SettingsHub() {
       </div>
 
       <div className="sh-shell">
-        {/* LEFT: fixed + sticky sidebar (never moves) */}
+        {/* LEFT: fixed + sticky sidebar */}
         <aside className="sh-side">
           <div className="sh-side-title">Settings</div>
           <nav className="sh-nav" role="tablist" aria-label="Settings sections">
@@ -256,11 +229,11 @@ export default function SettingsHub() {
           </nav>
         </aside>
 
-        {/* RIGHT: scrollable content only (fixed inner width) */}
-        <main className="sh-main">{/* CHANGED: overflow behaviour handled in CSS */}
+        {/* RIGHT: scrollable content */}
+        <main className="sh-main">
           <div className="sh-main-inner">
-            {active === "general"       && <GeneralPanel user={user} setUser={setUser} setMsg={setMsg} />}
-            {active === "account"       && <AccountPanel user={user} setUser={setUser} setMsg={setMsg} />}
+            {active === "general"       && <GeneralPanel setMsg={setMsg} />}
+            {active === "account"       && <AccountPanel baseUser={user} setMsg={setMsg} />}
             {active === "notifications" && <NotificationsPanel setMsg={setMsg} />}
             {active === "billing"       && <BillingPanel setMsg={setMsg} />}
             {active === "accessibility" && <AccessibilityPanel setMsg={setMsg} />}
@@ -284,15 +257,11 @@ export default function SettingsHub() {
    PANELS
    ========================================================= */
 
-function GeneralPanel({ user, setUser, setMsg }) {
-  const [locale,   setLocale]   = useState(readLS(LS_KEYS.locale, "en-US"));
-  const [timeZone, setTimeZone] = useState(readLS(LS_KEYS.tz, Intl.DateTimeFormat().resolvedOptions().timeZone));
-  const [theme,    setTheme]    = useState(readLS(LS_KEYS.theme, "system"));
-
-  useEffect(() => {
-    if (!locale   && user.locale)   setLocale(user.locale);
-    if (!timeZone && user.timeZone) setTimeZone(user.timeZone);
-  }, [user]);
+function GeneralPanel({ setMsg }) {
+  // Store these client-side for UX; (optional) also send to server if your API supports it
+  const [locale,   setLocale]   = useState("en-US");
+  const [timeZone, setTimeZone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const [theme,    setTheme]    = useState("system");
 
   const saveAPI = useDebounced(async (payload) => {
     try {
@@ -303,9 +272,9 @@ function GeneralPanel({ user, setUser, setMsg }) {
     }
   }, 400);
 
-  const onLocale   = (v) => { setLocale(v); writeLS(LS_KEYS.locale, v); setUser(u=>({...u, locale:v})); saveAPI({ locale:v, timeZone, theme }); };
-  const onTimeZone = (v) => { setTimeZone(v); writeLS(LS_KEYS.tz, v);   setUser(u=>({...u, timeZone:v})); saveAPI({ locale, timeZone:v, theme }); };
-  const onTheme    = (v) => { setTheme(v); writeLS(LS_KEYS.theme, v);   applyTheme(v); saveAPI({ locale, timeZone, theme:v }); };
+  const onLocale   = (v) => { setLocale(v); saveAPI({ locale:v, timeZone, theme }); };
+  const onTimeZone = (v) => { setTimeZone(v); saveAPI({ locale, timeZone:v, theme }); };
+  const onTheme    = (v) => { setTheme(v); applyTheme(v); saveAPI({ locale, timeZone, theme:v }); };
 
   const LANGS = [
     { value:"en-US", label:"English (United States)" },
@@ -347,99 +316,113 @@ function GeneralPanel({ user, setUser, setMsg }) {
   );
 }
 
-/* ---------- ACCOUNT ---------- */
-function AccountPanel({ user, setUser, setMsg }) {
-  const storageUser = readUserFromStorage();
-  const [me, setMe] = useState(readLS(LS_KEYS.profile, {
-    name:  user?.name || storageUser?.name || "",
-    email: user?.email || storageUser?.email || "",
+/* ---------- ACCOUNT (REAL-TIME FROM SERVER) ---------- */
+function AccountPanel({ baseUser, setMsg }) {
+  const [me, setMe] = useState({
+    name:  baseUser?.name || "",
+    email: baseUser?.email || "",
     phone: "",
-  }));
-  const [vehicles, setVehicles] = useState(readLS(LS_KEYS.vehicles, [{ make:"", model:"", plate:"", seats:4, id:"v1" }]));
-  const [emg, setEmg] = useState(readLS(LS_KEYS.emergency, { name:"", phone:"" }));
+  });
 
+  const [vehicles, setVehicles] = useState([{ make:"", model:"", plate:"", seats:4, id:"v1" }]);
+  const [emg, setEmg] = useState({ name:"", phone:"" });
+
+  // boot: fetch live profile + optional vehicle/emergency info
   useEffect(()=>{ (async()=>{
     try{
-      const r = await API.users?.getMe?.().catch(()=>null);
-      const d = r?.data || r || {};
-      const next = {
-        name:  d.name || d.fullName || me.name  || user?.name  || storageUser?.name  || "",
-        email: d.email || me.email   || user?.email || storageUser?.email || "",
-        phone: d.phone || d.mobile   || me.phone,
-      };
-      setMe(next); writeLS(LS_KEYS.profile, next);
+      const r = await API.users.me().catch(()=>null);
+      const u = r?.user || {};
+      setMe(m=>({
+        ...m,
+        name:  u.name || u.fullName || "",
+        email: u.email || "",
+        phone: u.phone || u.mobile || "",
+      }));
 
-      let vs = readLS(LS_KEYS.vehicles, []);
-      const gv = await API.users?.getVehicles?.().catch(()=>null);
-      if (Array.isArray(gv?.data)) vs = gv.data;
-      else {
-        const v1 = await API.users?.getVehicle?.().catch(()=>null);
-        const dv = v1?.data || v1 || {};
-        if (dv && (dv.make || dv.model || dv.plate || dv.seats)) vs = [dv];
-      }
-      if (vs && vs.length) {
-        const mapped = vs.slice(0,3).map((v,i)=>({ make:v.make||"", model:v.model||"", plate:v.plate||"", seats:Number(v.seats||4), id:`v${i+1}` }));
-        setVehicles(mapped); writeLS(LS_KEYS.vehicles, mapped);
+      // If your backend exposes these, pull them; otherwise keep editable blanks
+      let fetchedVehicles = null;
+      try {
+        // Option A: if you store vehicle under public profile
+        if (u?._id && API.profile?.getPublicProfile) {
+          const pv = await API.profile.getPublicProfile(u._id).catch(()=>null);
+          const v = pv?.vehicle || pv?.vehicles;
+          if (v) fetchedVehicles = Array.isArray(v) ? v : [v];
+        }
+      } catch {}
+      if (fetchedVehicles && fetchedVehicles.length) {
+        setVehicles(
+          fetchedVehicles.slice(0,3).map((v,i)=>({
+            make:v.make||"", model:v.model||"", plate:v.plateNumber||v.plate||"", seats:Number(v.seats||4), id:`v${i+1}`
+          }))
+        );
       }
 
-      const e = await API.users?.getEmergencyContact?.().catch(()=>null);
-      const de = e?.data || e || {};
-      const em = { name: de.name || emg.name, phone: de.phone || emg.phone };
-      setEmg(em); writeLS(LS_KEYS.emergency, em);
+      try {
+        if (API.profile?.getEmergencyContact) {
+          const ec = await API.profile.getEmergencyContact().catch(()=>null);
+          if (ec?.name || ec?.phone) setEmg({ name:ec.name||"", phone:ec.phone||"" });
+        }
+      } catch {}
     }catch{}
-  })(); }, []);
-
-  useEffect(()=>{
-    if (user?.name || user?.email) {
-      const next = { ...me, name:user.name || me.name, email:user.email || me.email };
-      setMe(next); writeLS(LS_KEYS.profile, next);
-    }
-  }, [user?.name, user?.email]);
+  })(); }, [baseUser?.email, baseUser?.name]);
 
   const addVehicle = () => {
     if (vehicles.length >= 3) return;
     const id = `v${Date.now().toString(36).slice(2,6)}`;
-    const next = [...vehicles, { make:"", model:"", plate:"", seats:4, id }];
-    setVehicles(next); writeLS(LS_KEYS.vehicles, next);
+    setVehicles(prev => [...prev, { make:"", model:"", plate:"", seats:4, id }]);
   };
   const removeVehicle = (id) => {
-    const next = vehicles.filter(v=>v.id!==id);
-    setVehicles(next.length ? next : [{ make:"", model:"", plate:"", seats:4, id:"v1"}]);
-    writeLS(LS_KEYS.vehicles, next.length ? next : [{ make:"", model:"", plate:"", seats:4, id:"v1"}]);
+    setVehicles(prev => {
+      const next = prev.filter(v=>v.id!==id);
+      return next.length ? next : [{ make:"", model:"", plate:"", seats:4, id:"v1"}];
+    });
   };
   const clampSeat = (val) => {
     const n = Math.max(1, Math.min(6, parseInt(val || "0", 10)));
     return Number.isFinite(n) ? n : 1;
   };
   const changeVehicle = (id, field, value) => {
-    const next = vehicles.map(v => {
-      if (v.id !== id) return v;
-      if (field === "seats") return { ...v, seats: clampSeat(value) };
-      return { ...v, [field]: value };
-    });
-    setVehicles(next); writeLS(LS_KEYS.vehicles, next);
+    setVehicles(prev => prev.map(v => v.id===id
+      ? (field==="seats" ? { ...v, seats: clampSeat(value) } : { ...v, [field]: value })
+      : v
+    ));
   };
 
   const saveAll = async ()=>{
     try{
-      await API.users?.updateProfile?.({ phone: me.phone });
-      if (API.users?.updateVehicles) {
-        await API.users.updateVehicles(vehicles.map(({id, ...v})=>v));
-      } else {
-        for (const v of vehicles) await API.users?.updateVehicle?.({ make:v.make, model:v.model, plate:v.plate, seats:v.seats });
+      // Save phone to server (name/email are read-only here; change from Profile page)
+      await API.users.updateMe({ phone: me.phone });
+
+      // Save vehicles (use whichever endpoints you actually have)
+      if (API.profile?.updateVehicle) {
+        for (const v of vehicles) {
+          await API.profile.updateVehicle({
+            make:v.make, model:v.model, plateNumber:v.plate, seats:v.seats
+          }).catch(()=>{});
+        }
       }
-      await API.users?.setEmergencyContact?.(emg);
-      writeLS(LS_KEYS.profile, me);
-      writeLS(LS_KEYS.vehicles, vehicles);
-      writeLS(LS_KEYS.emergency, emg);
+
+      // Save emergency contact
+      if (API.profile?.addEmergencyContact) {
+        await API.profile.addEmergencyContact({ name: emg.name, phone: emg.phone }).catch(()=>{});
+      } else if (API.users?.setEmergencyContact) {
+        await API.users.setEmergencyContact({ name: emg.name, phone: emg.phone }).catch(()=>{});
+      }
+
       setMsg({ ok:"Account settings saved.", err:"" });
-    }catch(e){ setMsg({ ok:"", err:String(e?.message || e) }); }
+    }catch(e){
+      setMsg({ ok:"", err:String(e?.message || e) });
+    }
   };
 
   const deleteAccount = async ()=>{
     if (!window.confirm("Permanently delete your account?")) return;
-    try { await API.users?.deleteAccount?.(); window.location.href="/login"; }
-    catch(e){ setMsg({ ok:"", err:String(e?.message || e) }); }
+    try {
+      if (API.users?.deleteAccount) await API.users.deleteAccount();
+      window.location.href="/login";
+    } catch(e) {
+      setMsg({ ok:"", err:String(e?.message || e) });
+    }
   };
 
   return (
@@ -509,15 +492,13 @@ function AccountPanel({ user, setUser, setMsg }) {
   );
 }
 
-/* ---------- NOTIFICATIONS ---------- */
+/* ---------- NOTIFICATIONS (kept local unless API exists) ---------- */
 function NotificationsPanel({ setMsg }) {
-  const [channels, setChannels] = useState(readLS("settings.channels",{ push:true, email:true, sms:false }));
-  const [pref, setPref]         = useState(readLS("settings.notif",{ rideAlerts:true, booking:true, payment:true }));
+  const [channels, setChannels] = useState({ push:true, email:true, sms:false });
+  const [pref, setPref]         = useState({ rideAlerts:true, booking:true, payment:true });
 
   const save = useDebounced(async (payload)=>{
     try{
-      writeLS("settings.notif",   { rideAlerts:payload.rideAlerts, booking:payload.booking, payment:payload.payment });
-      writeLS("settings.channels", payload.channels);
       if (API.settings?.updateNotifications) await API.settings.updateNotifications(payload);
       setMsg({ ok:"Notification settings saved.", err:"" });
     }catch(e){ setMsg({ ok:"", err:String(e?.message || e) }); }
@@ -559,31 +540,34 @@ function NotificationsPanel({ setMsg }) {
   );
 }
 
-/* ---------- BILLING ---------- */
+/* ---------- BILLING (kept; talks to API if available) ---------- */
 function BillingPanel({ setMsg }) {
-  const [methods, setMethods] = useState(readLS("billing.methods", []));
-  const [txns, setTxns]       = useState(readLS("billing.txns", []));
+  const [methods, setMethods] = useState([]);
+  const [txns, setTxns]       = useState([]);
+
   useEffect(()=>{ (async()=>{
     try{
       const m = await API.billing?.getMethods?.().catch(()=>null);
-      if (m?.data || m) { setMethods(m.data||m); writeLS("billing.methods", m.data||m); }
+      if (m?.data || m) setMethods(m.data||m);
       const t = await API.billing?.getTransactions?.().catch(()=>null);
-      if (t?.data || t) { setTxns(t.data||t); writeLS("billing.txns", t.data||t); }
+      if (t?.data || t) setTxns(t.data||t);
     }catch{}
   })(); }, []);
+
   const addMethod = async ()=>{
     const payload={ id:Math.random().toString(36).slice(2), brand:"VISA", last4:String(Math.floor(Math.random()*9000+1000)), exp:"08/29" };
     try{
       let out=payload;
       if (API.billing?.addMethod){ const r=await API.billing.addMethod(payload).catch(()=>({data:payload})); out=r?.data||payload; }
-      const next=[...methods,out]; setMethods(next); writeLS("billing.methods",next); setMsg({ok:"Payment method added.",err:""});
+      const next=[...methods,out]; setMethods(next); setMsg({ok:"Payment method added.",err:""});
     }catch(e){ setMsg({ok:"",err:String(e?.message||e)}); }
   };
+
   const removeMethod = async (id)=>{
     if(!window.confirm("Remove this payment method?")) return;
     try{
       if (API.billing?.removeMethod) await API.billing.removeMethod(id);
-      const next=methods.filter(m=>m.id!==id); setMethods(next); writeLS("billing.methods",next);
+      const next=methods.filter(m=>m.id!==id); setMethods(next);
     }catch(e){ setMsg({ok:"",err:String(e?.message||e)}); }
   };
 
@@ -635,13 +619,13 @@ function BillingPanel({ setMsg }) {
 
 /* ---------- ACCESSIBILITY ---------- */
 function AccessibilityPanel({ setMsg }) {
-  const [prefs, setPrefs] = useState(readLS("settings.accessibility", {
+  const [prefs, setPrefs] = useState({
     textSize:"md", contrast:"normal", voice:false, reader:false,
     rideNoMusic:false, ridePetFriendly:false, rideWomenOnly:false
-  }));
+  });
+
   const save = useDebounced(async (payload)=>{
     try{
-      writeLS("settings.accessibility", payload);
       if (API.settings?.updateAccessibility) await API.settings.updateAccessibility(payload);
       setMsg({ ok:"Accessibility settings saved.", err:"" });
     }catch(e){ setMsg({ ok:"", err:String(e?.message || e) }); }
@@ -702,41 +686,26 @@ function SecurityPanel({ setMsg }) {
   const [sessions, setSessions] = useState([]);
 
   // Identity
-  const [idv, setIdv] = useState({
-    license: null, // {url, status} or string url
-    aadhaar: null, // {url, status} or string url
-  });
+  const [idv, setIdv] = useState({ license: null, aadhaar: null });
   const [uploading, setUploading] = useState(false);
   const [uploadPct, setUploadPct] = useState(0);
 
-  // --------- bootstrap ---------
   useEffect(()=>{ (async()=>{
     try{
       const fa = await API.security?.get2FA?.().catch(()=>null);
       const dfa = fa?.data || fa || {};
-      setTwoFA(s=>({
-        ...s,
-        enabled: !!dfa.enabled,
-        verified: !!dfa.enabled,
-        secret: dfa.secret || "",
-        otpauthUrl: dfa.otpauthUrl || "",
-      }));
+      setTwoFA(s=>({ ...s, enabled: !!dfa.enabled, verified: !!dfa.enabled, secret: dfa.secret || "", otpauthUrl: dfa.otpauthUrl || "" }));
 
       const ses = await API.security?.getSessions?.().catch(()=>null);
       setSessions(ses?.data || ses || []);
 
       const id = await API.security?.getIdentity?.().catch(()=>null);
-      let di = id?.data || id || {};
-      // normalize to objects
+      const di = id?.data || id || {};
       const norm = (v)=> (v && typeof v === "object") ? v : (v ? { url:v, status:"uploaded" } : null);
-      setIdv({
-        license: norm(di.license),
-        aadhaar: norm(di.aadhaar),
-      });
+      setIdv({ license: norm(di.license), aadhaar: norm(di.aadhaar) });
     }catch{}
   })(); }, []);
 
-  // --------- sessions: poll every 15s + “last active” ticks ---------
   useEffect(()=>{
     const load = async ()=> {
       try{
@@ -745,13 +714,10 @@ function SecurityPanel({ setMsg }) {
       }catch{}
     };
     const t1 = setInterval(load, 15000);
-    const t2 = setInterval(()=>{ // force a re-render so relative time updates
-      setSessions(s => [...s]);
-    }, 60000);
+    const t2 = setInterval(()=>{ setSessions(s => [...s]); }, 60000);
     return ()=>{ clearInterval(t1); clearInterval(t2); };
   }, []);
 
-  // --------- identity: poll status if pending ---------
   useEffect(()=>{
     const needs = (x)=> !!x && typeof x === "object" && ["pending","review","verifying"].includes((x.status||"").toLowerCase());
     if (!needs(idv.license) && !needs(idv.aadhaar)) return;
@@ -767,7 +733,6 @@ function SecurityPanel({ setMsg }) {
     return ()=> clearInterval(t);
   }, [idv.license?.status, idv.aadhaar?.status]);
 
-  // --------- 2FA: QR render (no new deps required; tries dynamic 'qrcode' else falls back to <img>) ---------
   useEffect(()=>{
     (async ()=>{
       if (!showSetup || !twoFA.otpauthUrl || !qrCanvasRef.current) return;
@@ -776,13 +741,10 @@ function SecurityPanel({ setMsg }) {
         const QR = await import(/* webpackIgnore: true */'qrcode');
         await QR.toCanvas(qrCanvasRef.current, twoFA.otpauthUrl, { width: 180, margin: 1 });
         setQrDrawn(true);
-      }catch{
-        // no-op -> we’ll show <img> fallback
-      }
+      }catch{}
     })();
   }, [showSetup, twoFA.otpauthUrl]);
 
-  // --------- helpers ---------
   const rel = (ts)=>{
     const d = new Date(ts || Date.now());
     const mins = Math.round((Date.now() - d.getTime())/60000);
@@ -801,23 +763,18 @@ function SecurityPanel({ setMsg }) {
     }catch(e){ setMsg({ ok:"", err:String(e?.message || e) }); }
   };
 
-  // 2FA flows
   const startEnable2FA = async ()=>{
     try{
-      // Ask backend to provision a secret & otpauth url
       const r = await (API.security?.provision2FA?.() || API.security?.get2FASecret?.())?.catch(()=>null);
       const d = r?.data || r || {};
-      // Fallback: if only secret arrives, try to compose an otpauth URL
       const secret = d.secret || twoFA.secret || "";
-      const email = (await API.users?.getMe?.().catch(()=>({})))?.email || "";
+      const email = (await API.users?.me?.().catch(()=>({})))?.user?.email || "";
       const issuer = (d.issuer || document.title || "App").replace(/\s+/g, "_");
       const otpauthUrl = d.otpauthUrl || (secret ? `otpauth://totp/${issuer}:${encodeURIComponent(email)}?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30` : "");
-
       setTwoFA(s=>({ ...s, secret, otpauthUrl, enabled:false, verified:false }));
       setShowSetup(true);
       setMsg({ ok:"Scan the QR and verify to enable 2FA.", err:"" });
     }catch(e){
-      // If your API only supports direct toggle, fall back
       try{
         await API.security?.set2FA?.({ enabled:true });
         setTwoFA(s=>({ ...s, enabled:true, verified:true }));
@@ -850,7 +807,6 @@ function SecurityPanel({ setMsg }) {
     }catch(e){ setMsg({ ok:"", err:String(e?.message||e) }); }
   };
 
-  // Sessions
   const logoutSession = async (id)=>{
     try{
       await API.security?.revokeSession?.(id);
@@ -858,12 +814,10 @@ function SecurityPanel({ setMsg }) {
     }catch(e){ setMsg({ ok:"", err:String(e?.message||e) }); }
   };
 
-  // Identity upload with progress if your API exposes xhr
   const onUpload = async (e, field)=>{
     const file = e.target.files?.[0]; if(!file) return;
     setUploading(true); setUploadPct(0);
     try{
-      // If your API supports progress: API.security.uploadIdentity(field, fd, onProgress)
       const fd = new FormData(); fd.append("file", file);
       const up = API.security?.uploadIdentity;
       if (up?.length >= 3) {
@@ -871,7 +825,6 @@ function SecurityPanel({ setMsg }) {
         const url = r?.data?.url || r?.url || "(uploaded)";
         setIdv(v=>({ ...v, [field]: { url, status:"uploaded" } }));
       } else {
-        // fallback without progress
         const r = await up?.(field, fd).catch(()=>null);
         const url = r?.data?.url || r?.url || "(uploaded)";
         setIdv(v=>({ ...v, [field]: { url, status:"uploaded" } }));
@@ -885,7 +838,6 @@ function SecurityPanel({ setMsg }) {
     <div className="sh-security">
       <h1 className="sh-h1">Security</h1>
 
-      {/* Change password */}
       <section className="sh-card">
         <div className="sh-card-head">
           <div className="sh-card-title">Change password</div>
@@ -908,23 +860,17 @@ function SecurityPanel({ setMsg }) {
         </div>
       </section>
 
-      {/* 2FA */}
       <section className="sh-card">
         <div className="sh-card-head">
           <div className="sh-card-title">Two-Factor Authentication (2FA)</div>
         </div>
         <div className="sh-line" />
 
-        {/* toggle row */}
         <div className="sh-row-between" style={{padding:"16px 4px"}}>
           <div>
             <div style={{fontWeight:600,color:"var(--txt)"}}>Enable 2FA (TOTP/OTP)</div>
-            {twoFA.enabled && twoFA.verified && (
-              <div className="sh-badge ok">Enabled</div>
-            )}
-            {!twoFA.enabled && !showSetup && (
-              <div className="sh-help">Protect your account with a one-time code app (Google Authenticator, Authy, etc.)</div>
-            )}
+            {twoFA.enabled && twoFA.verified && <div className="sh-badge ok">Enabled</div>}
+            {!twoFA.enabled && !showSetup && <div className="sh-help">Protect your account with an authenticator app.</div>}
           </div>
 
           <div>
@@ -936,13 +882,11 @@ function SecurityPanel({ setMsg }) {
           </div>
         </div>
 
-        {/* setup block */}
         {showSetup && (
           <>
             <div className="sh-line" />
             <div className="sh-2fa-setup">
               <div className="sh-qr-wrap">
-                {/* canvas QR if available else img fallback */}
                 <canvas ref={qrCanvasRef} className="sh-qr" style={{display: qrDrawn ? "block":"none"}} />
                 {!qrDrawn && twoFA.otpauthUrl && (
                   <img
@@ -966,7 +910,6 @@ function SecurityPanel({ setMsg }) {
         )}
       </section>
 
-      {/* Sessions */}
       <section className="sh-card">
         <div className="sh-card-head">
           <div className="sh-card-title">Login devices / sessions</div>
@@ -993,7 +936,6 @@ function SecurityPanel({ setMsg }) {
         </div>
       </section>
 
-      {/* Identity */}
       <section className="sh-card">
         <div className="sh-card-head">
           <div className="sh-card-title">Identity verification</div>
@@ -1005,9 +947,7 @@ function SecurityPanel({ setMsg }) {
             <label>Driver license</label>
             <div className="sh-row">
               <Button variant="secondary" onClick={()=>document.getElementById("licUp").click()} disabled={uploading}>Upload</Button>
-              <span className={`sh-help ${idv.license?.status ? "":""}`}>
-                {idv.license ? (idv.license.status ? idv.license.status : "Uploaded") : "Not uploaded"}
-              </span>
+              <span className="sh-help">{idv.license ? (idv.license.status || "Uploaded") : "Not uploaded"}</span>
               {idv.license?.url && <a href={idv.license.url} target="_blank" rel="noreferrer" className="sh-link">View</a>}
             </div>
             <input id="licUp" type="file" accept="image/*,application/pdf" hidden onChange={e=>onUpload(e,"license")}/>
@@ -1017,9 +957,7 @@ function SecurityPanel({ setMsg }) {
             <label>Aadhaar / ID</label>
             <div className="sh-row">
               <Button variant="secondary" onClick={()=>document.getElementById("aadUp").click()} disabled={uploading}>Upload</Button>
-              <span className="sh-help">
-                {idv.aadhaar ? (idv.aadhaar.status ? idv.aadhaar.status : "Uploaded") : "Not uploaded"}
-              </span>
+              <span className="sh-help">{idv.aadhaar ? (idv.aadhaar.status || "Uploaded") : "Not uploaded"}</span>
               {idv.aadhaar?.url && <a href={idv.aadhaar.url} target="_blank" rel="noreferrer" className="sh-link">View</a>}
             </div>
             <input id="aadUp" type="file" accept="image/*,application/pdf" hidden onChange={e=>onUpload(e,"aadhaar")}/>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
+import API from './services/api';
 
 // Import components
 import LandingNavbar from './components/LandingNavbar';
@@ -50,15 +51,33 @@ function AppContent() {
   const [pendingAction, setPendingAction] = useState(null);
   const navigate = useNavigate();
 
+  const loadMe = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await API.auth.getCurrentUser();
+      setUser(res?.user || null);
+    } catch {
+      // invalid token -> clear
+      localStorage.removeItem('token');
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // If you later re-enable auto-login, do it here.
-    setLoading(false);
+    loadMe();
   }, []);
 
-  const handleLogin = (userData, token) => {
-    setUser(userData);
+  const handleLogin = (_userFromChild, token) => {
+    // store only token; always fetch fresh user from server
     localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
+    loadMe();
     if (pendingAction) {
       navigate(pendingAction);
       setPendingAction(null);
@@ -67,10 +86,9 @@ function AppContent() {
     }
   };
 
-  const handleRegister = (userData, token) => {
-    setUser(userData);
+  const handleRegister = (_userFromChild, token) => {
     localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
+    loadMe();
     if (pendingAction) {
       navigate(pendingAction);
       setPendingAction(null);
@@ -82,7 +100,6 @@ function AppContent() {
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
     setPendingAction(null);
     navigate('/', { replace: true });
   };
@@ -138,6 +155,8 @@ function AppContent() {
           element={
             <div>
               <LandingNavbar
+                user={user}
+                onLogout={handleLogout}
                 onShowLogin={handleShowLogin}
                 onShowRegister={handleShowRegister}
               />
@@ -155,6 +174,8 @@ function AppContent() {
           element={
             <div>
               <LandingNavbar
+                user={user}
+                onLogout={handleLogout}
                 onShowLogin={handleShowLogin}
                 onShowRegister={handleShowRegister}
               />
@@ -210,6 +231,8 @@ function AppContent() {
           element={
             <div>
               <LandingNavbar
+                user={user}
+                onLogout={handleLogout}
                 onShowLogin={handleShowLogin}
                 onShowRegister={handleShowRegister}
               />

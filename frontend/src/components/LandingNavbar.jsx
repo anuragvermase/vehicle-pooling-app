@@ -1,24 +1,29 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./LandingNavbar.css";
+import API from "../services/api";
 
-function LandingNavbar({ onShowLogin, onShowRegister }) {
+function LandingNavbar({ onShowLogin, onShowRegister, user: userProp, onLogout }) {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
   const [open, setOpen] = useState(false);
-  const [previewSrc, setPreviewSrc] = useState(user?.photo || "");
+  const [me, setMe] = useState(userProp || null);
   const ddRef = useRef(null);
 
-  const displayName = (user?.username || user?.name || "User").trim();
-  const email = user?.email || "";
+  // keep in sync with parent user
+  useEffect(() => {
+    setMe(userProp || null);
+  }, [userProp]);
 
-  const handleDashboardClick = () => navigate("/dashboard");
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/", { replace: true });
-    window.location.reload();
-  };
+  // when menu opens, pull latest profile (avatarUrl may have just changed)
+  useEffect(() => {
+    if (!open) return;
+    (async () => {
+      try {
+        const res = await API.users?.me?.();
+        if (res?.user) setMe(res.user);
+      } catch {}
+    })();
+  }, [open]);
 
   // close dropdown on outside click / ESC
   useEffect(() => {
@@ -34,22 +39,21 @@ function LandingNavbar({ onShowLogin, onShowRegister }) {
     };
   }, []);
 
-  // avatar upload preview (client-side only)
-  const onPickPhoto = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setPreviewSrc(String(reader.result));
-    reader.readAsDataURL(file);
-  };
+  const displayName = (me?.username || me?.name || "User").trim();
+  const email = me?.email || "";
+  const avatar = me?.avatarUrl || me?.profilePicture || "";
 
-  // initials fallback
   const initials = displayName
     .split(" ")
     .map((s) => s[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
+  const handleDashboardClick = () => navigate("/dashboard");
+  const handleLogoutClick = () => {
+    if (onLogout) onLogout();
+  };
 
   return (
     <header className="lnav">
@@ -72,9 +76,9 @@ function LandingNavbar({ onShowLogin, onShowRegister }) {
           <Link to="/faq" className="lnav__link">FAQ</Link>
         </div>
 
-        {/* Right: Dashboard + Username pinned to extreme right */}
+        {/* Right: Dashboard + User */}
         <div className="lnav__right">
-          {!user ? (
+          {!me ? (
             <>
               <button onClick={onShowLogin} className="btn btn--ghost">Login</button>
               <button onClick={onShowRegister} className="btn btn--solid">Sign Up</button>
@@ -85,7 +89,7 @@ function LandingNavbar({ onShowLogin, onShowRegister }) {
                 Dashboard
               </button>
 
-              {/* Push username to absolute right */}
+              {/* Push user to extreme right */}
               <div className="lnav__spacer" />
 
               {/* Username trigger + dropdown */}
@@ -97,28 +101,30 @@ function LandingNavbar({ onShowLogin, onShowRegister }) {
                   onClick={() => setOpen((v) => !v)}
                   title="Account"
                 >
+                  {/* 👇 Avatar circle in the trigger (real-time) */}
+                  <span className="userdd__avatar">
+                    {avatar ? (
+                      <img src={avatar} alt="Profile" />
+                    ) : (
+                      <span className="avatar__initials">{initials}</span>
+                    )}
+                  </span>
                   <span className="userdd__name">{displayName}</span>
-                  <span className={`userdd__chev ${open ? "is-open" : ""}`} aria-hidden>▾</span>
+                  <span className={`userdd__chev ${open ? "is-open" : ""}`} aria-hidden>
+                    ▾
+                  </span>
                 </button>
 
                 {open && (
                   <div className="userdd__menu" role="menu">
                     <div className="userdd__profile">
-                      <label htmlFor="lnav-avatar" className="avatar">
-                        {previewSrc ? (
-                          <img src={previewSrc} alt="Profile" />
+                      <span className="avatar">
+                        {avatar ? (
+                          <img src={avatar} alt="Profile" />
                         ) : (
                           <span className="avatar__initials">{initials}</span>
                         )}
-                        <input
-                          id="lnav-avatar"
-                          type="file"
-                          accept="image/*"
-                          onChange={onPickPhoto}
-                          style={{ display: "none" }}
-                        />
-                      </label>
-
+                      </span>
                       <div className="userdd__info">
                         <p className="userdd__title" title={displayName}>{displayName}</p>
                         {email && (
@@ -135,7 +141,7 @@ function LandingNavbar({ onShowLogin, onShowRegister }) {
                       View Profile
                     </button>
 
-                    <button className="userdd__item userdd__logout" onClick={handleLogout}>
+                    <button className="userdd_item userdd_logout" onClick={handleLogoutClick}>
                       Logout
                     </button>
                   </div>

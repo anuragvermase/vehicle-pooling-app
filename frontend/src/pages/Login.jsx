@@ -36,16 +36,14 @@ const Login = ({ onLogin }) => {
       const response = await API.auth.login(formData);
 
       // Ensure response contains token and user object
-      if (response.token && response.user) {
+      if (response.token) {
+        // store ONLY token; parent will fetch live user
         localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
 
-        // Notify parent of successful login (if provided)
         if (typeof onLogin === 'function') {
-          onLogin(response.user, response.token);
+          onLogin(response.user || null, response.token);
         }
 
-        // ✅ Stay on Home page after login
         navigate('/');
       } else {
         throw new Error('Invalid response from server.');
@@ -74,7 +72,6 @@ const Login = ({ onLogin }) => {
       return;
     }
 
-    // Load the GIS script once
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
@@ -104,7 +101,6 @@ const Login = ({ onLogin }) => {
     }
     setError('');
 
-    // Initialize a renderless Google One Tap/popup flow; we only use its callback.
     window.google.accounts.id.initialize({
       client_id: CLIENT_ID,
       callback: async (response) => {
@@ -116,11 +112,10 @@ const Login = ({ onLogin }) => {
 
         setLoading(true);
         try {
-          const res = await API.auth.loginWithGoogle({ idToken });
-          if (res?.token && res?.user) {
+          const res = await API.auth.loginWithGoogle?.({ idToken });
+          if (res?.token) {
             localStorage.setItem('token', res.token);
-            localStorage.setItem('user', JSON.stringify(res.user));
-            if (typeof onLogin === 'function') onLogin(res.user, res.token);
+            if (typeof onLogin === 'function') onLogin(res.user || null, res.token);
             navigate('/');
           } else {
             throw new Error('Invalid response from server.');
@@ -139,7 +134,6 @@ const Login = ({ onLogin }) => {
       use_fedcm_for_prompt: true,
     });
 
-    // Prompt shows a small dialog/popup; if blocked, GIS handles the UX fallback.
     window.google.accounts.id.prompt();
   };
 
@@ -177,6 +171,7 @@ const Login = ({ onLogin }) => {
       )}
 
       <form onSubmit={handleSubmit}>
+        {/* email */}
         <div style={{ marginBottom: '1.5rem' }}>
           <label style={{
             display: 'block',
@@ -204,14 +199,6 @@ const Login = ({ onLogin }) => {
                 outline: 'none',
                 boxSizing: 'border-box'
               }}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#667eea';
-                e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#e5e7eb';
-                e.target.style.boxShadow = 'none';
-              }}
               required
             />
             <span style={{
@@ -226,6 +213,7 @@ const Login = ({ onLogin }) => {
           </div>
         </div>
 
+        {/* password */}
         <div style={{ marginBottom: '1.5rem' }}>
           <label style={{
             display: 'block',
@@ -252,14 +240,6 @@ const Login = ({ onLogin }) => {
                 transition: 'border-color 0.3s ease',
                 outline: 'none',
                 boxSizing: 'border-box'
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#667eea';
-                e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#e5e7eb';
-                e.target.style.boxShadow = 'none';
               }}
               required
             />
@@ -306,10 +286,7 @@ const Login = ({ onLogin }) => {
             cursor: 'pointer',
             color: '#6b7280'
           }}>
-            <input
-              type="checkbox"
-              style={{ marginRight: '0.25rem' }}
-            />
+            <input type="checkbox" style={{ marginRight: '0.25rem' }} />
             Remember me
           </label>
           <button
@@ -321,7 +298,7 @@ const Login = ({ onLogin }) => {
               cursor: 'pointer',
               textDecoration: 'underline'
             }}
-            onClick={() => alert('Forgot Password flow')} // replace with your action
+            onClick={() => alert('Forgot Password flow')}
           >
             Forgot Password?
           </button>
@@ -343,14 +320,6 @@ const Login = ({ onLogin }) => {
             boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
           }}
           className="hover-scale"
-          onMouseEnter={(e) => {
-            e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.6)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
-          }}
         >
           Sign In
         </button>
@@ -395,26 +364,13 @@ const Login = ({ onLogin }) => {
               opacity: googleReady ? 1 : 0.6
             }}
             className="hover-scale"
-            onMouseEnter={(e) => {
-              if (!googleReady) return;
-              e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.boxShadow = 'none';
-            }}
-            onClick={handleGoogleClick} // 🔗 now wired to Google
+            onClick={handleGoogleClick}
             title={googleReady ? 'Sign in with Google' : 'Google Login not ready'}
           >
             <img
               src={googleLogo}
               alt="Google Logo"
-              style={{
-                width: '15px',
-                height: '15px',
-                objectFit: 'contain',
-                display: 'inline-block',
-                verticalAlign: 'middle'
-              }}
+              style={{ width: '15px', height: '15px', objectFit: 'contain' }}
             />
             Google
           </button>
@@ -433,13 +389,7 @@ const Login = ({ onLogin }) => {
               transition: 'all 0.3s ease'
             }}
             className="hover-scale"
-            onMouseEnter={(e) => {
-              e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.boxShadow = 'none';
-            }}
-            onClick={() => alert('Phone login flow')} // replace with real phone auth
+            onClick={() => alert('Phone login flow')}
           >
             <span role="img" aria-label="phone">📱</span> Phone
           </button>

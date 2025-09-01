@@ -16,6 +16,8 @@ const Navbar = ({ user, onLogout }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const avatar = user?.avatarUrl || user?.profilePicture || null;
+
   return (
     <header className="appnav">
       <nav className="appnav__inner">
@@ -47,6 +49,13 @@ const Navbar = ({ user, onLogout }) => {
                   className="user-trigger"
                   onClick={() => setOpen((prev) => !prev)}
                 >
+                  {avatar ? (
+                    <img
+                      src={avatar}
+                      alt="avatar"
+                      style={{ width: 24, height: 24, borderRadius: "50%", marginRight: 8 }}
+                    />
+                  ) : null}
                   {user.name || "User"}
                   <span className="arrow">{open ? "▲" : "▼"}</span>
                 </button>
@@ -54,26 +63,21 @@ const Navbar = ({ user, onLogout }) => {
                 {open && (
                   <div className="dropdown-menu">
                     <div className="profile-section">
-                      <label htmlFor="profile-upload" className="profile-pic">
-                        <img
-                          src={
-                            user.photo ||
-                            "https://via.placeholder.com/60?text=👤"
-                          }
-                          alt="profile"
-                        />
-                        <input
-                          type="file"
-                          id="profile-upload"
-                          accept="image/*"
-                          style={{ display: "none" }}
-                        />
-                      </label>
+                      <div className="profile-pic">
+                        {avatar ? (
+                          <img src={avatar} alt="profile" />
+                        ) : (
+                          <div className="no-avatar">👤</div>
+                        )}
+                      </div>
                       <div className="profile-info">
                         <p className="profile-name">{user.name}</p>
                         <p className="profile-email">{user.email}</p>
                       </div>
                     </div>
+
+                    <a href="/profile" className="dropdown-link">Profile</a>
+                    <a href="/settings" className="dropdown-link">Settings</a>
 
                     <button onClick={onLogout} className="dropdown-logout">
                       Logout

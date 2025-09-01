@@ -146,6 +146,7 @@ router.get('/me', protect, async (req, res, next) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
+    res.set('Cache-Control', 'no-store');   // <- add this
     res.json({ success: true, user: normalizeUser(user) });
   } catch (error) {
     logger.error('Get user error:', error);

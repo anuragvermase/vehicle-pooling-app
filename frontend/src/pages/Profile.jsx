@@ -1,6 +1,6 @@
 // frontend/src/pages/Profile.jsx
 import React, { useEffect, useMemo, useState, Suspense, useRef } from "react";
-import { Link } from "react-router-dom"; // SPA navigation
+import { Link } from "react-router-dom";
 import useWebSockets from "../hooks/useWebSockets";
 import API from "../services/api";
 import "./Profile.css";
@@ -59,6 +59,7 @@ export default function ProfilePage() {
   const { socket } = useWebSockets() || {};
 
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState({ email: false, phone: false });
 
   // modal state
@@ -100,27 +101,23 @@ export default function ProfilePage() {
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  // load profile
-  useEffect(() => {
-    (async () => {
-      const res = await API.users.me().catch(() => null);
+  // central fetcher (always real-time)
+  const fetchMe = async () => {
+    try {
+      // add a cache-buster query just in case
+      const res = await API.users.me({ _t: Date.now() });
       const user = res?.user || null;
-      setProfile(
-        user || {
-          name: "Anant Shukla",
-          email: "adhattarwal745@gmail.com",
-          phone: "+91 8506809525",
-          avatarUrl: "",
-          verified: true,
-          joinedAt: "2025-07-31T00:00:00.000Z",
-          subscriptionTier: "Gold",
-          stats: { totalRides: 305, rating: 4.8, completionRate: 0.99 },
-          ridesByMonth: [],
-          security: { twoFA: false },
-          location: { city: "Bengaluru", country: "India" },
-        }
-      );
-    })();
+      setProfile(user);
+    } catch {
+      setProfile(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // load profile (server only — no static fallback)
+  useEffect(() => {
+    fetchMe();
   }, []);
 
   // load recent activity
@@ -128,20 +125,21 @@ export default function ProfilePage() {
     (async () => {
       const lists = [];
       const a = await API.raw
-        .get("/bookings?status=all&page=1&limit=12")
+        .get(`/bookings?status=all&page=1&limit=12&_t=${Date.now()}`)
         .catch(() => null);
-      const b = await API.raw.get("/rides/user?status=all").catch(() => null);
+      const b = await API.raw
+        .get(`/rides/user?status=all&_t=${Date.now()}`)
+        .catch(() => null);
       if (Array.isArray(a?.data)) lists.push(...a.data);
       if (Array.isArray(b?.data)) lists.push(...b.data);
       setActivity(normalizeActivity(lists));
     })();
   }, []);
 
-  // socket live updates
+  // socket live updates (merge & also refetch when profile core changes)
   useEffect(() => {
     if (!socket) return;
-    const onProfile = (payload) =>
-      setProfile((p) => ({ ...(p || {}), ...(payload || {}) }));
+    const onProfile = () => fetchMe();
     const onStats = (stats) =>
       setProfile((p) => ({
         ...(p || {}),
@@ -193,7 +191,7 @@ export default function ProfilePage() {
   }, [profile?.name]);
 
   const joinedPretty = useMemo(() => {
-    const d = profile?.joinedAt ? new Date(profile.joinedAt) : null;
+    const d = profile?.createdAt ? new Date(profile.createdAt) : null;
     try {
       return d
         ? d.toLocaleDateString(undefined, {
@@ -204,7 +202,7 @@ export default function ProfilePage() {
     } catch {
       return "—";
     }
-  }, [profile?.joinedAt]);
+  }, [profile?.createdAt]);
 
   function flipCopied(key) {
     setCopied((c) => ({ ...c, [key]: true }));
@@ -236,17 +234,14 @@ export default function ProfilePage() {
     if (file) avatarUrl = await uploadAvatar();
     const payload = avatarUrl ? { name, avatarUrl } : { name };
     try {
-      const resp = await API.users.updateMe(payload);
-      const user = resp?.user || null;
-      if (user) {
-        setProfile(user);
-        setOpen(false);
-        setFile(null);
-        setPreview("");
-      } else {
-        setWarn("Saved locally (API didn’t respond).");
-        setOpen(false);
-      }
+      await API.users.updateMe(payload);
+      // Always re-fetch authoritative server state
+      await fetchMe();
+      setOpen(false);
+      setFile(null);
+      setPreview("");
+    } catch {
+      setWarn("Could not save profile. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -300,7 +295,7 @@ export default function ProfilePage() {
   return (
     <div className="pro-page">
       <div className="pro-container">
-        {/* ===== HEADER BAR (matches Overview style) ===== */}
+        {/* ===== HEADER BAR ===== */}
         <div className="pro-header" ref={menuRef}>
           <div className="pro-title">Profile</div>
 
@@ -319,7 +314,6 @@ export default function ProfilePage() {
 
             {menuOpen && (
               <div className="pro-menu">
-                {/* 🆕 Dashboard first */}
                 <Link
                   className="pro-menu-item"
                   to="/dashboard"
@@ -341,7 +335,6 @@ export default function ProfilePage() {
                 >
                   Settings
                 </Link>
-                {/* Logout usually needs full navigation */}
                 <a className="pro-menu-item danger" href="/logout">
                   Logout
                 </a>
@@ -365,13 +358,18 @@ export default function ProfilePage() {
             {profile?.verified && <span className="pro-verified">✔</span>}
           </div>
 
-          <div className="pro-name">{profile?.name || ""}</div>
+          <div className="pro-name">
+            {loading ? "Loading…" : profile?.name || "—"}
+          </div>
 
           <div className="pro-email-row">
-            <span className="pro-email">{profile?.email || "—"}</span>
+            <span className="pro-email">
+              {loading ? "Loading…" : profile?.email || "—"}
+            </span>
             <button
               className={`pro-chip ${copied.email ? "ok" : ""}`}
               onClick={() => handleCopy("email", profile?.email)}
+              disabled={!profile?.email}
             >
               {copied.email ? "Copied" : "Copy"}
             </button>
@@ -412,6 +410,7 @@ export default function ProfilePage() {
                 <button
                   className={`pro-copy ${copied.email ? "ok" : ""}`}
                   onClick={() => handleCopy("email", profile?.email)}
+                  disabled={!profile?.email}
                 >
                   {copied.email ? "Copied" : "Copy"}
                 </button>
@@ -424,6 +423,7 @@ export default function ProfilePage() {
                 <button
                   className={`pro-copy ${copied.phone ? "ok" : ""}`}
                   onClick={() => handleCopy("phone", profile?.phone)}
+                  disabled={!profile?.phone}
                 >
                   {copied.phone ? "Copied" : "Copy"}
                 </button>
@@ -441,7 +441,7 @@ export default function ProfilePage() {
             <div className="pro-row">
               <div className="pro-row-left">Subscription</div>
               <div className="pro-row-right">
-                {profile?.subscriptionTier || "Free"}
+                {profile?.subscriptionTier || profile?.subscription?.plan || "Free"}
               </div>
             </div>
           </div>
@@ -560,7 +560,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* MODAL (switches by mode) */}
+      {/* MODAL */}
       {open && (
         <div className="pro-modal-backdrop" onClick={() => setOpen(false)}>
           <div className="pro-modal" onClick={(e) => e.stopPropagation()}>

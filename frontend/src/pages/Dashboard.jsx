@@ -53,6 +53,7 @@ class SectionErrorBoundary extends React.Component {
 }
 
 const ROUTES = {
+  HOME: "/",              // 👈 added
   OFFER_RIDE: "/offer-ride",
   FIND_RIDES: "/find-ride",
   SUPPORT: "/support",
@@ -261,6 +262,9 @@ const Dashboard = ({ user, onLogout }) => {
     border: `2px solid ${borderClr}`,
     fontWeight: 700,
     cursor: "pointer",
+    textDecoration: "none",
+    display: "inline-block",
+    lineHeight: 1,
   });
 
   const avatarBtn = {
@@ -369,7 +373,7 @@ const Dashboard = ({ user, onLogout }) => {
         ))}
       </div>
 
-      {/* Header (Dashboard + avatar dropdown) */}
+      {/* Header (Dashboard + home + avatar dropdown) */}
       <div style={{ ...container, paddingTop: 20, paddingBottom: 12 }} ref={menuRef}>
         <div
           style={{
@@ -387,46 +391,59 @@ const Dashboard = ({ user, onLogout }) => {
             </div>
           </div>
 
-          <div style={{ position: "relative" }}>
-            <button
-              onClick={() => setMenuOpen((v) => !v)}
-              style={avatarBtn}
-              title="Menu"
-            >
-              {me?.avatarUrl ? (
-                <img
-                  src={me.avatarUrl}
-                  alt=""
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                  }}
-                />
-              ) : (
-                <span style={{ fontWeight: 700, fontSize: 14 }}>
-                  {initials || "U"}
-                </span>
-              )}
-            </button>
+          {/* Right side: Back to Home + Avatar menu */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {/* 👇 New: Back to Home chip */}
+            <Link to={ROUTES.HOME} style={chipBtn("#34d399", "#34d399")} title="Go to Home">
+              ← Home
+            </Link>
 
-            {menuOpen && (
-              <div style={menu}>
-                <Link to="/overview" onClick={() => setMenuOpen(false)} style={menuItem}>
-                  Overview
-                </Link>
-                <Link to="/profile" onClick={() => setMenuOpen(false)} style={menuItem}>
-                  Profile
-                </Link>
-                <Link to="/settings" onClick={() => setMenuOpen(false)} style={menuItem}>
-                  Settings
-                </Link>
-                <a href="/logout" style={{ ...menuItem, color: "#fca5a5" }}>
-                  Logout
-                </a>
-              </div>
-            )}
+            {/* Avatar dropdown */}
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => setMenuOpen((v) => !v)}
+                style={avatarBtn}
+                title="Menu"
+              >
+                {me?.avatarUrl ? (
+                  <img
+                    src={me.avatarUrl}
+                    alt=""
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <span style={{ fontWeight: 700, fontSize: 14 }}>
+                    {initials || "U"}
+                  </span>
+                )}
+              </button>
+
+              {menuOpen && (
+                <div style={menu}>
+                  {/* 👇 New: Home in dropdown */}
+                  <Link to={ROUTES.HOME} onClick={() => setMenuOpen(false)} style={menuItem}>
+                    Home
+                  </Link>
+                  <Link to="/overview" onClick={() => setMenuOpen(false)} style={menuItem}>
+                    Overview
+                  </Link>
+                  <Link to="/profile" onClick={() => setMenuOpen(false)} style={menuItem}>
+                    Profile
+                  </Link>
+                  <Link to="/settings" onClick={() => setMenuOpen(false)} style={menuItem}>
+                    Settings
+                  </Link>
+                  <a href="/logout" style={{ ...menuItem, color: "#fca5a5" }}>
+                    Logout
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -533,7 +550,7 @@ const Dashboard = ({ user, onLogout }) => {
             </div>
           </div>
 
-          {/* Quick actions (dark card instead of white) */}
+          {/* Quick actions */}
           <div style={{ ...card, paddingTop: "1.1rem" }}>
             <div style={{ ...cardTitle, marginBottom: 8, textAlign: "center" }}>
               Quick actions
@@ -543,7 +560,7 @@ const Dashboard = ({ user, onLogout }) => {
             </SectionErrorBoundary>
           </div>
 
-          {/* Recent activity (dark card instead of white) */}
+          {/* Recent activity */}
           <div style={{ ...card, paddingTop: "1.1rem" }}>
             <div style={{ ...cardTitle, marginBottom: 8, textAlign: "center" }}>
               Recent activity
