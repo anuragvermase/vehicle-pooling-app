@@ -1,9 +1,17 @@
+// src/App.jsx
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from 'react-router-dom';
 import './App.css';
 import API from './services/api';
 
-// Import components
+// Components / Pages
 import LandingNavbar from './components/LandingNavbar';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
@@ -21,21 +29,22 @@ import FAQ from './pages/FAQ';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 
-// NEW pages
+// Extras
 import Profile from './pages/Profile';
 import Overview from './pages/Overview';
 import Settings from './pages/Settings';
 
+// Ride details (after publish)
+import RidePublished from './pages/RidePublished';
+
 /**
  * RouteStyleLoader
  * Ensures page-scoped CSS is injected when navigating to certain routes.
- * This fixes cases where a page renders without its CSS due to missing imports.
  */
 function RouteStyleLoader() {
   const location = useLocation();
 
   useEffect(() => {
-    // Load Profile page CSS only when on /profile (case-insensitive, trailing slash tolerant)
     if (/^\/profile\/?$/i.test(location.pathname)) {
       import('./pages/Profile.css').catch(() => {});
     }
@@ -48,9 +57,10 @@ function RouteStyleLoader() {
 function AppContent() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [pendingAction, setPendingAction] = useState(null);
+  const [pendingAction, setPendingAction] = useState(null); // path to navigate post-login
   const navigate = useNavigate();
 
+  // Bootstrap current user from token
   const loadMe = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -75,7 +85,7 @@ function AppContent() {
   }, []);
 
   const handleLogin = (_userFromChild, token) => {
-    // store only token; always fetch fresh user from server
+    // store token only; always fetch fresh user from server
     localStorage.setItem('token', token);
     loadMe();
     if (pendingAction) {
@@ -112,7 +122,7 @@ function AppContent() {
     navigate(-1);
   };
 
-  // Ride actions (pre-login intent)
+  // Ride actions with pre-login intent capture
   const handleFindRide = () => {
     if (user) navigate('/find-ride');
     else {
@@ -131,13 +141,15 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        fontSize: '1.5rem'
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          fontSize: '1.5rem',
+        }}
+      >
         Loading... 🚗
       </div>
     );
@@ -145,11 +157,11 @@ function AppContent() {
 
   return (
     <div className="App">
-      {/* 🔽 Ensures page CSS (like Profile.css) is loaded on route change */}
+      {/* Ensure route-scoped CSS can lazy-load */}
       <RouteStyleLoader />
 
       <Routes>
-        {/* Landing Page Route */}
+        {/* Landing Page */}
         <Route
           path="/"
           element={
@@ -160,15 +172,12 @@ function AppContent() {
                 onShowLogin={handleShowLogin}
                 onShowRegister={handleShowRegister}
               />
-              <LandingPage
-                onFindRide={handleFindRide}
-                onOfferRide={handleOfferRide}
-              />
+              <LandingPage onFindRide={handleFindRide} onOfferRide={handleOfferRide} />
             </div>
           }
         />
 
-        {/* Login Route */}
+        {/* Login shown as modal over landing */}
         <Route
           path="/login"
           element={
@@ -179,31 +188,32 @@ function AppContent() {
                 onShowLogin={handleShowLogin}
                 onShowRegister={handleShowRegister}
               />
-              <LandingPage
-                onFindRide={handleFindRide}
-                onOfferRide={handleOfferRide}
-              />
+              <LandingPage onFindRide={handleFindRide} onOfferRide={handleOfferRide} />
 
-              <div style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: 'rgba(0,0,0,0.5)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 2000
-              }}>
-                <div style={{
-                  background: 'white',
-                  padding: '2rem',
-                  borderRadius: '15px',
-                  maxWidth: '400px',
-                  width: '90%',
-                  position: 'relative'
-                }}>
+              <div
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  background: 'rgba(0,0,0,0.5)',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 2000,
+                }}
+              >
+                <div
+                  style={{
+                    background: 'white',
+                    padding: '2rem',
+                    borderRadius: '15px',
+                    maxWidth: '400px',
+                    width: '90%',
+                    position: 'relative',
+                  }}
+                >
                   <button
                     onClick={handleCloseModal}
                     style={{
@@ -213,7 +223,7 @@ function AppContent() {
                       background: 'none',
                       border: 'none',
                       fontSize: '1.5rem',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
                     }}
                   >
                     ✕
@@ -225,7 +235,7 @@ function AppContent() {
           }
         />
 
-        {/* Register Route */}
+        {/* Register shown as modal over landing */}
         <Route
           path="/register"
           element={
@@ -236,31 +246,32 @@ function AppContent() {
                 onShowLogin={handleShowLogin}
                 onShowRegister={handleShowRegister}
               />
-              <LandingPage
-                onFindRide={handleFindRide}
-                onOfferRide={handleOfferRide}
-              />
+              <LandingPage onFindRide={handleFindRide} onOfferRide={handleOfferRide} />
 
-              <div style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: 'rgba(0,0,0,0.5)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 2000
-              }}>
-                <div style={{
-                  background: 'white',
-                  padding: '2rem',
-                  borderRadius: '15px',
-                  maxWidth: '400px',
-                  width: '90%',
-                  position: 'relative'
-                }}>
+              <div
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  background: 'rgba(0,0,0,0.5)',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 2000,
+                }}
+              >
+                <div
+                  style={{
+                    background: 'white',
+                    padding: '2rem',
+                    borderRadius: '15px',
+                    maxWidth: '400px',
+                    width: '90%',
+                    position: 'relative',
+                  }}
+                >
                   <button
                     onClick={handleCloseModal}
                     style={{
@@ -270,7 +281,7 @@ function AppContent() {
                       background: 'none',
                       border: 'none',
                       fontSize: '1.5rem',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
                     }}
                   >
                     ✕
@@ -282,75 +293,31 @@ function AppContent() {
           }
         />
 
-        {/* Dashboard Route - Protected */}
+        {/* Protected routes */}
         <Route
           path="/dashboard"
-          element={
-            user ? (
-              <Dashboard user={user} onLogout={handleLogout} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
+          element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />}
         />
-
-        {/* Find Ride Route - Protected */}
         <Route
           path="/find-ride"
-          element={
-            user ? (
-              <FindRide user={user} onLogout={handleLogout} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
+          element={user ? <FindRide user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />}
         />
-
-        {/* Offer Ride Route - Protected */}
         <Route
           path="/offer-ride"
-          element={
-            user ? (
-              <OfferRide user={user} onLogout={handleLogout} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
+          element={user ? <OfferRide user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />}
+        />
+        {/* Ride Published (protected) */}
+        <Route
+          path="/ride/:rideId"
+          element={user ? <RidePublished user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />}
         />
 
-        {/* NEW: Profile / Overview / Settings — Protected */}
-        <Route
-          path="/profile"
-          element={
-            user ? (
-              <Profile />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
-        />
-        <Route
-          path="/overview"
-          element={
-            user ? (
-              <Overview />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            user ? (
-              <Settings />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
-        />
+        {/* Extra protected pages */}
+        <Route path="/profile" element={user ? <Profile /> : <Navigate to="/" replace />} />
+        <Route path="/overview" element={user ? <Overview /> : <Navigate to="/" replace />} />
+        <Route path="/settings" element={user ? <Settings /> : <Navigate to="/" replace />} />
 
-        {/* Footer Pages */}
+        {/* Public footer pages */}
         <Route path="/about" element={<AboutUs />} />
         <Route path="/team" element={<OurTeam />} />
         <Route path="/support" element={<Support />} />
@@ -361,7 +328,7 @@ function AppContent() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
 
-        {/* Redirect any unknown routes to home */}
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

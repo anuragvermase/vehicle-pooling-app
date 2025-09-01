@@ -1,3 +1,4 @@
+// src/services/api.js
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -6,24 +7,24 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api
 const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: {
+    Accept: 'application/json',
     'Content-Type': 'application/json',
-    // Hint browsers not to cache API reads
-    'Cache-Control': 'no-store',
-    'Pragma': 'no-cache',
+    // ⚠️ Do NOT send Cache-Control/Pragma from the client; it triggers stricter CORS preflight.
   },
   timeout: 30000,
+  withCredentials: false, // tokens are sent via Authorization header
 });
 
 // Add token automatically
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token'); // token only; we no longer read/write any "user" object
+    const token = localStorage.getItem('token');
     if (token) config.headers.Authorization = `Bearer ${token}`;
-    // add a tiny cache-buster to GETs
-    if (config.method?.toLowerCase() === 'get') {
-      const url = new URL(config.url || '', window.location.origin);
-      url.searchParams.set('_t', Date.now().toString());
-      config.url = url.pathname + url.search;
+
+    // add a tiny cache-buster to GETs without touching absolute URLs
+    if ((config.method || 'get').toLowerCase() === 'get') {
+      // prefer params when possible to avoid URL parsing/browser deps
+      config.params = { ...(config.params || {}), _t: Date.now() };
     }
     return config;
   },
@@ -34,12 +35,25 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    const message = error.response?.data?.message || error.message || 'Something went wrong';
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');     // only token
-      if (window.location.pathname !== '/login') window.location.href = '/login';
+    // Network / CORS
+    if (!error.response) {
+      return Promise.reject(new Error('Network error. Please check your connection.'));
     }
-    return Promise.reject(new Error(message));
+
+    const status = error.response.status;
+    const serverMsg =
+      error.response.data?.message ||
+      error.response.data?.error ||
+      'Something went wrong';
+
+    if (status === 401) {
+      localStorage.removeItem('token');
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+
+    return Promise.reject(new Error(serverMsg));
   }
 );
 
@@ -47,8 +61,8 @@ const API = {
   raw: apiClient,
 
   users: {
-    me: (params) => apiClient.get('/users/me', { params }),                      // { success, user }
-    updateMe: (data) => apiClient.patch('/users/me', data),                      // { success, user }
+    me: (params) => apiClient.get('/users/me', { params }),
+    updateMe: (data) => apiClient.patch('/users/me', data),
     uploadAvatar: (file) => {
       const fd = new FormData();
       fd.append('avatar', file);
@@ -62,16 +76,15 @@ const API = {
   },
 
   auth: {
-    login: async (credentials) => apiClient.post('/auth/login', credentials),
-    register: async (userData) => apiClient.post('/auth/register', userData),
-    getCurrentUser: async () => apiClient.get('/auth/me'),
-    forgotPassword: async (email) => apiClient.post('/auth/forgot-password', { email }),
-    resetPassword: async (token, password) => apiClient.post('/auth/reset-password', { token, password }),
-    verifyEmail: async (token) => apiClient.post('/auth/verify-email', { token }),
-    refreshToken: async () => apiClient.post('/auth/refresh-token'),
+    login: (credentials) => apiClient.post('/auth/login', credentials),
+    register: (userData) => apiClient.post('/auth/register', userData),
+    getCurrentUser: () => apiClient.get('/auth/me'),
+    forgotPassword: (email) => apiClient.post('/auth/forgot-password', { email }),
+    resetPassword: (token, password) => apiClient.post('/auth/reset-password', { token, password }),
+    verifyEmail: (token) => apiClient.post('/auth/verify-email', { token }),
+    refreshToken: () => apiClient.post('/auth/refresh-token'),
   },
 
-  // (unchanged) … keep the rest of your modules as-is:
   dashboard: {
     getStats: () => apiClient.get('/dashboard/stats'),
     getUpcomingRides: () => apiClient.get('/dashboard/upcoming-rides'),
@@ -82,7 +95,8 @@ const API = {
 
   rides: {
     create: (rideData) => apiClient.post('/rides/create', rideData),
-    search: (searchParams) => apiClient.get(`/rides/search?${new URLSearchParams(searchParams).toString()}`),
+    search: (searchParams) =>
+      apiClient.get(`/rides/search?${new URLSearchParams(searchParams).toString()}`),
     book: (rideId, bookingData) => apiClient.post(`/rides/${rideId}/book`, bookingData),
     updateLocation: (rideId, location) => apiClient.put(`/rides/${rideId}/location`, location),
     getLocationSuggestions: (input, location = null) => {

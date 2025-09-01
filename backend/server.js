@@ -5,102 +5,100 @@ import dotenv from 'dotenv';
 import os from 'os';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-
-// ✨ NEW: small additions for uploads & current-user
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
 import { fileURLToPath } from 'url';
-import auth from './middleware/auth.js';
-import usersRoutes from './routes/user.js';
-import User from './models/User.js';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-// ✨ END NEW
 
 import connectDB from './config/database.js';
 import authRoutes from './routes/auth.js';
+import usersRoutes from './routes/user.js';
 import dashboardRoutes from './routes/dashboard.js';
-import rideRoutes from './routes/rides.js';
+import rideRoutes from './routes/rides.js';       // includes POST /api/rides/create and POST /api/rides
 import bookingRoutes from './routes/bookings.js';
 import chatRoutes from './routes/chat.js';
+import auth from './middleware/auth.js';
 import { initializeSocket } from './Socket/socketHandlers.js';
 import { logger } from './utils/logger.js';
 
-// Load environment variables
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = createServer(app);
-
 const isProd = process.env.NODE_ENV === 'production';
+const PORT = process.env.PORT || 5000;
 
-// ---- Minimal hardening (does not change functionality)
+/* ------------------------------- Hardening ------------------------------- */
 app.disable('x-powered-by');
 
-// Quick env sanity checks (log-only; does NOT crash)
-const REQUIRED_ENV = ['JWT_SECRET', 'MONGODB_URI'];
-for (const key of REQUIRED_ENV) {
+/* -------------------------- Env sanity (log-only) ------------------------- */
+for (const key of ['JWT_SECRET', 'MONGODB_URI']) {
   if (!process.env[key]) {
     logger.warn(`[env] ${key} is not set. Some features may not work as expected.`);
   }
 }
 
+/* ------------------------- CORS origin resolution ------------------------- */
 /**
- * Resolve allowed origins
- * - In development: allow all (so Expo Go on your phone can call the API)
- * - In production: use comma-separated FRONTEND_URLS env (e.g. https://web.example.com,https://app.example.com)
+ * - If FRONTEND_URLS is set: comma-separated list of origins
+ * - Else if FRONTEND_URL is set: single origin
+ * - Dev: allow all (true) so Expo/localhost variants work
  */
 const frontends =
   process.env.FRONTEND_URLS?.split(',').map(s => s.trim()).filter(Boolean) ||
   (process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []);
 
-const expressCorsOrigin = isProd ? frontends : true; // true == reflect request origin
+const expressCorsOrigin = isProd ? frontends : true; // true = reflect request origin (dev)
 const socketCorsOrigin = isProd ? frontends : true;
 
-// Initialize Socket.io
+/* -------------------------------- Socket.IO ------------------------------ */
 const io = new Server(server, {
   cors: {
     origin: socketCorsOrigin,
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
   },
   transports: ['websocket', 'polling'],
 });
-
-// Initialize socket handlers
 initializeSocket(io);
-
-// Make io available to routes
 app.set('socketio', io);
 
-// ---- Middleware
+/* --------------------------------- CORS ---------------------------------- */
 app.use(
   cors({
     origin: expressCorsOrigin,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+// Explicit preflight for all routes
+app.options('*', cors({ origin: expressCorsOrigin, credentials: true }));
 
+/* ------------------------------- Parsers ---------------------------------- */
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// ✨ NEW: serve static uploads (so avatar URLs work)
+/* --------------------------- Static file serving -------------------------- */
+// serve uploaded avatars: /uploads/avatars/<file>
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Request logger middleware
-app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.path} - ${req.ip}`);
+/* ---------------------------- Request logger ------------------------------ */
+app.use((req, _res, next) => {
+  logger.info(`${req.method} ${req.originalUrl} - ${req.ip}`);
   next();
 });
 
-// Root ping (quality of life)
+/* ------------------------------- Root ping -------------------------------- */
 app.get('/', (_req, res) => {
   res.status(200).send('OK. See /api/health');
 });
 
-// ---- Health & status
-app.get('/api/health', (req, res) => {
+/* ---------------------------- Health / Status ----------------------------- */
+app.get('/api/health', (_req, res) => {
   res.json({
     success: true,
     message: 'Server is running',
@@ -110,7 +108,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.get('/api/status', (req, res) => {
+app.get('/api/status', (_req, res) => {
   res.json({
     success: true,
     data: {
@@ -126,7 +124,7 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-// ✨ NEW: minimal avatar upload setup (disk storage under /uploads/avatars)
+/* -------------------------- Minimal avatar upload ------------------------- */
 const avatarStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = path.join(__dirname, 'uploads', 'avatars');
@@ -142,7 +140,7 @@ const avatarStorage = multer.diskStorage({
 });
 const uploadAvatar = multer({ storage: avatarStorage });
 
-// ---- API Routes
+/* --------------------------------- Routes -------------------------------- */
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -150,12 +148,13 @@ app.use('/api/rides', rideRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/chat', chatRoutes);
 
-// ✨ NEW: Current user endpoint (so the app can show name/avatar after login)
+// Current user (profile basics)
 app.get('/api/auth/me', auth, async (req, res, next) => {
   try {
     const uid = req.user?.id || req.user?._id;
     if (!uid) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
+    const User = (await import('./models/User.js')).default;
     const user = await User.findById(uid).select(
       'name fullName username firstName lastName email avatarUrl profilePicture'
     );
@@ -167,7 +166,7 @@ app.get('/api/auth/me', auth, async (req, res, next) => {
   }
 });
 
-// ✨ NEW: Avatar upload endpoint (persist avatar and return its URL)
+// Avatar upload
 app.post('/api/auth/avatar', auth, uploadAvatar.single('avatar'), async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
@@ -175,6 +174,7 @@ app.post('/api/auth/avatar', auth, uploadAvatar.single('avatar'), async (req, re
     const fileUrl = `${req.protocol}://${req.get('host')}/uploads/avatars/${req.file.filename}`;
     const uid = req.user?.id || req.user?._id;
 
+    const User = (await import('./models/User.js')).default;
     const user = await User.findByIdAndUpdate(
       uid,
       { avatarUrl: fileUrl, profilePicture: fileUrl },
@@ -187,7 +187,7 @@ app.post('/api/auth/avatar', auth, uploadAvatar.single('avatar'), async (req, re
   }
 });
 
-// 404 handler
+/* ---------------------------------- 404 ---------------------------------- */
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
@@ -195,8 +195,8 @@ app.use('*', (req, res) => {
   });
 });
 
-// Global error handler
-app.use((error, req, res, next) => {
+/* --------------------------- Global error handler ------------------------- */
+app.use((error, _req, res, _next) => {
   logger.error('Unhandled error:', error);
   const message = isProd ? 'Internal server error' : error.message;
   res.status(error.status || 500).json({
@@ -206,9 +206,7 @@ app.use((error, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-
-// helper to get a LAN IP for quick testing on phone
+/* ------------------------------- Utilities -------------------------------- */
 function getLanIPv4() {
   const nets = os.networkInterfaces();
   for (const name of Object.keys(nets)) {
@@ -219,22 +217,22 @@ function getLanIPv4() {
   return 'localhost';
 }
 
-// Start server
+/* ------------------------------- Start up --------------------------------- */
 const startServer = async () => {
   try {
     await connectDB();
 
-    // IMPORTANT: bind to 0.0.0.0 so phones on your LAN can reach it
+    // Bind to 0.0.0.0 so phones on your LAN can reach it
     server.listen(PORT, '0.0.0.0', () => {
       const ip = getLanIPv4();
+      const origins = expressCorsOrigin === true ? '(any - dev)' : JSON.stringify(frontends);
+
       logger.info(`🚗 RideShare Pro Server running on port ${PORT}`);
       logger.info(`🔗 Local Health:  http://localhost:${PORT}/api/health`);
       logger.info(`📱 Phone Health:  http://${ip}:${PORT}/api/health`);
-      logger.info(
-        `🌐 Allowed origins: ${expressCorsOrigin === true ? '(any - dev)' : JSON.stringify(frontends)}`
-      );
       logger.info(`🔌 WebSocket: Active`);
       logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+      logger.info(`🌐 CORS Origins: ${origins}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
@@ -242,7 +240,7 @@ const startServer = async () => {
   }
 };
 
-// Graceful shutdown
+/* --------------------------- Graceful shutdown ---------------------------- */
 const gracefulShutdown = (signal) => {
   logger.info(`${signal} received, shutting down gracefully`);
   server.close(() => {
@@ -252,7 +250,7 @@ const gracefulShutdown = (signal) => {
   setTimeout(() => {
     logger.error('Forcing shutdown');
     process.exit(1);
-  }, 10000);
+  }, 10_000);
 };
 
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
