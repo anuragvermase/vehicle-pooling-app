@@ -1,95 +1,120 @@
+// backend/middleware/auth.js
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { logger } from '../utils/logger.js';
 
+/** Extract JWT from common places (headers, cookies, query) */
+function extractToken(req) {
+  // Standard Authorization header: "Bearer <token>" or just "<token>"
+  const auth = req.headers.authorization || req.headers.Authorization;
+  if (auth && typeof auth === 'string') {
+    const parts = auth.trim().split(' ');
+    if (parts.length === 2 && /^Bearer$/i.test(parts[0])) return parts[1];
+    if (parts.length === 1) return parts[0]; // allow raw token
+  }
+  // Alt headers some clients use
+  if (req.headers['x-auth-token']) return req.headers['x-auth-token'];
+  if (req.headers['x-access-token']) return req.headers['x-access-token'];
+
+  // Optional cookie (if you ever set it)
+  if (req.cookies?.token) return req.cookies.token;
+
+  // Optional query param (useful for webviews/sockets if needed)
+  if (req.query?.token) return req.query.token;
+
+  return null;
+}
+
 export const protect = async (req, res, next) => {
   try {
-    let token;
+    const token = extractToken(req);
 
-    // Check for token in headers
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[1];
-    }
-
-    // Check if token exists
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Access denied. No token provided.'
+        message: 'Access denied. No token provided.',
       });
     }
 
     try {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
-      // Get user from token
-      const user = await User.findById(decoded.id).select('+isActive');
-      
+
+      // Support multiple claim names for the user id
+      const decodedId = decoded?.id || decoded?._id || decoded?.sub || decoded?.userId;
+      if (!decodedId) {
+        return res.status(401).json({
+          success: false,
+          message: 'Token is not valid. No subject.',
+        });
+      }
+
+      // Load user; include flags if they’re excluded by default
+      const user = await User.findById(decodedId).select('+isActive +isLocked');
+
       if (!user) {
         return res.status(401).json({
           success: false,
-          message: 'Token is not valid. User not found.'
+          message: 'Token is not valid. User not found.',
         });
       }
 
-      // Check if user account is active
-      if (!user.isActive) {
+      // Business rules you already had
+      if (user.isActive === false) {
         return res.status(401).json({
           success: false,
-          message: 'Account has been deactivated. Please contact support.'
+          message: 'Account has been deactivated. Please contact support.',
         });
       }
 
-      // Check if user account is locked
       if (user.isLocked) {
         return res.status(401).json({
           success: false,
-          message: 'Account is temporarily locked due to multiple failed login attempts.'
+          message: 'Account is temporarily locked due to multiple failed login attempts.',
         });
       }
 
-      // Add user to request object
-      req.user = user;
-      next();
+      // Attach to request (more convenient for routes)
+      req.user = user;                    // full user doc
+      req.userId = String(user._id);      // plain id
+      req.auth = { token, decoded };      // optional useful context
 
+      return next();
     } catch (jwtError) {
       logger.error('JWT verification failed:', jwtError);
-      
-      if (jwtError.name === 'TokenExpiredError') {
+
+      if (jwtError?.name === 'TokenExpiredError') {
         return res.status(401).json({
           success: false,
-          message: 'Token has expired. Please login again.'
+          message: 'Token has expired. Please login again.',
         });
       }
-      
+
       return res.status(401).json({
         success: false,
-        message: 'Token is not valid.'
+        message: 'Token is not valid.',
       });
     }
-
   } catch (error) {
     logger.error('Auth middleware error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: 'Server error in authentication'
+      message: 'Server error in authentication',
     });
   }
 };
 
-// Generate JWT Token
+// Generate JWT Token (unchanged)
 export const generateToken = (id) => {
   if (!id) {
     throw new Error('User ID is required to generate token');
   }
-
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE || '30d'
+    expiresIn: process.env.JWT_EXPIRE || '30d',
   });
 };
 
-// Verify token utility
+// Verify token utility (unchanged)
 export const verifyToken = (token) => {
   try {
     return jwt.verify(token, process.env.JWT_SECRET);
@@ -98,3 +123,6 @@ export const verifyToken = (token) => {
     return null;
   }
 };
+
+// Also export default for convenience: `import auth from './middleware/auth.js'`
+export default protect;

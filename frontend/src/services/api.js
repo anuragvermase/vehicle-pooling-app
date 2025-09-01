@@ -1,4 +1,3 @@
-// frontend/src/services/api.js
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -46,16 +45,40 @@ apiClient.interceptors.response.use(
 );
 
 const API = {
+  /* ---------------- NEW: expose client & users endpoints ---------------- */
+  // Access to the raw axios instance (useful for custom calls if needed)
+  raw: apiClient,
+
+  // Users module used by Profile page
+  users: {
+    // { success, user }
+    me: () => apiClient.get('/users/me'),
+
+    // { success, user }  body can contain { name, avatarUrl } (avatarUrl mapped server-side)
+    updateMe: (data) => apiClient.patch('/users/me', data),
+
+    // { success, url, avatarUrl }
+    uploadAvatar: (file) => {
+      const fd = new FormData();
+      fd.append('avatar', file);
+      return apiClient.post('/users/me/avatar', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    },
+
+    // { success: true } or { success:false, message }
+    updatePassword: (currentPassword, newPassword) =>
+      apiClient.post('/users/me/password', { currentPassword, newPassword }),
+
+    // ✅ ADDED: wrapper so your SecurityPanel's changePassword call works
+    changePassword: (payload) => apiClient.post('/users/me/password', payload),
+  },
+  /* --------------------------------------------------------------------- */
+
   // Authentication APIs
   auth: {
     login: async (credentials) => {
       const response = await apiClient.post('/auth/login', credentials);
-      return response;
-    },
-
-    // 🔐 Google Sign-in (ID token)
-    loginWithGoogle: async ({ idToken }) => {
-      const response = await apiClient.post('/auth/google', { idToken });
       return response;
     },
     
@@ -410,6 +433,33 @@ const API = {
       });
       return response;
     }
+  },
+
+  // ✅ NEW: SECURITY APIs (for 2FA + Sessions + Identity)
+  security: {
+    get2FA: () => apiClient.get('/security/2fa'),
+    provision2FA: () => apiClient.post('/security/2fa/provision'),
+    // flexible: accept string or {code}
+    verify2FA: (payload) => {
+      const body = typeof payload === 'string' ? { code: payload } : { code: payload?.code };
+      return apiClient.post('/security/2fa/verify', body);
+    },
+    toggle2FA: (enabled) => apiClient.post('/security/2fa', { enabled }),
+    // alias for backward compatibility (your panel sometimes calls set2FA)
+    set2FA: (body) => apiClient.post('/security/2fa', body),
+
+    // return array so UI can map directly
+    getSessions: () => apiClient.get('/security/sessions').then(r => r.sessions || []),
+    revokeSession: (sessionId) => apiClient.post(`/security/sessions/${sessionId}/revoke`),
+
+    getIdentity: () => apiClient.get('/security/identity'),
+    uploadIdentity: (field, formData, onProgress) =>
+      apiClient.post(`/security/identity/${field}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: p => {
+          if (onProgress && p.total) onProgress(Math.round((p.loaded / p.total) * 100));
+        }
+      }),
   },
 
   // Health check

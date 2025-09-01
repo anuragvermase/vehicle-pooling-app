@@ -6,6 +6,9 @@ import Message from '../models/Message.js';
 import { logger } from '../utils/logger.js';
 import { calculateDistance } from '../services/googleMapsService.js';
 
+// ✅ NEW: login devices / sessions tracking
+import Session from '../models/Session.js';
+
 const connectedUsers = new Map();
 const rideRooms = new Map();
 
@@ -33,7 +36,7 @@ export const initializeSocket = (io) => {
     }
   });
 
-  io.on('connection', (socket) => {
+  io.on('connection', async (socket) => {
     logger.info(`User connected: ${socket.user.name} (${socket.userId})`);
     
     // Store connected user
@@ -46,6 +49,42 @@ export const initializeSocket = (io) => {
 
     // Join user to their personal room
     socket.join(`user_${socket.userId}`);
+
+    // ===== Heartbeat: server ping → client pong (keeps sockets fresh) =====
+    let alive = true;
+    const heartbeat = setInterval(() => {
+      if (!alive) {
+        try { socket.disconnect(true); } catch {}
+        return;
+      }
+      alive = false;
+      socket.emit('server:ping');
+    }, 15000);
+    socket.on('client:pong', () => { alive = true; });
+    // =====================================================================
+
+    // ✅ NEW: create/update Session document (login devices list)
+    try {
+      const ua = socket.handshake.headers['user-agent'] || '';
+      const ip =
+        socket.handshake.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+        socket.handshake.address ||
+        '';
+      await Session.findOneAndUpdate(
+        { user: socket.userId, sessionId: socket.id },
+        {
+          user: socket.userId,
+          sessionId: socket.id,
+          device: ua,
+          ip,
+          current: true,
+          lastActive: new Date(),
+        },
+        { upsert: true, new: true }
+      );
+    } catch (e) {
+      logger.error('Session upsert error:', e);
+    }
 
     // Broadcast updated online users list
     broadcastOnlineUsers(io);
@@ -310,10 +349,6 @@ export const initializeSocket = (io) => {
         // Log emergency
         logger.warn(`Emergency alert from ${socket.user.name} in ride ${rideId}: ${type} - ${description}`);
 
-        // You could also save to Emergency model here
-        // const emergency = new Emergency({ ... });
-        // await emergency.save();
-
       } catch (error) {
         logger.error('Emergency alert error:', error);
         socket.emit('error', { message: 'Failed to send emergency alert' });
@@ -448,13 +483,26 @@ export const initializeSocket = (io) => {
     });
 
     // Handle user disconnection
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
+      // clear heartbeat
+      clearInterval(heartbeat);
+
       logger.info(`User disconnected: ${socket.user.name} (${socket.userId})`);
       
       // Update user status
       if (connectedUsers.has(socket.userId)) {
         connectedUsers.get(socket.userId).isOnline = false;
         connectedUsers.get(socket.userId).lastSeen = new Date();
+      }
+
+      // ✅ NEW: mark session as not current
+      try {
+        await Session.findOneAndUpdate(
+          { user: socket.userId, sessionId: socket.id },
+          { current: false, lastActive: new Date() }
+        );
+      } catch (e) {
+        logger.error('Session disconnect update error:', e);
       }
       
       // Remove from all ride rooms

@@ -55,6 +55,11 @@ const useWebSocket = (url, user) => {
         attemptReconnect();
       });
 
+      // ADD: heartbeat reply for server ping
+      socketInstance.on('server:ping', () => {
+        try { socketInstance.emit('client:pong'); } catch {}
+      });
+
       // Ride-related notifications
       socketInstance.on('ride_booked', (data) => {
         addNotification({
@@ -133,7 +138,6 @@ const useWebSocket = (url, user) => {
       socketInstance.on('location_update', (data) => {
         console.log('📍 Location update:', data);
         // Handle driver location updates for passengers
-        // You can emit this to other components that need location updates
       });
 
       socketInstance.on('driver_approaching', (data) => {
@@ -163,7 +167,6 @@ const useWebSocket = (url, user) => {
           isRead: false
         }]);
 
-        // Add notification for new messages (if sender is not current user)
         if (data.sender._id !== (user.id || user._id)) {
           addNotification({
             type: 'message',
@@ -177,7 +180,6 @@ const useWebSocket = (url, user) => {
 
       socketInstance.on('message_read', (data) => {
         console.log('Message read:', data);
-        // Update message read status in UI
       });
 
       socketInstance.on('message_deleted', (data) => {
@@ -187,7 +189,7 @@ const useWebSocket = (url, user) => {
       // Typing indicators
       socketInstance.on('user_typing', (data) => {
         setTypingUsers(prev => {
-          if (!prev.find(user => user.userId === data.userId)) {
+          if (!prev.find(u => u.userId === data.userId)) {
             return [...prev, data];
           }
           return prev;
@@ -195,7 +197,7 @@ const useWebSocket = (url, user) => {
       });
 
       socketInstance.on('user_stopped_typing', (data) => {
-        setTypingUsers(prev => prev.filter(user => user.userId !== data.userId));
+        setTypingUsers(prev => prev.filter(u => u.userId !== data.userId));
       });
 
       // Online users
@@ -213,7 +215,6 @@ const useWebSocket = (url, user) => {
           priority: 'critical'
         });
 
-        // Show urgent browser notification
         showBrowserNotification('Emergency Alert!', data.message, {
           requireInteraction: true,
           tag: 'emergency'
@@ -257,7 +258,7 @@ const useWebSocket = (url, user) => {
         addNotification({
           type: 'info',
           title: 'Booking Updated',
-          message:`Your booking status has been updated to: ${data.status}`,
+          message:  `Your booking status has been updated to: ${data.status}`,
           data: data,
           priority: 'medium'
         });

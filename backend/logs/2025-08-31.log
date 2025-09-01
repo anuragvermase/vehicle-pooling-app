@@ -1,0 +1,364 @@
+[2025-08-31T10:44:29.093Z] INFO: MongoDB Connected: localhost
+[2025-08-31T10:44:29.096Z] INFO: Database Name: rideshare
+[2025-08-31T10:44:29.112Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T10:44:29.113Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T10:44:29.114Z] INFO: 📱 Phone Health:  http://192.168.43.59:5000/api/health
+[2025-08-31T10:44:29.115Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T10:44:29.116Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T10:44:29.118Z] INFO: 🌍 Environment: development
+[2025-08-31T11:00:58.267Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T11:00:58.274Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T11:00:58.574Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T11:07:09.702Z] INFO: GET /api/health - 10.170.176.117
+[2025-08-31T11:07:09.967Z] INFO: GET /favicon.ico - 10.170.176.117
+[2025-08-31T11:07:12.537Z] INFO: GET /api/health - 10.170.176.117
+[2025-08-31T11:11:32.786Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T11:11:32.789Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T11:11:33.052Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T11:11:47.412Z] INFO: GET /api/rides/search - 10.170.176.117
+[2025-08-31T11:11:48.075Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-31T11:11:48.371Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-31T12:05:14.059Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T12:05:30.324Z] INFO: GET /api/rides - 10.170.176.117
+[2025-08-31T12:05:30.573Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-31T12:05:30.943Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-31T12:05:32.470Z] INFO: GET /api/rides - 10.170.176.117
+[2025-08-31T12:05:32.598Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-31T12:05:33.033Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-31T12:31:01.934Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T12:31:01.937Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T12:31:02.200Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T12:31:17.829Z] INFO: GET /api/rides - 10.170.176.117
+[2025-08-31T12:31:18.130Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-31T12:31:18.437Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-31T12:31:20.825Z] INFO: GET /api/rides - 10.170.176.117
+[2025-08-31T12:31:20.957Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-31T12:31:21.256Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-31T12:37:36.325Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T12:37:43.834Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T12:37:43.836Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T12:37:44.096Z] WARN: Login failed - invalid password: kannu@gmail.com
+[2025-08-31T12:37:55.121Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T12:37:55.122Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T12:37:55.387Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T12:38:54.881Z] INFO: GET /favicon.ico - 10.170.176.117
+[2025-08-31T12:58:03.360Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T12:58:03.362Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T12:58:03.632Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T12:58:34.176Z] INFO: GET /api/rides - 10.170.176.117
+[2025-08-31T12:58:34.592Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-31T12:58:34.892Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-31T13:09:16.296Z] INFO: GET /favicon.ico - 10.170.176.117
+[2025-08-31T13:20:04.373Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T13:38:24.825Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T13:48:12.596Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T13:48:12.599Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T13:48:12.869Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T14:09:22.836Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T14:09:22.838Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T14:09:23.100Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T14:09:23.586Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T14:09:27.983Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T14:09:45.711Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T14:17:18.196Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T14:17:18.197Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T14:17:18.457Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T14:25:06.247Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T14:25:06.249Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T14:25:06.519Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T14:36:33.855Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T14:36:33.857Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T14:36:34.121Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T14:51:26.509Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T14:51:26.512Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T14:51:26.956Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T14:51:27.315Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T14:51:27.345Z] INFO: GET /api/users/me - 10.170.176.117
+[2025-08-31T14:51:27.415Z] INFO: GET /api/me - 10.170.176.117
+[2025-08-31T14:51:27.479Z] INFO: GET /api/profile - 10.170.176.117
+[2025-08-31T14:51:35.414Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T14:51:35.443Z] INFO: GET /api/users/me - 10.170.176.117
+[2025-08-31T14:51:35.516Z] INFO: GET /api/me - 10.170.176.117
+[2025-08-31T14:51:35.608Z] INFO: GET /api/profile - 10.170.176.117
+[2025-08-31T15:00:21.652Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T15:00:21.655Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T15:00:22.103Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T15:00:22.565Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:00:29.944Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:00:43.674Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:00:54.831Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:05:46.596Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:05:46.600Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:09:25.401Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T15:09:25.404Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T15:09:25.858Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T15:09:26.324Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:09:35.130Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:10:15.890Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T15:10:15.892Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T15:10:16.356Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T15:10:16.505Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:10:26.224Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:10:37.709Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:10:52.348Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:49:23.689Z] INFO: MongoDB Connected: localhost
+[2025-08-31T15:49:23.691Z] INFO: Database Name: rideshare
+[2025-08-31T15:49:23.706Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T15:49:23.707Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T15:49:23.708Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T15:49:23.709Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T15:49:23.710Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T15:49:23.713Z] INFO: 🌍 Environment: development
+[2025-08-31T15:51:46.957Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T15:51:46.973Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T15:51:47.475Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T15:51:48.097Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:51:53.645Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:52:06.052Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:52:57.575Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T15:52:57.580Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T15:52:58.035Z] WARN: Login failed - invalid password: kannu@gmail.com
+[2025-08-31T15:53:07.590Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T15:53:07.593Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T15:53:08.033Z] WARN: Login failed - invalid password: kannu@gmail.com
+[2025-08-31T15:53:54.176Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:53:54.508Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:54:37.372Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T15:54:37.375Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T15:54:37.821Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T15:54:38.096Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T15:58:06.913Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:01:33.352Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T16:01:33.356Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-31T16:01:33.805Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-31T16:01:34.157Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:01:43.280Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:07:44.663Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T16:07:44.668Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T16:07:45.140Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-31T16:07:45.566Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:07:49.160Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:08:14.827Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-08-31T16:08:14.829Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-31T16:08:15.276Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-31T16:16:50.592Z] INFO: MongoDB Connected: localhost
+[2025-08-31T16:16:50.595Z] INFO: Database Name: rideshare
+[2025-08-31T16:16:50.610Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T16:16:50.611Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T16:16:50.612Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T16:16:50.615Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T16:16:50.616Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T16:16:50.617Z] INFO: 🌍 Environment: development
+[2025-08-31T16:20:24.211Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T16:20:24.227Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T16:20:25.310Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:20:28.568Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:20:41.160Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:21:01.287Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:21:41.792Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T16:21:41.798Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T16:21:42.625Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:35:19.676Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T16:35:19.681Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T16:35:20.813Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:35:36.252Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-08-31T16:35:39.384Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:35:55.705Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T16:35:55.708Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T16:35:56.516Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:36:16.784Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-08-31T16:36:16.787Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T16:36:47.934Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-08-31T16:36:50.955Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:36:54.391Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:36:58.572Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T16:59:50.253Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T16:59:50.265Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T16:59:51.220Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:00:01.029Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:00:46.676Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:01:27.226Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:01:43.905Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:01:48.816Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-08-31T17:01:53.115Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:02:15.140Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T17:02:15.143Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T17:02:16.053Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:02:22.447Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:02:31.962Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:02:37.664Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-08-31T17:02:40.881Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:02:54.153Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:02:58.420Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-08-31T17:03:07.980Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:03:55.597Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:05:56.537Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T17:05:56.541Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T17:05:57.664Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:06:12.212Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-08-31T17:06:15.398Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:14:10.929Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T17:14:10.933Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T17:14:12.002Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:14:22.497Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-08-31T17:14:26.175Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:15:02.142Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-08-31T17:15:09.497Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:15:22.309Z] INFO: POST /api/auth/avatar - 10.170.176.117
+[2025-08-31T17:15:25.173Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:16:18.217Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:22:10.791Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:38:33.136Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T17:38:33.138Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T17:38:34.229Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:38:40.418Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:39:07.604Z] INFO: PUT /api/auth/profile - 10.170.176.117
+[2025-08-31T17:39:07.627Z] INFO: Profile updated for user: kannu@gmail.com
+[2025-08-31T17:39:14.380Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:39:18.978Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:40:15.322Z] INFO: POST /api/auth/login - 10.170.176.117
+[2025-08-31T17:40:15.325Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T17:40:16.230Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:40:19.106Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T17:40:30.685Z] INFO: GET /api/auth/me - 10.170.176.117
+[2025-08-31T23:12:13.216Z] INFO: MongoDB Connected: localhost
+[2025-08-31T23:12:13.219Z] INFO: Database Name: rideshare
+[2025-08-31T23:12:13.232Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T23:12:13.233Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T23:12:13.234Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T23:12:13.235Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T23:12:13.236Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T23:12:13.237Z] INFO: 🌍 Environment: development
+[2025-08-31T23:12:28.157Z] INFO: MongoDB Connected: localhost
+[2025-08-31T23:12:28.160Z] INFO: Database Name: rideshare
+[2025-08-31T23:12:28.175Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T23:12:28.177Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T23:12:28.178Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T23:12:28.179Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T23:12:28.180Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T23:12:28.181Z] INFO: 🌍 Environment: development
+[2025-08-31T23:12:53.141Z] INFO: MongoDB Connected: localhost
+[2025-08-31T23:12:53.143Z] INFO: Database Name: rideshare
+[2025-08-31T23:12:53.155Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T23:12:53.157Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T23:12:53.158Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T23:12:53.159Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T23:12:53.160Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T23:12:53.161Z] INFO: 🌍 Environment: development
+[2025-08-31T23:14:45.831Z] INFO: MongoDB Connected: localhost
+[2025-08-31T23:14:45.834Z] INFO: Database Name: rideshare
+[2025-08-31T23:14:45.845Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T23:14:45.846Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T23:14:45.847Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T23:14:45.848Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T23:14:45.848Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T23:14:45.849Z] INFO: 🌍 Environment: development
+[2025-08-31T23:15:01.605Z] INFO: MongoDB Connected: localhost
+[2025-08-31T23:15:01.609Z] INFO: Database Name: rideshare
+[2025-08-31T23:15:01.622Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T23:15:01.623Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T23:15:01.625Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T23:15:01.628Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T23:15:01.630Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T23:15:01.632Z] INFO: 🌍 Environment: development
+[2025-08-31T23:15:31.406Z] INFO: MongoDB Connected: localhost
+[2025-08-31T23:15:31.409Z] INFO: Database Name: rideshare
+[2025-08-31T23:15:31.422Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T23:15:31.423Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T23:15:31.424Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T23:15:31.425Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T23:15:31.426Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T23:15:31.427Z] INFO: 🌍 Environment: development
+[2025-08-31T23:15:53.223Z] INFO: MongoDB Connected: localhost
+[2025-08-31T23:15:53.225Z] INFO: Database Name: rideshare
+[2025-08-31T23:15:53.236Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T23:15:53.237Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T23:15:53.238Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T23:15:53.239Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T23:15:53.240Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T23:15:53.242Z] INFO: 🌍 Environment: development
+[2025-08-31T23:16:09.222Z] INFO: MongoDB Connected: localhost
+[2025-08-31T23:16:09.225Z] INFO: Database Name: rideshare
+[2025-08-31T23:16:09.237Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T23:16:09.238Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T23:16:09.238Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T23:16:09.239Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T23:16:09.240Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T23:16:09.241Z] INFO: 🌍 Environment: development
+[2025-08-31T23:16:39.910Z] INFO: MongoDB Connected: localhost
+[2025-08-31T23:16:39.913Z] INFO: Database Name: rideshare
+[2025-08-31T23:16:39.927Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T23:16:39.928Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T23:16:39.929Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T23:16:39.930Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T23:16:39.931Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T23:16:39.932Z] INFO: 🌍 Environment: development
+[2025-08-31T23:17:16.506Z] INFO: MongoDB Connected: localhost
+[2025-08-31T23:17:16.508Z] INFO: Database Name: rideshare
+[2025-08-31T23:17:16.520Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T23:17:16.521Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T23:17:16.522Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T23:17:16.523Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T23:17:16.524Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T23:17:16.525Z] INFO: 🌍 Environment: development
+[2025-08-31T23:19:08.418Z] INFO: MongoDB Connected: localhost
+[2025-08-31T23:19:08.420Z] INFO: Database Name: rideshare
+[2025-08-31T23:19:08.433Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T23:19:08.434Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T23:19:08.435Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T23:19:08.436Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T23:19:08.437Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T23:19:08.438Z] INFO: 🌍 Environment: development
+[2025-08-31T23:19:16.615Z] INFO: MongoDB Connected: localhost
+[2025-08-31T23:19:16.620Z] INFO: Database Name: rideshare
+[2025-08-31T23:19:16.645Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T23:19:16.665Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T23:19:16.667Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T23:19:16.669Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T23:19:16.671Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T23:19:16.677Z] INFO: 🌍 Environment: development
+[2025-08-31T23:46:01.992Z] INFO: MongoDB Connected: ac-axtossa-shard-00-02.zdprcoy.mongodb.net
+[2025-08-31T23:46:01.995Z] INFO: Database Name: rideshare
+[2025-08-31T23:46:02.018Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-31T23:46:02.021Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-31T23:46:02.023Z] INFO: 📱 Phone Health:  http://10.170.176.193:5000/api/health
+[2025-08-31T23:46:02.026Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-31T23:46:02.027Z] INFO: 🔌 WebSocket: Active
+[2025-08-31T23:46:02.028Z] INFO: 🌍 Environment: development
+[2025-08-31T23:48:37.264Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-08-31T23:48:37.281Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T23:48:37.404Z] WARN: Login failed - user not found: kannu@gmail.com
+[2025-08-31T23:48:43.285Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-08-31T23:48:43.290Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-31T23:48:43.438Z] WARN: Login failed - user not found: kannu@gmail.com
+[2025-08-31T23:48:57.757Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-08-31T23:48:57.761Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-31T23:48:57.876Z] WARN: Login failed - user not found: anuragver689@gmail.com
+[2025-08-31T23:49:48.192Z] INFO: POST /api/auth/register - 127.0.0.1
+[2025-08-31T23:49:48.196Z] INFO: Registration attempt for email: kannu@gmail.com
+[2025-08-31T23:49:49.152Z] INFO: GET /api/dashboard/stats - 127.0.0.1
+[2025-08-31T23:49:49.161Z] INFO: GET /api/dashboard/upcoming-rides - 127.0.0.1
+[2025-08-31T23:49:49.463Z] INFO: GET /api/users/me - 127.0.0.1
+[2025-08-31T23:49:49.469Z] INFO: GET /api/users/me - 127.0.0.1
+[2025-08-31T23:49:49.502Z] INFO: GET /api/dashboard/upcoming-rides - 127.0.0.1
+[2025-08-31T23:49:51.592Z] INFO: GET /api/dashboard/stats - 127.0.0.1
+[2025-08-31T23:50:02.974Z] INFO: GET /api/users/me - 127.0.0.1
+[2025-08-31T23:50:02.978Z] INFO: GET /api/bookings - 127.0.0.1
+[2025-08-31T23:50:02.989Z] INFO: GET /api/users/me - 127.0.0.1
+[2025-08-31T23:50:03.415Z] INFO: GET /api/bookings - 127.0.0.1
+[2025-08-31T23:50:03.424Z] INFO: GET /api/rides/user - 127.0.0.1
+[2025-08-31T23:50:03.823Z] INFO: GET /api/rides/user - 127.0.0.1
+[2025-08-31T23:51:26.593Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-08-31T23:51:26.595Z] INFO: Login attempt for email: kannu@gmail.com

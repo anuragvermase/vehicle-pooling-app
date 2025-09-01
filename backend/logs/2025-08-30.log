@@ -31,3 +31,167 @@
 [2025-08-30T09:58:15.272Z] INFO: POST /api/auth/login - 127.0.0.1
 [2025-08-30T09:58:15.284Z] INFO: Login attempt for email: anuragver689@gmail.com
 [2025-08-30T09:58:15.749Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-30T15:34:49.749Z] INFO: MongoDB Connected: localhost
+[2025-08-30T15:34:49.753Z] INFO: Database Name: rideshare
+[2025-08-30T15:34:49.764Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-30T15:34:49.765Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-30T15:34:49.766Z] INFO: 📱 Phone Health:  http://192.168.1.4:5000/api/health
+[2025-08-30T15:34:49.767Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-30T15:34:49.768Z] INFO: 🔌 WebSocket: Active
+[2025-08-30T15:34:49.770Z] INFO: 🌍 Environment: development
+[2025-08-30T15:38:22.863Z] INFO: GET /api/auth/me - 192.168.206.117
+[2025-08-30T17:07:43.463Z] INFO: SIGINT received, shutting down gracefully
+[2025-08-30T17:07:43.471Z] INFO: Server closed
+[2025-08-30T17:07:47.129Z] INFO: MongoDB Connected: localhost
+[2025-08-30T17:07:47.131Z] INFO: Database Name: rideshare
+[2025-08-30T17:07:47.138Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-30T17:07:47.139Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-30T17:07:47.140Z] INFO: 📱 Phone Health:  http://192.168.206.193:5000/api/health
+[2025-08-30T17:07:47.140Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-30T17:07:47.141Z] INFO: 🔌 WebSocket: Active
+[2025-08-30T17:07:47.142Z] INFO: 🌍 Environment: development
+[2025-08-30T17:09:27.698Z] INFO: GET /api/auth/me - 192.168.206.117
+[2025-08-30T17:58:36.465Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T17:58:36.476Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T17:58:36.769Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-30T17:58:37.333Z] INFO: User connected: Kannu (68b20f63c2a38acea9dfb143)
+[2025-08-30T17:59:27.554Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T17:59:27.556Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-30T17:59:27.820Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-30T19:23:10.571Z] INFO: SIGINT received, shutting down gracefully
+[2025-08-30T19:23:10.612Z] WARN: Mongoose disconnected from MongoDB
+[2025-08-30T19:23:10.614Z] INFO: Mongoose connection closed through app termination
+[2025-08-30T19:23:15.540Z] INFO: MongoDB Connected: localhost
+[2025-08-30T19:23:15.543Z] INFO: Database Name: rideshare
+[2025-08-30T19:23:15.555Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-08-30T19:23:15.556Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-08-30T19:23:15.556Z] INFO: 📱 Phone Health:  http://192.168.206.193:5000/api/health
+[2025-08-30T19:23:15.557Z] INFO: 🌐 Allowed origins: (any - dev)
+[2025-08-30T19:23:15.558Z] INFO: 🔌 WebSocket: Active
+[2025-08-30T19:23:15.559Z] INFO: 🌍 Environment: development
+[2025-08-30T19:24:23.202Z] INFO: User connected: Anu (68b20338c2a38acea9dfb132)
+[2025-08-30T19:25:06.652Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T19:25:06.664Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-30T19:25:07.165Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-30T19:26:03.260Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-08-30T19:26:03.264Z] INFO: Login attempt for email: anuragver689@gmail.com
+[2025-08-30T19:26:03.748Z] INFO: Login successful for user: anuragver689@gmail.com
+[2025-08-30T19:26:44.490Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-08-30T19:26:44.493Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-30T19:26:44.939Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-30T19:27:19.452Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-08-30T19:27:19.454Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T19:27:19.905Z] WARN: Login failed - invalid password: kannu@gmail.com
+[2025-08-30T19:27:24.025Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-08-30T19:27:24.029Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T19:27:24.486Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-30T19:59:56.194Z] INFO: GET /api/health - 192.168.206.193
+[2025-08-30T19:59:56.304Z] INFO: GET /favicon.ico - 192.168.206.193
+[2025-08-30T20:01:06.434Z] INFO: User disconnected: Anu (68b20338c2a38acea9dfb132)
+[2025-08-30T20:57:19.515Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T20:57:19.524Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T20:57:20.016Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-30T20:57:25.016Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T20:57:25.027Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T20:57:25.478Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-30T20:57:46.128Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T20:57:46.131Z] INFO: Login attempt for email: anuragreat@gmail.com
+[2025-08-30T20:57:46.597Z] INFO: Login successful for user: anuragreat@gmail.com
+[2025-08-30T20:59:30.664Z] INFO: GET /api/auth/me - 192.168.206.117
+[2025-08-30T21:02:43.725Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T21:02:43.729Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T21:02:44.206Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-30T21:02:54.271Z] INFO: GET /api/rides/search - 192.168.206.117
+[2025-08-30T21:02:55.191Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T21:02:55.371Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T21:02:57.827Z] INFO: GET /api/rides/search - 192.168.206.117
+[2025-08-30T21:02:57.955Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T21:02:58.262Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T21:29:04.225Z] INFO: GET /api/auth/me - 192.168.206.117
+[2025-08-30T21:29:24.477Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T21:29:24.478Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T21:29:24.741Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-30T21:29:44.257Z] INFO: GET /api/rides/search - 192.168.206.117
+[2025-08-30T21:29:44.929Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T21:29:45.058Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T21:29:47.633Z] INFO: GET /api/rides/search - 192.168.206.117
+[2025-08-30T21:29:47.747Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T21:29:48.098Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T21:40:54.527Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T21:40:54.529Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T21:40:54.790Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-30T21:41:21.364Z] INFO: GET /api/rides/search - 192.168.206.117
+[2025-08-30T21:41:22.004Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T21:41:22.110Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T21:41:24.206Z] INFO: GET /api/rides/search - 192.168.206.117
+[2025-08-30T21:41:24.332Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T21:41:24.690Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T21:54:52.407Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T21:54:52.408Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T21:54:52.670Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-30T22:12:57.823Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T22:12:57.826Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T22:12:58.267Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-30T22:13:18.486Z] INFO: GET /api/rides/search - 192.168.206.117
+[2025-08-30T22:13:19.201Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:13:19.325Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:13:22.346Z] INFO: GET /api/rides/search - 192.168.206.117
+[2025-08-30T22:13:22.457Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:13:22.789Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:16:08.084Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T22:16:08.086Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T22:16:08.421Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-30T22:21:03.415Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T22:21:03.418Z] INFO: Login attempt for email: kaanu@gmail.com
+[2025-08-30T22:21:03.422Z] WARN: Login failed - user not found: kaanu@gmail.com
+[2025-08-30T22:21:10.990Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T22:21:10.993Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T22:21:11.442Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-30T22:21:25.454Z] INFO: GET /api/rides/search - 192.168.206.117
+[2025-08-30T22:21:26.227Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:21:26.348Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:23:54.925Z] INFO: GET /api/rides/search - 192.168.206.117
+[2025-08-30T22:23:55.332Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:23:55.722Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:25:07.938Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T22:25:07.940Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T22:25:08.394Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-30T22:25:39.583Z] INFO: GET /api/rides/search - 192.168.206.117
+[2025-08-30T22:25:40.197Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:25:40.376Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:28:40.012Z] INFO: GET /api/rides/search - 192.168.206.117
+[2025-08-30T22:28:40.823Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:28:40.926Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:28:42.751Z] INFO: GET /api/rides/search - 192.168.206.117
+[2025-08-30T22:28:42.864Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:28:43.274Z] ERROR: Geocoding error:
+Data: {}
+[2025-08-30T22:36:41.690Z] INFO: POST /api/auth/login - 192.168.206.117
+[2025-08-30T22:36:41.693Z] INFO: Login attempt for email: kannu@gmail.com
+[2025-08-30T22:36:42.152Z] INFO: Login successful for user: kannu@gmail.com
+[2025-08-30T22:45:55.177Z] INFO: GET /api/auth/me - 192.168.206.117

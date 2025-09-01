@@ -1,75 +1,108 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, Alert } from 'react-native';
-import { colors } from '../theme/colors';
-import * as Auth from '../services/auth';
-import { connectSocket } from '../services/socket';
+// src/screens/Login.tsx
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+// ✅ Use NAMED export, not default
+import { AuthAPI, asMessage } from "../services/api";
+import { Storage } from "../services/storage";
 
-type Props = { navigation: any };
-
-export default function Login({ navigation }: Props) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function Login({ navigation }: any) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function onLogin() {
-    if (!email.trim() || !password) {
-      Alert.alert('Missing info', 'Please enter email and password');
-      return;
-    }
+  const disabled = !email.trim() || !password.trim();
+
+  const onLogin = async () => {
+    if (disabled) return;
+
     try {
       setLoading(true);
-      await Auth.login(email.trim(), password);
-      await connectSocket();
-
-      // ✅ After login, jump into the app stack root
-      // If you want to land on Dashboard, change 'Landing' -> 'Dashboard'
-      navigation.reset({ index: 0, routes: [{ name: 'Landing' as never }] });
-    } catch (e: any) {
-      console.log('LOGIN ERROR =>', e?.response?.status, e?.response?.data, e?.message);
-      Alert.alert('Login failed', e?.response?.data?.message || e?.message || 'Try again');
+      // AuthAPI.login returns { token }
+      const { token } = await AuthAPI.login(email.trim(), password);
+      await Storage.setToken(token); // save for interceptors / auth flow
+      // Go to app flow
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Landing" }],
+      });
+    } catch (e) {
+      Alert.alert("Login failed", asMessage(e));
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg, padding: 20 }}>
-      <Text style={{ color: colors.text, fontSize: 22, fontWeight: '800', marginBottom: 12 }}>
+    <View style={{ flex: 1, backgroundColor: "#0b1220", padding: 16, justifyContent: "center" }}>
+      <Text style={{ color: "white", fontSize: 28, fontWeight: "800", marginBottom: 16 }}>
         Welcome back
       </Text>
 
       <TextInput
         placeholder="Email"
-        placeholderTextColor={colors.muted}
-        value={email}
-        onChangeText={setEmail}
+        placeholderTextColor="#9ca3af"
         autoCapitalize="none"
         keyboardType="email-address"
-        style={{ backgroundColor: '#1f2937', color: colors.text, padding: 12, borderRadius: 10, marginBottom: 10 }}
+        value={email}
+        onChangeText={setEmail}
+        style={{
+          backgroundColor: "#1f2937",
+          color: "#e5e7eb",
+          padding: 14,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: "#23314a",
+          marginBottom: 12,
+        }}
       />
 
       <TextInput
         placeholder="Password"
-        placeholderTextColor={colors.muted}
-        value={password}
+        placeholderTextColor="#9ca3af"
         secureTextEntry
+        value={password}
         onChangeText={setPassword}
-        style={{ backgroundColor: '#1f2937', color: colors.text, padding: 12, borderRadius: 10, marginBottom: 16 }}
+        style={{
+          backgroundColor: "#1f2937",
+          color: "#e5e7eb",
+          padding: 14,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: "#23314a",
+          marginBottom: 16,
+        }}
       />
 
       <Pressable
-        disabled={loading}
+        disabled={loading || disabled}
         onPress={onLogin}
-        style={{ backgroundColor: colors.primary, padding: 12, borderRadius: 10 }}
+        style={{
+          backgroundColor: disabled ? "#3b4a61" : "#22c55e",
+          padding: 16,
+          borderRadius: 30,
+          alignItems: "center",
+          marginBottom: 12,
+        }}
       >
-        <Text style={{ color: 'white', textAlign: 'center', fontWeight: '700' }}>
-          {loading ? 'Please wait…' : 'Login'}
-        </Text>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={{ color: "white", fontWeight: "800", fontSize: 16 }}>
+            Sign in
+          </Text>
+        )}
       </Pressable>
 
-      <Pressable onPress={() => navigation.navigate('Register')} style={{ marginTop: 14 }}>
-        <Text style={{ color: colors.muted, textAlign: 'center' }}>
-          No account? Register
+      <Pressable onPress={() => navigation.navigate("Register")}>
+        <Text style={{ color: "#93c5fd", textAlign: "center" }}>
+          New here? Create an account
         </Text>
       </Pressable>
     </View>

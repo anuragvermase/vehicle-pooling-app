@@ -6,6 +6,7 @@ const rideSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+
   startLocation: {
     name: { type: String, required: true },
     coordinates: {
@@ -15,6 +16,7 @@ const rideSchema = new mongoose.Schema({
     address: String,
     placeId: String
   },
+
   endLocation: {
     name: { type: String, required: true },
     coordinates: {
@@ -24,6 +26,32 @@ const rideSchema = new mongoose.Schema({
     address: String,
     placeId: String
   },
+
+  // ✅ Added: GeoJSON mirrors for proper 2dsphere queries (keeps your existing fields intact)
+  startLocationGeo: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    // Note: GeoJSON uses [lng, lat]
+    coordinates: {
+      type: [Number],
+      default: undefined
+    }
+  },
+  endLocationGeo: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number],
+      default: undefined
+    }
+  },
+
   // NEW: Via locations support
   viaLocations: [{
     name: { type: String, required: true },
@@ -35,8 +63,22 @@ const rideSchema = new mongoose.Schema({
     placeId: String,
     order: { type: Number, required: true },
     estimatedArrival: Date,
-    maxWaitTime: { type: Number, default: 5 } // minutes
+    maxWaitTime: { type: Number, default: 5 }, // minutes
+
+    // ✅ Added: optional GeoJSON mirror per via point
+    geo: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number], // [lng, lat]
+        default: undefined
+      }
+    }
   }],
+
   departureTime: {
     type: Date,
     required: true
@@ -44,6 +86,7 @@ const rideSchema = new mongoose.Schema({
   arrivalTime: {
     type: Date
   },
+
   availableSeats: {
     type: Number,
     required: true,
@@ -54,11 +97,13 @@ const rideSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+
   pricePerSeat: {
     type: Number,
     required: true,
     min: 0
   },
+
   // Dynamic pricing
   dynamicPricing: {
     enabled: { type: Boolean, default: false },
@@ -66,6 +111,7 @@ const rideSchema = new mongoose.Schema({
     currentMultiplier: { type: Number, default: 1 },
     surgeReason: String
   },
+
   distance: {
     type: Number,
     required: true
@@ -74,11 +120,13 @@ const rideSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+
   status: {
     type: String,
     enum: ['active', 'in_progress', 'completed', 'cancelled', 'full'],
     default: 'active'
   },
+
   // Real-time tracking
   realTimeTracking: {
     enabled: { type: Boolean, default: false },
@@ -90,6 +138,7 @@ const rideSchema = new mongoose.Schema({
     estimatedArrival: Date,
     routeProgress: { type: Number, default: 0 }
   },
+
   preferences: {
     smokingAllowed: { type: Boolean, default: false },
     petsAllowed: { type: Boolean, default: false },
@@ -99,6 +148,7 @@ const rideSchema = new mongoose.Schema({
     minAge: { type: Number, default: 18 },
     verifiedUsersOnly: { type: Boolean, default: false }
   },
+
   vehicle: {
     model: String,
     color: String,
@@ -113,10 +163,12 @@ const rideSchema = new mongoose.Schema({
       enum: ['ac', 'music', 'charging', 'wifi', 'water', 'snacks', 'sanitizer', 'newspapers']
     }]
   },
+
   bookings: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Booking'
   }],
+
   // Enhanced route with polyline
   route: {
     polyline: String,
@@ -128,7 +180,9 @@ const rideSchema = new mongoose.Schema({
     totalDistance: Number,
     totalDuration: Number
   },
+
   description: String,
+
   recurring: {
     isRecurring: { type: Boolean, default: false },
     frequency: {
@@ -138,6 +192,7 @@ const rideSchema = new mongoose.Schema({
     daysOfWeek: [{ type: Number, min: 0, max: 6 }],
     endDate: Date
   },
+
   // Payment and booking options
   paymentOptions: {
     cash: { type: Boolean, default: true },
@@ -145,6 +200,7 @@ const rideSchema = new mongoose.Schema({
     card: { type: Boolean, default: false },
     wallet: { type: Boolean, default: false }
   },
+
   bookingPolicy: {
     instantBooking: { type: Boolean, default: true },
     requireApproval: { type: Boolean, default: false },
@@ -154,26 +210,35 @@ const rideSchema = new mongoose.Schema({
       default: 'moderate'
     }
   },
+
   // Rating and feedback
   rating: {
     average: { type: Number, default: 0, min: 0, max: 5 },
     count: { type: Number, default: 0 }
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  // ✅ Ensure virtuals are returned to clients
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
-// Indexes
+// Indexes (kept yours, added geo indexes on the new GeoJSON fields)
 rideSchema.index({ 'startLocation.coordinates': '2dsphere' });
 rideSchema.index({ 'endLocation.coordinates': '2dsphere' });
 rideSchema.index({ 'viaLocations.coordinates': '2dsphere' });
+
+rideSchema.index({ startLocationGeo: '2dsphere' });   // ✅ added
+rideSchema.index({ endLocationGeo: '2dsphere' });     // ✅ added
+rideSchema.index({ 'viaLocations.geo': '2dsphere' }); // ✅ added
+
 rideSchema.index({ departureTime: 1 });
 rideSchema.index({ driver: 1 });
 rideSchema.index({ status: 1 });
 rideSchema.index({ pricePerSeat: 1 });
 rideSchema.index({ createdAt: -1 });
 
-// Virtual properties
+// Virtual properties (kept yours)
 rideSchema.virtual('totalEarnings').get(function() {
   const bookedSeats = this.totalSeats - this.availableSeats;
   return bookedSeats * this.pricePerSeat;
@@ -184,7 +249,26 @@ rideSchema.virtual('occupancyRate').get(function() {
   return (bookedSeats / this.totalSeats) * 100;
 });
 
-// Methods
+// ✅ Added: compatibility virtuals for mobile UI (non-breaking)
+rideSchema.virtual('from').get(function () {
+  if (!this.startLocation) return undefined;
+  return {
+    text: this.startLocation.name,
+    lat: this.startLocation.coordinates?.lat,
+    lng: this.startLocation.coordinates?.lng
+  };
+});
+
+rideSchema.virtual('to').get(function () {
+  if (!this.endLocation) return undefined;
+  return {
+    text: this.endLocation.name,
+    lat: this.endLocation.coordinates?.lat,
+    lng: this.endLocation.coordinates?.lng
+  };
+});
+
+// Methods (kept yours)
 rideSchema.methods.calculateDynamicPrice = function() {
   if (!this.dynamicPricing.enabled) return this.pricePerSeat;
   
@@ -201,7 +285,7 @@ rideSchema.methods.updateLocation = function(lat, lng) {
   return this.save();
 };
 
-// Pre-save middleware
+// Pre-save middleware (kept yours, added geo mirror population)
 rideSchema.pre('save', function(next) {
   if (this.availableSeats === 0 && this.status === 'active') {
     this.status = 'full';
@@ -220,6 +304,31 @@ rideSchema.pre('save', function(next) {
       this.dynamicPricing.currentMultiplier = 1;
       this.dynamicPricing.surgeReason = null;
     }
+  }
+
+  // ✅ Populate GeoJSON mirrors from lat/lng so 2dsphere indexes work properly
+  if (this.startLocation?.coordinates) {
+    const { lat, lng } = this.startLocation.coordinates;
+    if (typeof lat === 'number' && typeof lng === 'number') {
+      this.startLocationGeo = { type: 'Point', coordinates: [lng, lat] };
+    }
+  }
+  if (this.endLocation?.coordinates) {
+    const { lat, lng } = this.endLocation.coordinates;
+    if (typeof lat === 'number' && typeof lng === 'number') {
+      this.endLocationGeo = { type: 'Point', coordinates: [lng, lat] };
+    }
+  }
+  if (Array.isArray(this.viaLocations)) {
+    this.viaLocations = this.viaLocations.map(v => {
+      if (v?.coordinates && typeof v.coordinates.lat === 'number' && typeof v.coordinates.lng === 'number') {
+        return {
+          ...v,
+          geo: { type: 'Point', coordinates: [v.coordinates.lng, v.coordinates.lat] }
+        };
+      }
+      return v;
+    });
   }
   
   next();

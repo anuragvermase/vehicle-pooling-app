@@ -1,5 +1,10 @@
 // backend/routes/auth.js
 import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import multer from 'multer';
+import { fileURLToPath } from 'url';
+
 import User from '../models/User.js';
 import { protect, generateToken } from '../middleware/auth.js';
 import { validateRegistration, validateLogin, handleValidationErrors } from '../middleware/validation.js';
@@ -8,223 +13,201 @@ import { OAuth2Client } from 'google-auth-library';
 
 const router = express.Router();
 
-// @route   POST /api/auth/register
-// @desc    Register user
-// @access  Public
+/* ---------- helpers ---------- */
+function normalizeUser(u) {
+  // Convert mongoose doc -> plain object via your safe serializer, then normalize avatar
+  const obj = typeof u.toSafeObject === 'function' ? u.toSafeObject() : u.toObject?.() ?? u;
+  const url = obj.avatarUrl || obj.profilePicture || obj.avatar || null;
+
+  return {
+    ...obj,
+    avatarUrl: url,                     // always present if any
+    profilePicture: obj.profilePicture ?? url,
+    avatar: obj.avatar ?? url,
+  };
+}
+
+/* ---------- avatar upload: disk storage ---------- */
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const AVATAR_DIR = path.join(__dirname, '..', 'uploads', 'avatars');
+fs.mkdirSync(AVATAR_DIR, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, AVATAR_DIR),
+  filename: (req, file, cb) => {
+    const orig = file?.originalname || 'avatar.jpg';
+    const ext = path.extname(orig) || '.jpg';
+    const uid = req.user?.id || req.user?._id || 'user';
+    cb(null, `${uid}-${Date.now()}${ext}`);
+  },
+});
+const fileFilter = (_req, file, cb) => {
+  if (!file?.mimetype?.startsWith('image/')) return cb(new Error('Only image files are allowed'));
+  cb(null, true);
+};
+const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
+
+/* ---------- REGISTER ---------- */
 router.post('/register', validateRegistration, handleValidationErrors, async (req, res, next) => {
   try {
     const { name, email, password, phone } = req.body;
 
     logger.info(`Registration attempt for email: ${email}`);
 
-    // Check if user already exists
     const existingUser = await User.findOne({
-      $or: [
-        { email: email.toLowerCase() },
-        { phone: phone }
-      ]
+      $or: [{ email: email.toLowerCase() }, { phone }],
     });
 
     if (existingUser) {
       const conflictField = existingUser.email === email.toLowerCase() ? 'email' : 'phone';
       logger.warn(`Registration failed - ${conflictField} already exists: ${email}`);
-      
       return res.status(400).json({
         success: false,
         message: `User already exists with this ${conflictField}`,
-        field: conflictField
+        field: conflictField,
       });
     }
 
-    // Create user
-    const userData = {
+    const user = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password,
-      phone: phone?.trim()
-    };
+      phone: phone?.trim(),
+    });
 
-    const user = await User.create(userData);
-    logger.info(`User registered successfully: ${user.email}`);
-
-    // Generate token
-    const token = generateToken(user._id);
-
-    // Update last login
+    // last login
     user.lastLogin = new Date();
     await user.save();
 
+    const token = generateToken(user._id);
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
       token,
-      user: user.toSafeObject()
+      user: normalizeUser(user),
     });
-
   } catch (error) {
     logger.error('Registration error:', error);
     next(error);
   }
 });
 
-// @route   POST /api/auth/login
-// @desc    Login user
-// @access  Public
+/* ---------- LOGIN ---------- */
 router.post('/login', validateLogin, handleValidationErrors, async (req, res, next) => {
   try {
     const { email, password } = req.body;
-
     logger.info(`Login attempt for email: ${email}`);
 
-    // Get user with password and login attempts
     const user = await User.findOne({ email: email.toLowerCase() })
       .select('+password +loginAttempts +lockUntil +isActive');
 
     if (!user) {
       logger.warn(`Login failed - user not found: ${email}`);
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
-
-    // Check if account is active
     if (!user.isActive) {
       logger.warn(`Login failed - account deactivated: ${email}`);
-      return res.status(401).json({
-        success: false,
-        message: 'Account has been deactivated. Please contact support.'
-      });
+      return res.status(401).json({ success: false, message: 'Account has been deactivated. Please contact support.' });
     }
-
-    // Check if account is locked
     if (user.isLocked) {
       logger.warn(`Login failed - account locked: ${email}`);
-      return res.status(401).json({
-        success: false,
-        message: 'Account is temporarily locked due to multiple failed login attempts. Please try again later.'
-      });
+      return res.status(401).json({ success: false, message: 'Account is temporarily locked due to multiple failed login attempts. Please try again later.' });
     }
 
-    // Check password
-    const isPasswordValid = await user.comparePassword(password);
-
-    if (!isPasswordValid) {
+    const ok = await user.comparePassword(password);
+    if (!ok) {
       logger.warn(`Login failed - invalid password: ${email}`);
-      
-      // Increment login attempts
       await user.incLoginAttempts();
-      
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
-    // Reset login attempts on successful login
-    if (user.loginAttempts > 0) {
-      await user.resetLoginAttempts();
-    }
+    if (user.loginAttempts > 0) await user.resetLoginAttempts();
 
-    // Update last login
     user.lastLogin = new Date();
     await user.save();
 
-    // Generate token
     const token = generateToken(user._id);
-
-    logger.info(`Login successful for user: ${email}`);
-
     res.json({
       success: true,
       message: 'Login successful',
       token,
-      user: user.toSafeObject()
+      user: normalizeUser(user),
     });
-
   } catch (error) {
     logger.error('Login error:', error);
     next(error);
   }
 });
 
-// @route   GET /api/auth/me
-// @desc    Get current user
-// @access  Private
+/* ---------- CURRENT USER ---------- */
 router.get('/me', protect, async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      user: user.toSafeObject()
-    });
-
+    res.json({ success: true, user: normalizeUser(user) });
   } catch (error) {
     logger.error('Get user error:', error);
     next(error);
   }
 });
 
-// @route   PUT /api/auth/profile
-// @desc    Update user profile
-// @access  Private
+/* ---------- UPDATE PROFILE (JSON) ---------- */
 router.put('/profile', protect, async (req, res, next) => {
   try {
-    const { name, phone, profilePicture } = req.body;
-    
-    const updateData = {};
-    if (name) updateData.name = name.trim();
-    if (phone) updateData.phone = phone.trim();
-    if (profilePicture !== undefined) updateData.profilePicture = profilePicture;
+    const { name, phone, profilePicture, avatarUrl, avatar } = req.body;
 
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      updateData,
-      { new: true, runValidators: true }
-    );
+    const update = {};
+    if (name) update.name = name.trim();
+    if (phone) update.phone = phone.trim();
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+    // accept any of these fields from client
+    const url = avatarUrl || profilePicture || avatar;
+    if (url !== undefined) {
+      update.profilePicture = url;
+      update.avatarUrl = url;
+      update.avatar = url;
     }
 
+    const user = await User.findByIdAndUpdate(req.user.id, update, { new: true, runValidators: true });
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
     logger.info(`Profile updated for user: ${user.email}`);
-
-    res.json({
-      success: true,
-      message: 'Profile updated successfully',
-      user: user.toSafeObject()
-    });
-
+    res.json({ success: true, message: 'Profile updated successfully', user: normalizeUser(user) });
   } catch (error) {
     logger.error('Profile update error:', error);
     next(error);
   }
 });
 
-// @route   POST /api/auth/logout
-// @desc    Logout user (client-side token removal)
-// @access  Private
-router.post('/logout', protect, (req, res) => {
-  logger.info(`User logged out: ${req.user.email}`);
-  
-  res.json({
-    success: true,
-    message: 'Logged out successfully'
-  });
+/* ---------- AVATAR UPLOAD (multipart/form-data) ---------- */
+router.post('/avatar', protect, upload.single('avatar'), async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+    const fileUrl = `${req.protocol}://${req.get('host')}/uploads/avatars/${req.file.filename}`;
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { profilePicture: fileUrl, avatarUrl: fileUrl, avatar: fileUrl }, // set all three
+      { new: true }
+    );
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    return res.json({ success: true, url: fileUrl, user: normalizeUser(user) });
+  } catch (error) {
+    logger.error('Avatar upload error:', error);
+    next(error);
+  }
 });
 
-// ---------- GOOGLE SIGN-IN (ID TOKEN) ----------
+/* ---------- LOGOUT ---------- */
+router.post('/logout', protect, (req, res) => {
+  logger.info(`User logged out: ${req.user.email}`);
+  res.json({ success: true, message: 'Logged out successfully' });
+});
+
+/* ---------- GOOGLE SIGN-IN ---------- */
 router.post('/google', async (req, res) => {
   try {
     const { idToken } = req.body || {};
@@ -238,56 +221,49 @@ router.post('/google', async (req, res) => {
     }
 
     const client = new OAuth2Client(GOOGLE_CLIENT_ID);
-    const ticket = await client.verifyIdToken({
-      idToken,
-      audience: GOOGLE_CLIENT_ID,
-    });
+    const ticket = await client.verifyIdToken({ idToken, audience: GOOGLE_CLIENT_ID });
 
     const payload = ticket.getPayload();
-    // Fields: sub (google user id), email, email_verified, name, picture
     const email = (payload.email || '').toLowerCase();
     const emailVerified = payload.email_verified;
     const googleId = payload.sub;
     const name = payload.name || email.split('@')[0];
-    const avatar = payload.picture || null;
+    const picture = payload.picture || null;
 
     if (!email || !emailVerified) {
       return res.status(401).json({ success: false, message: 'Google account email not verified.' });
     }
 
-    // Find or create user
     let user = await User.findOne({ email });
-
     if (!user) {
       user = await User.create({
         name,
         email,
-        avatar,
         provider: 'google',
         googleId,
-        // password and phone are optional for Google users
+        profilePicture: picture || undefined,
+        avatarUrl: picture || undefined,
+        avatar: picture || undefined,
       });
     } else {
-      // If existing local user, attach googleId/provider/avatar when missing
       let changed = false;
       if (!user.googleId) { user.googleId = googleId; changed = true; }
       if (!user.provider) { user.provider = 'google'; changed = true; }
-      if (!user.avatar && avatar) { user.avatar = avatar; changed = true; }
+      if (!user.profilePicture && picture) { user.profilePicture = picture; changed = true; }
+      if (!user.avatarUrl && picture) { user.avatarUrl = picture; changed = true; }
+      if (!user.avatar && picture) { user.avatar = picture; changed = true; }
       if (changed) await user.save();
     }
 
-    // Update last login
     user.lastLogin = new Date();
     await user.save();
 
-    // Issue JWT
     const token = generateToken(user._id);
-
     return res.json({
       success: true,
       message: 'Google login successful',
       token,
-      user: user.toSafeObject()
+      user: normalizeUser(user),
     });
   } catch (err) {
     logger.error('Google auth error:', err);

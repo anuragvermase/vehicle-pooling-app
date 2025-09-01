@@ -1,5 +1,12 @@
-import React from 'react';
-import RootNavigator from './navigation/RootNavigator';
+// src/App.tsx
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import RootNavigator from "./navigation/RootNavigator";
+
 export default function App() {
-  return <RootNavigator />;
+  return (
+    <NavigationContainer>
+      <RootNavigator />
+    </NavigationContainer>
+  );
 }

@@ -6,6 +6,17 @@ import os from 'os';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
+// ✨ NEW: small additions for uploads & current-user
+import path from 'path';
+import fs from 'fs';
+import multer from 'multer';
+import { fileURLToPath } from 'url';
+import auth from './middleware/auth.js';
+import User from './models/User.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// ✨ END NEW
+
 import connectDB from './config/database.js';
 import authRoutes from './routes/auth.js';
 import dashboardRoutes from './routes/dashboard.js';
@@ -22,6 +33,17 @@ const app = express();
 const server = createServer(app);
 
 const isProd = process.env.NODE_ENV === 'production';
+
+// ---- Minimal hardening (does not change functionality)
+app.disable('x-powered-by');
+
+// Quick env sanity checks (log-only; does NOT crash)
+const REQUIRED_ENV = ['JWT_SECRET', 'MONGODB_URI'];
+for (const key of REQUIRED_ENV) {
+  if (!process.env[key]) {
+    logger.warn(`[env] ${key} is not set. Some features may not work as expected.`);
+  }
+}
 
 /**
  * Resolve allowed origins
@@ -62,10 +84,18 @@ app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// ✨ NEW: serve static uploads (so avatar URLs work)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Request logger middleware
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.path} - ${req.ip}`);
   next();
+});
+
+// Root ping (quality of life)
+app.get('/', (_req, res) => {
+  res.status(200).send('OK. See /api/health');
 });
 
 // ---- Health & status
@@ -95,12 +125,65 @@ app.get('/api/status', (req, res) => {
   });
 });
 
+// ✨ NEW: minimal avatar upload setup (disk storage under /uploads/avatars)
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, 'uploads', 'avatars');
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const orig = file?.originalname || 'avatar.jpg';
+    const ext = path.extname(orig) || '.jpg';
+    const uid = req.user?.id || req.user?._id || 'user';
+    cb(null, `${uid}-${Date.now()}${ext}`);
+  },
+});
+const uploadAvatar = multer({ storage: avatarStorage });
+
 // ---- API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/rides', rideRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/chat', chatRoutes);
+
+// ✨ NEW: Current user endpoint (so the app can show name/avatar after login)
+app.get('/api/auth/me', auth, async (req, res, next) => {
+  try {
+    const uid = req.user?.id || req.user?._id;
+    if (!uid) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+    const user = await User.findById(uid).select(
+      'name fullName username firstName lastName email avatarUrl profilePicture'
+    );
+
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    res.json({ user });
+  } catch (e) {
+    next(e);
+  }
+});
+
+// ✨ NEW: Avatar upload endpoint (persist avatar and return its URL)
+app.post('/api/auth/avatar', auth, uploadAvatar.single('avatar'), async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+
+    const fileUrl = `${req.protocol}://${req.get('host')}/uploads/avatars/${req.file.filename}`;
+    const uid = req.user?.id || req.user?._id;
+
+    const user = await User.findByIdAndUpdate(
+      uid,
+      { avatarUrl: fileUrl, profilePicture: fileUrl },
+      { new: true }
+    ).select('name email avatarUrl profilePicture');
+
+    res.json({ url: fileUrl, user });
+  } catch (e) {
+    next(e);
+  }
+});
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -146,9 +229,7 @@ const startServer = async () => {
       logger.info(`🔗 Local Health:  http://localhost:${PORT}/api/health`);
       logger.info(`📱 Phone Health:  http://${ip}:${PORT}/api/health`);
       logger.info(
-        `🌐 Allowed origins: ${
-          expressCorsOrigin === true ? '(any - dev)' : JSON.stringify(frontends)
-        }`
+        `🌐 Allowed origins: ${expressCorsOrigin === true ? '(any - dev)' : JSON.stringify(frontends)}`
       );
       logger.info(`🔌 WebSocket: Active`);
       logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);

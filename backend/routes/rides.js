@@ -5,14 +5,32 @@ import Booking from '../models/Booking.js';
 import User from '../models/User.js';
 import { logger } from '../utils/logger.js';
 import { geocodeAddress, calculateRoute, getLocationSuggestions } from '../services/googleMapsService.js';
+import { ensureOp } from '../services/idempotency.js'; // ✅ ADDED: Redis idempotency
 
 const router = express.Router();
 
+// Small helper to read opId from header/body
+function getOpId(req) {
+  return req.headers['x-op-id'] || req.body?.opId || null;
+}
+
+/* =========================================================================
+   CREATE RIDE
+   ========================================================================= */
 // @route   POST /api/rides/create
 // @desc    Create a new ride with Google Maps integration
 // @access  Private
 router.post('/create', protect, async (req, res) => {
   try {
+    // ✅ Idempotency: skip duplicate create submissions in the last 1 hour
+    const opId = getOpId(req);
+    if (opId) {
+      const first = await ensureOp(`${req.user.id}:${opId}`, 3600);
+      if (!first) {
+        return res.json({ success: true, dedup: true });
+      }
+    }
+
     const {
       startLocation,
       endLocation,
@@ -31,10 +49,9 @@ router.post('/create', protect, async (req, res) => {
 
     // Geocode start location
     const startGeocode = await geocodeAddress(startLocation.name || startLocation);
-    
     // Geocode end location
     const endGeocode = await geocodeAddress(endLocation.name || endLocation);
-    
+
     // Geocode via locations
     const processedViaLocations = [];
     for (let i = 0; i < viaLocations.length; i++) {
@@ -89,8 +106,6 @@ router.post('/create', protect, async (req, res) => {
     });
 
     await ride.save();
-    
-    // Populate driver info for response
     await ride.populate('driver', 'name email phone rating vehicle');
 
     // Emit socket event for new ride
@@ -106,7 +121,7 @@ router.post('/create', protect, async (req, res) => {
     }
 
     logger.info(`New ride created by user ${req.user.id}: ${ride._id}`);
-    
+
     res.status(201).json({
       success: true,
       message: 'Ride created successfully',
@@ -121,6 +136,9 @@ router.post('/create', protect, async (req, res) => {
   }
 });
 
+/* =========================================================================
+   SEARCH
+   ========================================================================= */
 // @route   GET /api/rides/search
 // @desc    Advanced search with Google Maps integration
 // @access  Private
@@ -162,7 +180,6 @@ router.get('/search', protect, async (req, res) => {
           }
         };
       } catch (error) {
-        // Fallback to text search if geocoding fails
         query['startLocation.name'] = { $regex: from, $options: 'i' };
       }
     }
@@ -207,7 +224,7 @@ router.get('/search', protect, async (req, res) => {
       const searchDate = new Date(date);
       const nextDay = new Date(searchDate);
       nextDay.setDate(nextDay.getDate() + 1);
-      
+
       query.departureTime = {
         $gte: searchDate,
         $lt: nextDay
@@ -293,11 +310,71 @@ router.get('/search', protect, async (req, res) => {
   }
 });
 
+/* =========================================================================
+   MY RIDES (NEW) — must be BEFORE any :rideId route
+   ========================================================================= */
+// @route   GET /api/rides/user
+// @desc    Get rides created by the current user (driver)
+// @access  Private
+router.get('/user', protect, async (req, res) => {
+  try {
+    const { status = 'all', page = 1, limit = 20 } = req.query;
+
+    const q = { driver: req.user.id };
+    if (status !== 'all') q.status = status;
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const [items, total] = await Promise.all([
+      Ride.find(q)
+        .populate('driver', 'name rating phone profilePicture vehicle stats')
+        .sort({ departureTime: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Ride.countDocuments(q),
+    ]);
+
+    const enriched = items.map((ride) => {
+      const obj = ride.toObject();
+      return {
+        ...obj,
+        currentPrice: ride.calculateDynamicPrice(),
+        bookingsCount: Array.isArray(ride.bookings) ? ride.bookings.length : 0,
+        canBook: false, // owner cannot book own ride
+      };
+    });
+
+    res.json({
+      success: true,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total,
+      count: enriched.length,
+      rides: enriched,
+    });
+  } catch (error) {
+    logger.error('Get user rides error:', error);
+    res.status(500).json({ success: false, message: 'Failed to get user rides' });
+  }
+});
+
+/* =========================================================================
+   BOOK A RIDE
+   ========================================================================= */
 // @route   POST /api/rides/:rideId/book
 // @desc    Book a ride with enhanced features
 // @access  Private
-router.post('/:rideId/book', protect, async (req, res) => {
+router.post('/:rideId([0-9a-fA-F]{24})/book', protect, async (req, res) => {
   try {
+    // ✅ Idempotency: skip duplicate booking submissions in the last 1 hour
+    const opId = getOpId(req);
+    if (opId) {
+      const first = await ensureOp(`${req.user.id}:${opId}`, 3600);
+      if (!first) {
+        return res.json({ success: true, dedup: true });
+      }
+    }
+
     const { rideId } = req.params;
     const { 
       seatsToBook, 
@@ -380,7 +457,7 @@ router.post('/:rideId/book', protect, async (req, res) => {
         rideId,
         passengerName: req.user.name,
         passengerPhone: req.user.phone,
-        seatsBooked,
+        seatsBooked: seatsToBook,
         totalAmount,
         from: ride.startLocation.name,
         to: ride.endLocation.name,
@@ -406,10 +483,13 @@ router.post('/:rideId/book', protect, async (req, res) => {
   }
 });
 
+/* =========================================================================
+   UPDATE LOCATION
+   ========================================================================= */
 // @route   PUT /api/rides/:rideId/location
 // @desc    Update real-time location
 // @access  Private
-router.put('/:rideId/location', protect, async (req, res) => {
+router.put('/:rideId([0-9a-fA-F]{24})/location', protect, async (req, res) => {
   try {
     const { rideId } = req.params;
     const { lat, lng } = req.body;
@@ -457,6 +537,9 @@ router.put('/:rideId/location', protect, async (req, res) => {
   }
 });
 
+/* =========================================================================
+   SUGGESTIONS
+   ========================================================================= */
 // @route   GET /api/rides/suggestions
 // @desc    Get location suggestions using Google Places API
 // @access  Private
@@ -486,10 +569,13 @@ router.get('/suggestions', protect, async (req, res) => {
   }
 });
 
+/* =========================================================================
+   GET RIDE DETAILS
+   ========================================================================= */
 // @route   GET /api/rides/:rideId
 // @desc    Get ride details
 // @access  Private
-router.get('/:rideId', protect, async (req, res) => {
+router.get('/:rideId([0-9a-fA-F]{24})', protect, async (req, res) => {
   try {
     const { rideId } = req.params;
     
@@ -529,10 +615,13 @@ router.get('/:rideId', protect, async (req, res) => {
   }
 });
 
+/* =========================================================================
+   CANCEL RIDE
+   ========================================================================= */
 // @route   PUT /api/rides/:rideId/cancel
 // @desc    Cancel a ride
 // @access  Private
-router.put('/:rideId/cancel', protect, async (req, res) => {
+router.put('/:rideId([0-9a-fA-F]{24})/cancel', protect, async (req, res) => {
   try {
     const { rideId } = req.params;
     const { reason } = req.body;
@@ -574,9 +663,7 @@ router.put('/:rideId/cancel', protect, async (req, res) => {
         refundEligible: true
       };
       await booking.save();
-
-      // Process refund logic here
-      // await processRefund(booking);
+      // process refunds here if needed
     }
 
     // Emit cancellation notifications

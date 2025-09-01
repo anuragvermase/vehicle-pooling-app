@@ -1,0 +1,178 @@
+/* Make root containers fill the viewport */
+html, body, #root { width:100%; height:100%; }
+
+/* Global page theme + lock scroll for this page */
+body.overview-active,
+body.overview-active #root,
+body.overview-active .App {
+  background: #0b1220 !important;
+  overflow: hidden !important;
+}
+
+:root{
+  --gap: 20px;                 /* a bit more spacing */
+  --radius: 18px;
+  --panel: #0f172a;
+
+  /* Heights injected by JS so total = viewport height (no scroll) */
+  --h-row1: 130px;
+  --h-row2: 130px;
+  --h-bottom: 320px;
+
+  /* 🔒 design scale so 100% zoom looks like 75% */
+  --ov-scale: .75;
+}
+
+.ov-page{ min-height:100vh; color:#e5e7eb; }
+
+/* === SCALE WRAPPER: pinned to viewport, expands to compensate scale === */
+.ov-zoomwrap{
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform: scale(var(--ov-scale));
+  transform-origin: top left;
+
+  /* compensate size so scaled content still fills the screen */
+  width: calc(100vw / var(--ov-scale));
+  height: calc(100vh / var(--ov-scale));
+  overflow: hidden;
+  pointer-events: auto; /* allow interactions */
+}
+
+/* Outer frame must fill the wrapper (NOT 100vw) */
+.ov-frame{
+  width:100%; max-width:none; margin:0 auto;
+  padding:26px 20px 26px;             /* extra top/bottom to reveal header */
+  box-sizing:border-box;
+  border-radius:22px;
+  background:
+    radial-gradient(1100px 520px at -10% -20%, rgba(80,140,255,.08), transparent 60%),
+    radial-gradient(900px 520px at 120% 0%, rgba(0,220,200,.06), transparent 60%),
+    rgba(12,17,29,.72);
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 10px 32px rgba(0,0,0,.38);
+}
+.ov-board{ padding:22px 18px 18px; box-sizing:border-box; }
+
+/* ===== Header (Overview + profile-like dropdown) ===== */
+.ov-header{
+  display:flex; justify-content:space-between; align-items:center;
+  margin: 10px 0 18px;                 /* top margin ensures visibility */
+}
+.ov-title{ font-size:30px; font-weight:800; color:#fff; }
+
+/* NEW: right avatar + dropdown (same feel as Profile) */
+.ov-head-right{ position:relative; }
+.ov-avatar-btn{
+  width:38px; height:38px; border-radius:50%;
+  display:grid; place-items:center;
+  border:1px solid rgba(255,255,255,.08);
+  background:#0f172a; color:#e5e7eb; cursor:pointer;
+  padding:0; outline:none;
+}
+.ov-avatar-btn img{ width:100%; height:100%; border-radius:50%; object-fit:cover; }
+.ov-avatar-btn span{ font-weight:700; font-size:14px; }
+
+.ov-menu{
+  position:absolute; right:0; top:46px; z-index:40;
+  background:#0f172a; border:1px solid rgba(255,255,255,.10);
+  border-radius:12px; min-width:180px; padding:6px;
+  box-shadow:0 18px 42px rgba(0,0,0,.45);
+}
+.ov-menu-item{
+  display:block; text-decoration:none; color:#e5e7eb;
+  padding:10px 12px; border-radius:10px; font-size:14px;
+}
+.ov-menu-item:hover{ background:rgba(255,255,255,.06); }
+.ov-menu-item.danger{ color:#fca5a5; }
+
+/* (old fallback avatar style remains, safe if component ever renders) */
+.ov-fallback-avatar{
+  display:grid; place-items:center; width:38px; height:38px; border-radius:50%;
+  background:#0f172a; border:1px solid rgba(255,255,255,.08); color:#e5e7eb; text-decoration:none;
+}
+
+/* ===== Grid system ===== */
+.ov-row{ display:grid; gap: var(--gap); margin-bottom: var(--gap); }
+.ov-4{ grid-template-columns: repeat(4,1fr); align-items:stretch; }
+
+/* Equal width columns for bottom row as requested */
+.ov-2{ grid-template-columns: 1fr 1fr; align-items:stretch; }
+
+/* ===== Cards (with visible neon animated border) ===== */
+.ov-card{
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding:16px 18px;
+  height:100%;
+  position:relative;
+  border:2px solid transparent;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  background-image:
+    linear-gradient(#0f172a,#0f172a),
+    linear-gradient(135deg, rgba(90,150,255,.60), rgba(0,230,220,.45), rgba(90,150,255,.60));
+  animation: ov-borderPulse 2.2s ease-in-out infinite;
+}
+@keyframes ov-borderPulse{
+  0%{ box-shadow:0 0 4px rgba(90,150,255,.30); }
+  50%{ box-shadow:0 0 10px rgba(90,150,255,.65); }
+  100%{ box-shadow:0 0 4px rgba(90,150,255,.30); }
+}
+
+/* ===== Head row inside cards ===== */
+.ov-head{ display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:8px; color:#cbd5e1; font-size:14px; }
+.ov-label{ color:#cbd5e1; }
+.ov-icon-slot{ width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; opacity:.95; }
+.ic{ width:24px; height:24px; display:block; }
+
+/* ===== Numbers ===== */
+.ov-hero{ font-weight:800; font-size:42px; color:#fff; letter-spacing:-.02em; }
+.ov-kpi { font-weight:800; font-size:36px; color:#fff; letter-spacing:-.02em; }
+
+/* ===== Bottom cards headers (Statistics / Activity) ===== */
+.ov-bottom-head{
+  display:flex; align-items:flex-end; gap:12px;
+  height:46px;                 /* fixed header height; chart uses remainder */
+  margin-bottom:10px;
+}
+.ov-section{ font-weight:800; font-size:20px; color:#fff; }
+.ov-subtle-inline{ color:#b9c4cf; font-size:16px; letter-spacing:.2px; }
+
+/* ===== Chart fills remaining height of statistics card ===== */
+.ov-card.ov-bottom .ov-chart{
+  width:100%;
+  height: calc(100% - 56px);     /* 46 header + 10 gap */
+  min-height:230px;
+  background:#0a0f1a;
+  border:1px solid rgba(148,163,184,.18);
+  border-radius:12px;
+  overflow:hidden;
+  position:relative;
+}
+.ov-chart-svg{ width:100%; height:100%; display:block; }
+
+/* ===== Activity card ===== */
+.ov-activity{ display:flex; flex-direction:column; gap:12px; height: calc(100% - 0px); }
+.ov-empty{ color:#9aa4b2; font-size:14px; }
+.ov-activity-card{
+  display:flex; align-items:center; gap:14px; padding:12px 14px;
+  border:1px solid rgba(148,163,184,.18); border-radius:12px; background:rgba(255,255,255,.03);
+}
+.ov-avatar{ width:44px; height:44px; border-radius:50%; object-fit:cover; border:1px solid rgba(255,255,255,.08); }
+.ov-activity-text{ flex:1; min-width:0; }
+.ov-activity-title{ font-weight:600; color:#e8edf4; }
+.ov-activity-sub{ font-size:14px; color:#9fb2c6; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ov-activity-meta{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+.ov-arrow{ margin:0 6px; opacity:.7; }
+.ov-date{ color:#99a9bb; font-size:12px; }
+
+/* ===== Errors ===== */
+.ov-err{ margin-top:6px; color:#f87171; font-size:13px; }
+
+/* ===== Responsives (unchanged fallbacks) ===== */
+@media (max-width: 1200px) { .ov-4{ grid-template-columns: repeat(3,1fr); } }
+@media (max-width: 992px)  { .ov-4{ grid-template-columns: repeat(2,1fr); } .ov-2{ grid-template-columns: 1fr; } }
+@media (max-width: 560px)  { .ov-4{ grid-template-columns: 1fr; } .ov-hero{ font-size:34px; } .ov-kpi{ font-size:28px; } }

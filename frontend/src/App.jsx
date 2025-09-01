@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 
 // Import components
@@ -20,19 +20,38 @@ import FAQ from './pages/FAQ';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 
+// NEW pages
+import Profile from './pages/Profile';
+import Overview from './pages/Overview';
+import Settings from './pages/Settings';
+
+/**
+ * RouteStyleLoader
+ * Ensures page-scoped CSS is injected when navigating to certain routes.
+ * This fixes cases where a page renders without its CSS due to missing imports.
+ */
+function RouteStyleLoader() {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Load Profile page CSS only when on /profile (case-insensitive, trailing slash tolerant)
+    if (/^\/profile\/?$/i.test(location.pathname)) {
+      import('./pages/Profile.css').catch(() => {});
+    }
+  }, [location.pathname]);
+
+  return null;
+}
+
 // Main App Content Component
 function AppContent() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [pendingAction, setPendingAction] = useState(null); 
+  const [pendingAction, setPendingAction] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    if (token && userData) {
-      setUser(JSON.parse(userData));
-    }
+    // If you later re-enable auto-login, do it here.
     setLoading(false);
   }, []);
 
@@ -40,13 +59,11 @@ function AppContent() {
     setUser(userData);
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
-
     if (pendingAction) {
       navigate(pendingAction);
       setPendingAction(null);
     } else {
-      // ✅ Stay on home after login
-      navigate('/', { replace: true });
+      navigate('/dashboard', { replace: false });
     }
   };
 
@@ -54,13 +71,11 @@ function AppContent() {
     setUser(userData);
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
-
     if (pendingAction) {
       navigate(pendingAction);
       setPendingAction(null);
     } else {
-      // ✅ Stay on home after register
-      navigate('/', { replace: true });
+      navigate('/dashboard', { replace: false });
     }
   };
 
@@ -72,32 +87,26 @@ function AppContent() {
     navigate('/', { replace: true });
   };
 
-  const handleShowLogin = () => {
-    navigate('/login');
-  };
-
-  const handleShowRegister = () => {
-    navigate('/register');
-  };
+  const handleShowLogin = () => navigate('/login');
+  const handleShowRegister = () => navigate('/register');
 
   const handleCloseModal = () => {
     setPendingAction(null);
     navigate(-1);
   };
 
+  // Ride actions (pre-login intent)
   const handleFindRide = () => {
-    if (user) {
-      navigate('/find-ride');
-    } else {
+    if (user) navigate('/find-ride');
+    else {
       setPendingAction('/find-ride');
       navigate('/login');
     }
   };
 
   const handleOfferRide = () => {
-    if (user) {
-      navigate('/offer-ride');
-    } else {
+    if (user) navigate('/offer-ride');
+    else {
       setPendingAction('/offer-ride');
       navigate('/login');
     }
@@ -119,41 +128,41 @@ function AppContent() {
 
   return (
     <div className="App">
+      {/* 🔽 Ensures page CSS (like Profile.css) is loaded on route change */}
+      <RouteStyleLoader />
+
       <Routes>
-        {/* Landing Page */}
-        <Route 
-          path="/" 
+        {/* Landing Page Route */}
+        <Route
+          path="/"
           element={
             <div>
-              <LandingNavbar 
-                user={user}
+              <LandingNavbar
                 onShowLogin={handleShowLogin}
                 onShowRegister={handleShowRegister}
-                onLogout={handleLogout}
               />
-              <LandingPage 
+              <LandingPage
                 onFindRide={handleFindRide}
                 onOfferRide={handleOfferRide}
               />
             </div>
-          } 
+          }
         />
-        
-        {/* Login Modal */}
-        <Route 
-          path="/login" 
+
+        {/* Login Route */}
+        <Route
+          path="/login"
           element={
             <div>
-              <LandingNavbar 
-                user={user}
+              <LandingNavbar
                 onShowLogin={handleShowLogin}
                 onShowRegister={handleShowRegister}
-                onLogout={handleLogout}
               />
-              <LandingPage 
+              <LandingPage
                 onFindRide={handleFindRide}
                 onOfferRide={handleOfferRide}
               />
+
               <div style={{
                 position: 'fixed',
                 top: 0,
@@ -192,24 +201,23 @@ function AppContent() {
                 </div>
               </div>
             </div>
-          } 
+          }
         />
-        
-        {/* Register Modal */}
-        <Route 
-          path="/register" 
+
+        {/* Register Route */}
+        <Route
+          path="/register"
           element={
             <div>
-              <LandingNavbar 
-                user={user}
+              <LandingNavbar
                 onShowLogin={handleShowLogin}
                 onShowRegister={handleShowRegister}
-                onLogout={handleLogout}
               />
-              <LandingPage 
+              <LandingPage
                 onFindRide={handleFindRide}
                 onOfferRide={handleOfferRide}
               />
+
               <div style={{
                 position: 'fixed',
                 top: 0,
@@ -248,27 +256,77 @@ function AppContent() {
                 </div>
               </div>
             </div>
-          } 
-        />
-        
-        {/* Dashboard */}
-        <Route 
-          path="/dashboard" 
-          element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />} 
+          }
         />
 
-        {/* Find Ride */}
-        <Route 
-          path="/find-ride" 
-          element={user ? <FindRide user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />} 
+        {/* Dashboard Route - Protected */}
+        <Route
+          path="/dashboard"
+          element={
+            user ? (
+              <Dashboard user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
         />
 
-        {/* Offer Ride */}
-        <Route 
-          path="/offer-ride" 
-          element={user ? <OfferRide user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />} 
+        {/* Find Ride Route - Protected */}
+        <Route
+          path="/find-ride"
+          element={
+            user ? (
+              <FindRide user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
         />
-        
+
+        {/* Offer Ride Route - Protected */}
+        <Route
+          path="/offer-ride"
+          element={
+            user ? (
+              <OfferRide user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        {/* NEW: Profile / Overview / Settings — Protected */}
+        <Route
+          path="/profile"
+          element={
+            user ? (
+              <Profile />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/overview"
+          element={
+            user ? (
+              <Overview />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            user ? (
+              <Settings />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
         {/* Footer Pages */}
         <Route path="/about" element={<AboutUs />} />
         <Route path="/team" element={<OurTeam />} />
@@ -279,15 +337,15 @@ function AppContent() {
         <Route path="/faq" element={<FAQ />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
-        
-        {/* Fallback */}
+
+        {/* Redirect any unknown routes to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );
 }
 
-// Main App
+// Main App Component with Router
 function App() {
   return (
     <Router>
