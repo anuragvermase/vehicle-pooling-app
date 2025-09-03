@@ -153,17 +153,21 @@ const OfferRide = ({ user, onLogout }) => {
   };
 
   /* ------------------------ Route + Estimates ------------------------- */
-  const calculateRouteInfo = useCallback(async () => {
-    if (!window.google || !locationData.startLocation || !locationData.endLocation) return;
+  const calculateRouteInfo = useCallback(async (override) => {
+    const start = override?.start || locationData.startLocation;
+    const end = override?.end || locationData.endLocation;
+    const viaLocs = override?.vias ?? locationData.viaLocations;
+
+    if (!window.google || !start || !end) return;
     try {
       const directionsService = new window.google.maps.DirectionsService();
-      const waypoints = (locationData.viaLocations || [])
+      const waypoints = (viaLocs || [])
         .filter(Boolean)
         .map((location) => ({ location: location.coordinates, stopover: true }));
 
       const response = await directionsService.route({
-        origin: locationData.startLocation.coordinates,
-        destination: locationData.endLocation.coordinates,
+        origin: start.coordinates,
+        destination: end.coordinates,
         waypoints,
         travelMode: window.google.maps.TravelMode.DRIVING,
         optimizeWaypoints: true,
@@ -175,25 +179,41 @@ const OfferRide = ({ user, onLogout }) => {
       const totalDistance = (route.legs || []).reduce((sum, leg) => sum + (leg.distance?.value || 0), 0) / 1000;
       const totalDuration = (route.legs || []).reduce((sum, leg) => sum + (leg.duration?.value || 0), 0) / 60;
 
+      // Prefer overview_path (no geometry lib needed); fall back to decoding if available
+      const path =
+        route.overview_path?.map((p) => ({ lat: p.lat(), lng: p.lng() })) ||
+        (route.overview_polyline?.points && window.google.maps.geometry?.encoding
+          ? window.google.maps.geometry.encoding
+              .decodePath(route.overview_polyline.points)
+              .map((p) => ({ lat: p.lat(), lng: p.lng() }))
+          : null);
+
       setRouteInfo({
         distance: Math.round(totalDistance),
         duration: Math.round(totalDuration),
-        polyline: route.overview_polyline?.points,
+        path,
         bounds: route.bounds,
       });
+
+      // Fit map to route
+      if (mapRef.current && route.bounds) {
+        mapRef.current.fitBounds(route.bounds);
+      }
     } catch (error) {
       console.error('Error calculating route:', error);
     }
   }, [locationData]);
 
+  // Recalculate when locations change
   useEffect(() => {
     if (locationData.startLocation && locationData.endLocation) {
       calculateRouteInfo();
     }
   }, [locationData.startLocation, locationData.endLocation, locationData.viaLocations, calculateRouteInfo]);
 
+  // Update suggested price when route changes
   useEffect(() => {
-    if (routeInfo) {
+    if (routeInfo?.distance != null) {
       const baseRate = 6;
       const min = Math.floor(routeInfo.distance * baseRate * 0.8);
       const max = Math.ceil(routeInfo.distance * baseRate * 1.2);
@@ -414,7 +434,44 @@ const OfferRide = ({ user, onLogout }) => {
     setRouteInfo(null);
   };
 
-  const nextStep = () => { if (currentStep < steps.length) setCurrentStep((s) => s + 1); };
+  // 🔧 Ensure we geocode typed addresses before leaving Step 1 and draw the route immediately
+  const nextStep = async () => {
+    if (currentStep === 1) {
+      let s = locationData.startLocation;
+      let e = locationData.endLocation;
+
+      if (!s && rideData.startLocation) {
+        const g = await geocodeAddress(rideData.startLocation);
+        if (g) {
+          s = {
+            name: rideData.startLocation,
+            address: g.formatted_address || rideData.startLocation,
+            placeId: g.place_id,
+            coordinates: { lat: g.lat, lng: g.lng },
+          };
+        }
+      }
+      if (!e && rideData.endLocation) {
+        const g = await geocodeAddress(rideData.endLocation);
+        if (g) {
+          e = {
+            name: rideData.endLocation,
+            address: g.formatted_address || rideData.endLocation,
+            placeId: g.place_id,
+            coordinates: { lat: g.lat, lng: g.lng },
+          };
+        }
+      }
+
+      if (s && e) {
+        setLocationData((prev) => ({ ...prev, startLocation: s, endLocation: e }));
+        setMapCenter(s.coordinates);
+        await calculateRouteInfo({ start: s, end: e, vias: locationData.viaLocations });
+      }
+    }
+    if (currentStep < steps.length) setCurrentStep((s) => s + 1);
+  };
+
   const prevStep = () => { if (currentStep > 1) setCurrentStep((s) => s - 1); };
 
   const canProceedToNext = () => {
@@ -1158,9 +1215,9 @@ const OfferRide = ({ user, onLogout }) => {
                       )
                   )}
 
-                  {routeInfo?.polyline && window.google?.maps?.geometry?.encoding && (
+                  {routeInfo?.path && (
                     <Polyline
-                      path={window.google.maps.geometry.encoding.decodePath(routeInfo.polyline)}
+                      path={routeInfo.path}
                       options={{ strokeColor: '#2196F3', strokeOpacity: 0.8, strokeWeight: 4, geodesic: true }}
                     />
                   )}

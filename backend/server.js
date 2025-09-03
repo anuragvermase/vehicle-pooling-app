@@ -29,7 +29,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const server = createServer(app);
 const isProd = process.env.NODE_ENV === 'production';
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 /* ------------------------------- Hardening ------------------------------- */
 app.disable('x-powered-by');
