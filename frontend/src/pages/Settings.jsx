@@ -1,976 +1,1248 @@
-// frontend/src/pages/Settings.jsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+// src/pages/Settings.jsx
+import React, { useEffect, useRef, useState } from "react";
 import "./Settings.css";
 import API from "../services/api";
 
-/* =========================================================
-   SMALL UTILS (debounce + theme)
-   ========================================================= */
-const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/* ---- Select options ---- */
+const options = {
+  languages: ["English", "Hindi", "Spanish", "French"],
+  regions: ["United States", "India", "Europe", "Asia"],
+  timezones: [
+    "Pacific Time (US & Canada)",
+    "Eastern Time (US & Canada)",
+    "India Standard Time",
+    "Central European Time",
+  ],
+  themes: ["Light", "Dark", "System"],
+  channels: ["Push", "Email", "SMS", "Push + Email", "All"],
+  fontSizes: ["Small", "Medium", "Large"],
+};
 
-function useDebounced(fn, delay = 600) {
-  const t = useRef();
+/* ---- Defaults ---- */
+const DEFAULTS = {
+  language: "English",
+  region: "United States",
+  timezone: "Pacific Time (US & Canada)",
+  theme: "Dark",
+  ridePref: true,
+  notifications: {
+    push: true,
+    email: true,
+    booking: true,
+    cancellations: true,
+    driverArrival: true,
+    rideStatus: true,
+    fareUpdates: true,
+    rateReminder: true,
+    newReview: true,
+    emergency: true,
+    accountSecurity: true,
+    channel: "Push",
+    doNotDisturb: false,
+  },
+  // NEW: Accessibility defaults
+  accessibility: {
+    fontSize: "Medium",
+    highContrast: false,
+    screenReader: false,
+    soundAlerts: true,
+    vibrationAlerts: true,
+    speechAnnouncements: false,
+    reducedMotion: true,
+    keyboardNavigation: true,
+    focusOutline: true,
+    voiceControl: false,
+    langMode: true,          // accessible language mode
+    autoContrastDark: true,  // auto contrast for dark mode
+  },
+};
+
+/* ---- Billing defaults ---- */
+const DEFAULT_BILLING = {
+  methods: [
+    { id: "pm_1", brand: "VISA", last4: "1234", name: "Primary", exp: "12/27", isDefault: true },
+    { id: "pm_2", brand: "MC", last4: "5578", name: "Backup", exp: "07/26", isDefault: false },
+  ],
+  plan: { tier: "Premium", price: 500.0, active: false },
+  credits: 0,
+};
+
+const STORAGE_KEY = "vehiclePooling.settings.v1";
+const TAB_KEY = "vehiclePooling.settings.activeTab";
+const ACCOUNT_KEY = "vehiclePooling.account.v1";
+const BILLING_KEY = "vehiclePooling.billing.v1";
+
+/* ---- Utils ---- */
+function readJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+function debounce(fn, ms = 500) {
+  let t;
   return (...args) => {
-    if (t.current) clearTimeout(t.current);
-    t.current = setTimeout(() => fn(...args), delay);
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
   };
 }
-
-/** Applies theme immediately; when mode === "system" it follows OS and updates on change */
-function applyTheme(mode) {
-  const root = document.documentElement;
-  if (applyTheme._mql) {
-    applyTheme._mql.removeEventListener?.("change", applyTheme._listener);
-    applyTheme._mql = null;
-    applyTheme._listener = null;
-  }
-  const setFromSystem = () => {
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    root.dataset.theme = prefersDark ? "dark" : "light";
-  };
-  if (mode === "system") {
-    const mql = window.matchMedia("(prefers-color-scheme: dark)");
-    const listener = () => setFromSystem();
-    mql.addEventListener?.("change", listener);
-    applyTheme._mql = mql;
-    applyTheme._listener = listener;
-    setFromSystem();
-  } else {
-    root.dataset.theme = mode; // "light" or "dark"
-  }
+function detectBrand(num) {
+  const s = String(num || "").replace(/\D/g, "");
+  if (/^4/.test(s)) return "VISA";
+  if (/^5[1-5]/.test(s)) return "MC";
+  if (/^3[47]/.test(s)) return "AMEX";
+  if (/^6(?:011|5)/.test(s)) return "DISC";
+  return "CARD";
 }
 
-/* =========================================================
-   TINY UI PIECES (styled in CSS)
-   ========================================================= */
-function Switch({ label, desc, checked, onChange, disabled }) {
-  const id = useMemo(() => `sw_${Math.random().toString(36).slice(2)}`, []);
-  return (
-    <label htmlFor={id} className={`sh-switch ${disabled ? "is-disabled":""}`}>
-      <div className="sh-switch-text">
-        <div className="sh-switch-label">{label}</div>
-        {desc ? <div className="sh-switch-desc">{desc}</div> : null}
-      </div>
-      <input id={id} type="checkbox" checked={!!checked} disabled={disabled}
-        onChange={(e)=>onChange?.(e.target.checked)} />
-      <span className="sh-slider" aria-hidden/>
-    </label>
+export default function Settings() {
+  const [activeTab, setActiveTab] = useState(
+    () => localStorage.getItem(TAB_KEY) || "General"
   );
-}
-function Radio({ name, value, current, onChange, label }) {
-  const id = useMemo(() => `rd_${Math.random().toString(36).slice(2)}`, []);
-  return (
-    <label htmlFor={id} className="sh-radio">
-      <input id={id} name={name} type="radio" checked={current===value} onChange={()=>onChange(value)} />
-      <span className="sh-radio-dot" aria-hidden />
-      <span className="sh-radio-label">{label}</span>
-    </label>
+
+  // Restore settings (deep-merge notifications + accessibility)
+  const [settings, setSettings] = useState(() => {
+    const local = readJSON(STORAGE_KEY, {});
+    return {
+      ...DEFAULTS,
+      ...local,
+      notifications: {
+        ...DEFAULTS.notifications,
+        ...(local?.notifications || {}),
+      },
+      accessibility: {
+        ...DEFAULTS.accessibility,
+        ...(local?.accessibility || {}),
+      },
+    };
+  });
+
+  // Account
+  const [account, setAccount] = useState(() =>
+    readJSON(ACCOUNT_KEY, { name: "", email: "", phone: "", vehicles: [] })
   );
-}
-function Select({ label, value, onChange, options, placeholder }) {
-  const id = useMemo(() => `sel_${Math.random().toString(36).slice(2)}`, []);
-  return (
-    <div className="sh-field">
-      <label htmlFor={id}>{label}</label>
-      <select id={id} value={value} onChange={(e)=>onChange(e.target.value)}>
-        {placeholder && <option value="" disabled>{placeholder}</option>}
-        {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-      </select>
-    </div>
+
+  // Billing
+  const [billing, setBilling] = useState(() =>
+    readJSON(BILLING_KEY, DEFAULT_BILLING)
   );
-}
-function Input({ label, type="text", value, onChange, placeholder, bad, disabled=false, className="", ...rest }) {
-  const id = useMemo(() => `in_${Math.random().toString(36).slice(2)}`, []);
-  return (
-    <div className={`sh-field ${className}`}>
-      <label htmlFor={id}>{label}</label>
-      <input
-        id={id}
-        type={type}
-        value={value}
-        onChange={(e)=>onChange(e.target.value)}
-        placeholder={placeholder}
-        className={`${bad ? "sh-bad":""} ${disabled ? "sh-disabled":""}`}
-        disabled={disabled}
-        {...rest}
-      />
-    </div>
-  );
-}
-function Button({ children, variant="primary", ...props }) {
-  return <button className={`sh-btn sh-${variant}`} {...props}>{children}</button>;
-}
+  const [showAddCard, setShowAddCard] = useState(false);
+  const [newCard, setNewCard] = useState({ name: "", number: "", exp: "", cvc: "" });
+  const [promo, setPromo] = useState("");
+  const [promoMsg, setPromoMsg] = useState("");
+  const [showPlans, setShowPlans] = useState(false);
 
-/* Flat group (no boxes on the right) */
-function Group({ title, right, children }) {
-  return (
-    <section className="sh-group">
-      <div className="sh-group-head">
-        <h3 className="sh-group-title">{title}</h3>
-        {right ? <div className="sh-group-right">{right}</div> : null}
-      </div>
-      <div className="sh-group-body">{children}</div>
-      <div className="sh-divider" />
-    </section>
-  );
-}
+  const [loading, setLoading] = useState(true);
+  const [limitMsg, setLimitMsg] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-/* =========================================================
-   MAIN HUB
-   ========================================================= */
-const TABS = [
-  { key: "general",       icon: "⚙", label: "General" },
-  { key: "account",       icon: "👤", label: "Account" },
-  { key: "notifications", icon: "🔔", label: "Notifications" },
-  { key: "billing",       icon: "💳", label: "Billing" },
-  { key: "accessibility", icon: "♿", label: "Accessibility" },
-  { key: "security",      icon: "🔐", label: "Security" },
-];
+  const didHydratePrefs = useRef(false);
 
-export default function SettingsHub() {
-  // lock page shell (fixed sidebar) and apply saved theme on mount
-  useEffect(() => {
-    document.body.classList.add("settings-active");
-    // default to system; real-time prefs saved server-side under GeneralPanel below
-    applyTheme("system");
-    return () => document.body.classList.remove("settings-active");
-  }, []);
-
-  // Dropdown
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [me, setMe] = useState(null);
-  const menuRef = useRef(null);
-
+  /* Load account info & merge */
   useEffect(() => {
     (async () => {
-      const res = await API.users?.me?.().catch(() => null);
-      setMe(res?.user || null);
+      try {
+        const res = await API.users.me();
+        const data = res?.user || res || {};
+        setAccount((s) => {
+          const next = {
+            ...s,
+            name: data.name || s.name,
+            email: data.email || s.email,
+            phone: data.phone || s.phone,
+            vehicles: Array.isArray(data.vehicles) && data.vehicles.length
+              ? data.vehicles
+              : s.vehicles,
+          };
+          localStorage.setItem(ACCOUNT_KEY, JSON.stringify(next));
+          return next;
+        });
+      } catch (e) {
+        console.warn("Could not load profile from server:", e?.message || e);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
+  /* Theme */
+  useEffect(() => applyTheme(settings.theme), [settings.theme]);
+  function applyTheme(mode) {
+    const root = document.documentElement;
+    if (applyTheme._mql && applyTheme._listener) {
+      applyTheme._mql.removeEventListener?.("change", applyTheme._listener);
+      applyTheme._mql = null;
+      applyTheme._listener = null;
+    }
+    if (mode === "System") {
+      const mql = window.matchMedia("(prefers-color-scheme: dark)");
+      const setFromSystem = () => (root.dataset.theme = mql.matches ? "dark" : "light");
+      mql.addEventListener?.("change", setFromSystem);
+      applyTheme._mql = mql;
+      applyTheme._listener = setFromSystem;
+      setFromSystem();
+    } else {
+      root.dataset.theme = String(mode).toLowerCase();
+    }
+  }
+
+  /* Persist settings */
   useEffect(() => {
-    const onDocClick = (e) => {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target)) setMenuOpen(false);
+    if (!didHydratePrefs.current) {
+      didHydratePrefs.current = true;
+      return;
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    debouncedSave(settings);
+  }, [settings]);
+
+  const debouncedSave = debounce(async (prefs) => {
+    try {
+      await API.profile.updatePreferences(prefs); // includes accessibility + notifications
+    } catch (e) {
+      console.warn("Saving preferences failed:", e?.message || e);
+    }
+  }, 600);
+
+  /* Persist Billing */
+  useEffect(() => {
+    localStorage.setItem(BILLING_KEY, JSON.stringify(billing));
+    debouncedSaveBilling(billing);
+  }, [billing]);
+  const debouncedSaveBilling = debounce(async (data) => {
+    try {
+      if (API?.billing?.updateBilling) await API.billing.updateBilling(data);
+      else if (API?.billing?.update) await API.billing.update(data);
+    } catch {}
+  }, 600);
+
+  /* Persist active tab */
+  useEffect(() => localStorage.setItem(TAB_KEY, activeTab), [activeTab]);
+
+  /* Cross-tab sync */
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          const next = JSON.parse(e.newValue);
+          setSettings((s) => ({
+            ...s,
+            ...next,
+            notifications: { ...s.notifications, ...(next.notifications || {}) },
+            accessibility: { ...s.accessibility, ...(next.accessibility || {}) },
+          }));
+        } catch {}
+      }
+      if (e.key === ACCOUNT_KEY && e.newValue) {
+        try {
+          const next = JSON.parse(e.newValue);
+          setAccount((s) => ({ ...s, ...next }));
+        } catch {}
+      }
+      if (e.key === BILLING_KEY && e.newValue) {
+        try {
+          const next = JSON.parse(e.newValue);
+          setBilling(next);
+        } catch {}
+      }
+      if (e.key === TAB_KEY && e.newValue) setActiveTab(e.newValue);
     };
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  const initials = useMemo(() => {
-    const n = me?.name || "";
-    return n.split(" ").map(s => s[0]).filter(Boolean).slice(0,2).join("").toUpperCase();
-  }, [me?.name]);
+  /* Handlers: Settings / Notifications / Accessibility */
+  const onPrefChange = (key, value) => setSettings((s) => ({ ...s, [key]: value }));
+  const onNotifChange = (key, value) =>
+    setSettings((s) => ({ ...s, notifications: { ...s.notifications, [key]: value } }));
+  const onA11yChange = (key, value) =>
+    setSettings((s) => ({ ...s, accessibility: { ...s.accessibility, [key]: value } }));
 
-  const [active, setActive] = useState("general");
-  const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState({ ok:"", err:"" });
+  const resetPrefs = () =>
+    setSettings({
+      ...DEFAULTS,
+      notifications: { ...DEFAULTS.notifications },
+      accessibility: { ...DEFAULTS.accessibility },
+    });
 
-  // real-time user (name/email/phone) for Account tab
-  const [user, setUser] = useState({ name:"", email:"", timeZone:"", locale:"" });
-
-  useEffect(() => { (async()=>{
-    setLoading(true);
-    try{
-      const r = await API.users.me();
-      const u = r?.user || {};
-      setUser({
-        name: u.name || u.fullName || "",
-        email: u.email || "",
-        locale: u.preferences?.locale || "",
-        timeZone: u.preferences?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-      });
-    } finally { setLoading(false); }
-  })(); }, []);
-
-  return (
-    <div className="sh-page">
-      {/* Header with dropdown */}
-      <div className="set-header" ref={menuRef}>
-        <div className="set-title">Settings</div>
-        <div className="set-head-right">
-          <button
-            className="set-avatar-btn"
-            title="Menu"
-            onClick={() => setMenuOpen(v => !v)}
-          >
-            {me?.avatarUrl ? <img src={me.avatarUrl} alt="" /> : <span>{initials || "U"}</span>}
-          </button>
-
-          {menuOpen && (
-            <div className="set-menu">
-              <Link className="set-menu-item" to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</Link>
-              <Link className="set-menu-item" to="/overview"  onClick={() => setMenuOpen(false)}>Overview</Link>
-              <Link className="set-menu-item" to="/profile"   onClick={() => setMenuOpen(false)}>Profile</Link>
-              <a    className="set-menu-item danger" href="/logout">Logout</a>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="sh-shell">
-        {/* LEFT: fixed + sticky sidebar */}
-        <aside className="sh-side">
-          <div className="sh-side-title">Settings</div>
-          <nav className="sh-nav" role="tablist" aria-label="Settings sections">
-            {TABS.map(t => (
-              <button
-                key={t.key}
-                className={`sh-nav-item ${active===t.key ? "is-active":""}`}
-                onClick={()=>setActive(t.key)}
-                role="tab"
-                aria-selected={active===t.key}
-              >
-                <span className="sh-nav-ico" aria-hidden>{t.icon}</span>
-                <span>{t.label}</span>
-              </button>
-            ))}
-          </nav>
-        </aside>
-
-        {/* RIGHT: scrollable content */}
-        <main className="sh-main">
-          <div className="sh-main-inner">
-            {active === "general"       && <GeneralPanel setMsg={setMsg} />}
-            {active === "account"       && <AccountPanel baseUser={user} setMsg={setMsg} />}
-            {active === "notifications" && <NotificationsPanel setMsg={setMsg} />}
-            {active === "billing"       && <BillingPanel setMsg={setMsg} />}
-            {active === "accessibility" && <AccessibilityPanel setMsg={setMsg} />}
-            {active === "security"      && <SecurityPanel setMsg={setMsg} />}
-
-            {(loading || msg.ok || msg.err) && (
-              <div className="sh-status">
-                {loading && <span>Loading…</span>}
-                {msg.ok  && <span className="sh-ok">{msg.ok}</span>}
-                {msg.err && <span className="sh-err">{msg.err}</span>}
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
-    </div>
-  );
-}
-
-/* =========================================================
-   PANELS
-   ========================================================= */
-
-function GeneralPanel({ setMsg }) {
-  // Store these client-side for UX; (optional) also send to server if your API supports it
-  const [locale,   setLocale]   = useState("en-US");
-  const [timeZone, setTimeZone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
-  const [theme,    setTheme]    = useState("system");
-
-  const saveAPI = useDebounced(async (payload) => {
+  /* Handlers: Account & Vehicles (unchanged) */
+  const saveAccountDebounced = debounce(async (acc) => {
     try {
-      if (API.settings?.updateGeneral) await API.settings.updateGeneral(payload);
-      setMsg({ ok:"General settings saved.", err:"" });
+      await API.profile.updateProfile({
+        name: acc.name,
+        email: acc.email,
+        phone: acc.phone,
+        vehicles: acc.vehicles,
+      });
+      try { await API.profile.updateVehicle({ vehicles: acc.vehicles }); } catch {}
     } catch (e) {
-      setMsg({ ok:"", err:String(e?.message || e) });
+      console.warn("Saving account failed:", e?.message || e);
     }
-  }, 400);
+  }, 700);
 
-  const onLocale   = (v) => { setLocale(v); saveAPI({ locale:v, timeZone, theme }); };
-  const onTimeZone = (v) => { setTimeZone(v); saveAPI({ locale, timeZone:v, theme }); };
-  const onTheme    = (v) => { setTheme(v); applyTheme(v); saveAPI({ locale, timeZone, theme:v }); };
-
-  const LANGS = [
-    { value:"en-US", label:"English (United States)" },
-    { value:"hi-IN", label:"हिन्दी (भारत)" },
-    { value:"en-GB", label:"English (United Kingdom)" },
-  ];
-  const TZ = [
-    { value:"Asia/Kolkata",        label:"(GMT+05:30) India Standard Time, 24h" },
-    { value:"UTC",                 label:"(GMT+00:00) Coordinated Universal Time" },
-    { value:"America/Los_Angeles", label:"(GMT-08:00) Pacific Time" },
-  ];
-
-  return (
-    <>
-      <h1 className="sh-h1">General settings</h1>
-
-      <div className="sh-2col">
-        <Group title="Language & region">
-          <Select label="Language" value={locale} onChange={onLocale} options={LANGS} />
-        </Group>
-        <Group title="Time zone & format">
-          <Select label="Time zone" value={timeZone} onChange={onTimeZone} options={TZ} />
-        </Group>
-      </div>
-
-      <div className="sh-2col">
-        <Group title="Theme mode">
-          <div className="sh-row">
-            <Radio name="theme" value="light"  current={theme} onChange={onTheme} label="Light" />
-            <Radio name="theme" value="dark"   current={theme} onChange={onTheme} label="Dark" />
-            <Radio name="theme" value="system" current={theme} onChange={onTheme} label="System" />
-          </div>
-        </Group>
-        <Group title="Ride preferences">
-          <div className="sh-help">Set pickup radius, rider filters, trusted contacts.</div>
-        </Group>
-      </div>
-    </>
-  );
-}
-
-/* ---------- ACCOUNT (REAL-TIME FROM SERVER) ---------- */
-function AccountPanel({ baseUser, setMsg }) {
-  const [me, setMe] = useState({
-    name:  baseUser?.name || "",
-    email: baseUser?.email || "",
-    phone: "",
-  });
-
-  const [vehicles, setVehicles] = useState([{ make:"", model:"", plate:"", seats:4, id:"v1" }]);
-  const [emg, setEmg] = useState({ name:"", phone:"" });
-
-  // boot: fetch live profile + optional vehicle/emergency info
-  useEffect(()=>{ (async()=>{
-    try{
-      const r = await API.users.me().catch(()=>null);
-      const u = r?.user || {};
-      setMe(m=>({
-        ...m,
-        name:  u.name || u.fullName || "",
-        email: u.email || "",
-        phone: u.phone || u.mobile || "",
-      }));
-
-      // If your backend exposes these, pull them; otherwise keep editable blanks
-      let fetchedVehicles = null;
-      try {
-        // Option A: if you store vehicle under public profile
-        if (u?._id && API.profile?.getPublicProfile) {
-          const pv = await API.profile.getPublicProfile(u._id).catch(()=>null);
-          const v = pv?.vehicle || pv?.vehicles;
-          if (v) fetchedVehicles = Array.isArray(v) ? v : [v];
-        }
-      } catch {}
-      if (fetchedVehicles && fetchedVehicles.length) {
-        setVehicles(
-          fetchedVehicles.slice(0,3).map((v,i)=>({
-            make:v.make||"", model:v.model||"", plate:v.plateNumber||v.plate||"", seats:Number(v.seats||4), id:`v${i+1}`
-          }))
-        );
-      }
-
-      try {
-        if (API.profile?.getEmergencyContact) {
-          const ec = await API.profile.getEmergencyContact().catch(()=>null);
-          if (ec?.name || ec?.phone) setEmg({ name:ec.name||"", phone:ec.phone||"" });
-        }
-      } catch {}
-    }catch{}
-  })(); }, [baseUser?.email, baseUser?.name]);
-
-  const addVehicle = () => {
-    if (vehicles.length >= 3) return;
-    const id = `v${Date.now().toString(36).slice(2,6)}`;
-    setVehicles(prev => [...prev, { make:"", model:"", plate:"", seats:4, id }]);
-  };
-  const removeVehicle = (id) => {
-    setVehicles(prev => {
-      const next = prev.filter(v=>v.id!==id);
-      return next.length ? next : [{ make:"", model:"", plate:"", seats:4, id:"v1"}];
+  const onAccountChange = (key, value) => {
+    setAccount((s) => {
+      const next = { ...s, [key]: value };
+      localStorage.setItem(ACCOUNT_KEY, JSON.stringify(next));
+      saveAccountDebounced(next);
+      return next;
     });
   };
-  const clampSeat = (val) => {
-    const n = Math.max(1, Math.min(6, parseInt(val || "0", 10)));
-    return Number.isFinite(n) ? n : 1;
-  };
-  const changeVehicle = (id, field, value) => {
-    setVehicles(prev => prev.map(v => v.id===id
-      ? (field==="seats" ? { ...v, seats: clampSeat(value) } : { ...v, [field]: value })
-      : v
-    ));
+
+  const onVehicleChange = (idx, key, value) => {
+    setAccount((s) => {
+      const vehicles = s.vehicles.slice();
+      vehicles[idx] = { ...vehicles[idx], [key]: value };
+      const next = { ...s, vehicles };
+      localStorage.setItem(ACCOUNT_KEY, JSON.stringify(next));
+      saveAccountDebounced(next);
+      return next;
+    });
   };
 
-  const saveAll = async ()=>{
-    try{
-      // Save phone to server (name/email are read-only here; change from Profile page)
-      await API.users.updateMe({ phone: me.phone });
-
-      // Save vehicles (use whichever endpoints you actually have)
-      if (API.profile?.updateVehicle) {
-        for (const v of vehicles) {
-          await API.profile.updateVehicle({
-            make:v.make, model:v.model, plateNumber:v.plate, seats:v.seats
-          }).catch(()=>{});
-        }
+  const addVehicle = () => {
+    setLimitMsg("");
+    setAccount((s) => {
+      if (s.vehicles.length >= 3) {
+        setLimitMsg("Maximum number of vehicles reached (3).");
+        return s;
       }
-
-      // Save emergency contact
-      if (API.profile?.addEmergencyContact) {
-        await API.profile.addEmergencyContact({ name: emg.name, phone: emg.phone }).catch(()=>{});
-      } else if (API.users?.setEmergencyContact) {
-        await API.users.setEmergencyContact({ name: emg.name, phone: emg.phone }).catch(()=>{});
-      }
-
-      setMsg({ ok:"Account settings saved.", err:"" });
-    }catch(e){
-      setMsg({ ok:"", err:String(e?.message || e) });
-    }
+      const v = { label: `Vehicle ${s.vehicles.length + 1}`, model: "", plate: "", seats: "" };
+      const next = { ...s, vehicles: [...s.vehicles, v] };
+      localStorage.setItem(ACCOUNT_KEY, JSON.stringify(next));
+      saveAccountDebounced(next);
+      return next;
+    });
   };
 
-  const deleteAccount = async ()=>{
-    if (!window.confirm("Permanently delete your account?")) return;
+  const removeVehicle = (idx) => {
+    setLimitMsg("");
+    setAccount((s) => {
+      const vehicles = s.vehicles
+        .filter((_, i) => i !== idx)
+        .map((v, i) => ({ ...v, label: `Vehicle ${i + 1}` }));
+      const next = { ...s, vehicles };
+      localStorage.setItem(ACCOUNT_KEY, JSON.stringify(next));
+      saveAccountDebounced(next);
+      return next;
+    });
+  };
+
+  async function handleDeleteAccount() {
     try {
-      if (API.users?.deleteAccount) await API.users.deleteAccount();
-      window.location.href="/login";
-    } catch(e) {
-      setMsg({ ok:"", err:String(e?.message || e) });
+      setDeleting(true);
+      await API.users.deleteMe();
+      localStorage.clear();
+      window.location.href = "/login";
+    } catch (e) {
+      alert("Failed to delete account: " + (e?.message || e));
+    } finally {
+      setDeleting(false);
     }
+  }
+
+  // Close modal on ESC (account delete, add card, plans)
+  useEffect(() => {
+    function onKey(e) { if (e.key === "Escape") { setShowDeleteModal(false); setShowAddCard(false); setShowPlans(false);} }
+    if (showDeleteModal || showAddCard || showPlans) window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showDeleteModal, showAddCard, showPlans]);
+
+  const tabs = [
+    { key: "General", icon: "⚙️" },
+    { key: "Account", icon: "👤" },
+    { key: "Notifications", icon: "🔔" },
+    { key: "Billing", icon: "💳" },
+    { key: "Accessibility", icon: "♿" },
+    { key: "Security", icon: "🔒" },
+  ];
+
+  /* -------- Billing actions (unchanged from your last code) -------- */
+  const setDefaultMethod = (id) =>
+    setBilling((b) => ({
+      ...b,
+      methods: b.methods.map((m) => ({ ...m, isDefault: m.id === id })),
+    }));
+  const removeMethod = (id) =>
+    setBilling((b) => {
+      const list = b.methods.filter((m) => m.id !== id);
+      if (list.length > 0 && !list.some((m) => m.isDefault)) list[0].isDefault = true;
+      return { ...b, methods: list };
+    });
+  const addMethod = (e) => {
+    e?.preventDefault?.();
+    const digits = (newCard.number || "").replace(/\D/g, "");
+    if (digits.length < 12) return alert("Please enter a valid card number.");
+    const brand = detectBrand(digits);
+    const last4 = digits.slice(-4);
+    const id = `pm_${Date.now()}`;
+    setBilling((b) => ({
+      ...b,
+      methods: [...b.methods, { id, brand, last4, name: newCard.name || "Card", exp: newCard.exp || "01/30", isDefault: b.methods.length === 0 }],
+    }));
+    setShowAddCard(false);
+    setNewCard({ name: "", number: "", exp: "", cvc: "" });
   };
-
-  return (
-    <>
-      <h1 className="sh-h1">Account settings</h1>
-
-      <div className="sh-stack-v">
-        {/* Profile info */}
-        <Group title="Profile info">
-          <div className="sh-2col">
-            <Input label="Name"  value={me.name}  onChange={()=>{}} disabled />
-            <Input label="Email" value={me.email} onChange={()=>{}} bad={!emailRe.test(me.email||"")} disabled />
-          </div>
-          <div className="sh-1col">
-            <Input label="Phone number" value={me.phone} onChange={(v)=>setMe({...me, phone:v})} placeholder="+91 XXXXXXXXXX"/>
-          </div>
-        </Group>
-
-        {/* Vehicle info */}
-        <Group title="Vehicle info" right={<Button variant="secondary" onClick={addVehicle} disabled={vehicles.length>=3}>Add vehicle</Button>}>
-          {vehicles.map((v, idx)=>(
-            <div key={v.id} className="veh-block">
-              <div className="veh-head">
-                <div className="veh-title">Vehicle {idx+1}</div>
-                {vehicles.length>1 && (<Button variant="ghost" onClick={()=>removeVehicle(v.id)}>Remove</Button>)}
-              </div>
-              <div className="sh-3col">
-                <Input label="Make"      value={v.make}  onChange={(val)=>changeVehicle(v.id,"make",val)}/>
-                <Input label="Model"     value={v.model} onChange={(val)=>changeVehicle(v.id,"model",val)}/>
-                <Input label="Plate no." value={v.plate} onChange={(val)=>changeVehicle(v.id,"plate",val)}/>
-              </div>
-              <div className="sh-1col">
-                <Input
-                  label="Seats"
-                  type="number"
-                  value={v.seats}
-                  onChange={(val)=>changeVehicle(v.id,"seats",val)}
-                  min={1}
-                  max={6}
-                  step={1}
-                  inputMode="numeric"
-                  pattern="[1-6]"
-                  className="seats-field"
-                />
-              </div>
-              <div className="sh-divider" />
-            </div>
-          ))}
-        </Group>
-
-        {/* Emergency contact */}
-        <Group title="Emergency contact">
-          <div className="sh-2col">
-            <Input label="Contact name"  value={emg.name}  onChange={(v)=>setEmg({...emg, name:v})}/>
-            <Input label="Contact phone" value={emg.phone} onChange={(v)=>setEmg({...emg, phone:v})}/>
-          </div>
-        </Group>
-
-        {/* Delete account */}
-        <Group title="Delete account" right={<Button variant="danger" onClick={deleteAccount}>Delete</Button>}>
-          <div className="sh-help">GDPR compliant delete — removes your data and logs you out.</div>
-        </Group>
-
-        <div className="sh-right"><Button onClick={saveAll}>Save changes</Button></div>
-      </div>
-    </>
-  );
-}
-
-/* ---------- NOTIFICATIONS (kept local unless API exists) ---------- */
-function NotificationsPanel({ setMsg }) {
-  const [channels, setChannels] = useState({ push:true, email:true, sms:false });
-  const [pref, setPref]         = useState({ rideAlerts:true, booking:true, payment:true });
-
-  const save = useDebounced(async (payload)=>{
-    try{
-      if (API.settings?.updateNotifications) await API.settings.updateNotifications(payload);
-      setMsg({ ok:"Notification settings saved.", err:"" });
-    }catch(e){ setMsg({ ok:"", err:String(e?.message || e) }); }
-  }, 400);
-
-  useEffect(()=>{ save({ ...pref, channels }); }, [pref, channels]);
-
-  return (
-    <>
-      <h1 className="sh-h1">Notification settings</h1>
-
-      <div className="sh-2col">
-        <Group title="Ride alerts">
-          <Switch label="Notify when someone offers a ride near me" checked={pref.rideAlerts}
-            onChange={v=>setPref({...pref, rideAlerts:v})}/>
-        </Group>
-
-        <Group title="Booking status">
-          <Switch label="Confirmation, cancellations & driver arrival" checked={pref.booking}
-            onChange={v=>setPref({...pref, booking:v})}/>
-        </Group>
-      </div>
-
-      <div className="sh-2col">
-        <Group title="Payment notifications">
-          <Switch label="Receipts & refunds" checked={pref.payment}
-            onChange={v=>setPref({...pref, payment:v})}/>
-        </Group>
-
-        <Group title="Channels">
-          <div className="sh-row">
-            <Switch label="Push"  checked={channels.push}  onChange={v=>setChannels({...channels, push:v})}/>
-            <Switch label="Email" checked={channels.email} onChange={v=>setChannels({...channels, email:v})}/>
-            <Switch label="SMS"   checked={channels.sms}   onChange={v=>setChannels({...channels, sms:v})}/>
-          </div>
-        </Group>
-      </div>
-    </>
-  );
-}
-
-/* ---------- BILLING (kept; talks to API if available) ---------- */
-function BillingPanel({ setMsg }) {
-  const [methods, setMethods] = useState([]);
-  const [txns, setTxns]       = useState([]);
-
-  useEffect(()=>{ (async()=>{
-    try{
-      const m = await API.billing?.getMethods?.().catch(()=>null);
-      if (m?.data || m) setMethods(m.data||m);
-      const t = await API.billing?.getTransactions?.().catch(()=>null);
-      if (t?.data || t) setTxns(t.data||t);
-    }catch{}
-  })(); }, []);
-
-  const addMethod = async ()=>{
-    const payload={ id:Math.random().toString(36).slice(2), brand:"VISA", last4:String(Math.floor(Math.random()*9000+1000)), exp:"08/29" };
-    try{
-      let out=payload;
-      if (API.billing?.addMethod){ const r=await API.billing.addMethod(payload).catch(()=>({data:payload})); out=r?.data||payload; }
-      const next=[...methods,out]; setMethods(next); setMsg({ok:"Payment method added.",err:""});
-    }catch(e){ setMsg({ok:"",err:String(e?.message||e)}); }
+  const togglePlan = () =>
+    setBilling((b) => ({ ...b, plan: { ...b.plan, active: !b.plan.active } }));
+  const applyPromo = () => {
+    const code = promo.trim().toUpperCase();
+    if (!code) return;
+    if (code === "SAVE50") {
+      setBilling((b) => ({ ...b, credits: b.credits + 50 }));
+      setPromoMsg("Applied ₹50 credit.");
+    } else if (code === "WELCOME100") {
+      setBilling((b) => ({ ...b, credits: b.credits + 100 }));
+      setPromoMsg("Applied ₹100 credit.");
+    } else {
+      setPromoMsg("Invalid code.");
+    }
+    setTimeout(() => setPromoMsg(""), 2500);
+    setPromo("");
   };
-
-  const removeMethod = async (id)=>{
-    if(!window.confirm("Remove this payment method?")) return;
-    try{
-      if (API.billing?.removeMethod) await API.billing.removeMethod(id);
-      const next=methods.filter(m=>m.id!==id); setMethods(next);
-    }catch(e){ setMsg({ok:"",err:String(e?.message||e)}); }
-  };
-
-  return (
-  <div className="sh-legacy">
-    <h1 className="sh-h1">Billing</h1>
-
-    <div className="sh-2col">
-      <Group title="Payment methods" right={<Button variant="secondary" onClick={addMethod}>Add method</Button>}>
-        <div className="sh-table">
-          <div className="sh-tr sh-th"><div>Brand</div><div>Last 4</div><div>Expires</div><div></div></div>
-          {methods.map(m=>(
-            <div className="sh-tr" key={m.id}>
-              <div>{m.brand||"Card"}</div>
-              <div>{m.last4}</div>
-              <div>{m.exp || `${String(m.expMonth).padStart(2,"0")}/${String(m.expYear).slice(-2)}`}</div>
-              <div className="sh-right"><Button variant="ghost" onClick={()=>removeMethod(m.id)}>Remove</Button></div>
-            </div>
-          ))}
-          {!methods.length && <div className="sh-empty">No payment methods added yet.</div>}
-        </div>
-      </Group>
-
-      <Group title="Transaction history" right={<Button variant="secondary" onClick={()=>window.print()}>Download receipts</Button>}>
-        <div className="sh-table">
-          <div className="sh-tr sh-th"><div>Date</div><div>Amount</div><div>Status</div><div>Invoice</div></div>
-          {txns.map(t=>(
-            <div className="sh-tr" key={t.id}>
-              <div>{new Date(t.date||Date.now()).toLocaleString()}</div>
-              <div>₹{Number(t.amount||0).toLocaleString("en-IN")}</div>
-              <div>{t.status||"paid"}</div>
-              <div><Button variant="ghost" onClick={()=>alert("Open invoice viewer")}>View</Button></div>
-            </div>
-          ))}
-          {!txns.length && <div className="sh-empty">No transactions yet.</div>}
-        </div>
-      </Group>
-    </div>
-
-    <Group title="Subscription plan">
-      <div className="sh-row">
-        <div className="sh-help">Upgrade to Priority plan for zero-fee cancellations and priority booking.</div>
-        <Button onClick={()=>alert("Open subscription flow")}>Explore plans</Button>
-      </div>
-    </Group>
+  const openDemoReceipt = () => {
+    const today = new Date();
+    const id = `INV-${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, "0")}${String(today.getDate()).padStart(2, "0")}-${String(
+      today.getHours()
+    ).padStart(2, "0")}${String(today.getMinutes()).padStart(2, "0")}`;
+    const price = (billing.plan?.price || 500).toFixed(2);
+    const html = `
+<!doctype html><html><head><meta charset="utf-8"/>
+<title>Receipt ${id}</title>
+<style>
+  :root{--text:#0f1115;--muted:#6b7280;--line:#e5e7eb}
+  @media (prefers-color-scheme: dark){:root{--text:#f3f4f6;--muted:#9aa4b2;--line:#2a3039;background:#0d0f13}}
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:40px;color:var(--text)}
+  .wrap{max-width:800px;margin:0 auto;border:1px solid var(--line);border-radius:14px;padding:24px}
+  h1{margin:0 0 4px;font-size:22px} .muted{color:var(--muted)}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .total{font-weight:800;font-size:20px}
+  .btn{display:inline-block;margin-top:18px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:inherit}
+</style></head>
+<body>
+  <div class="wrap">
+    <h1>PoolRideX Receipt</h1>
+    <div class="muted">Receipt ID: ${id}</div>
+    <div class="muted">Date: ${today.toDateString()}</div>
+    <div class="row"><div>Plan</div><div>${billing.plan?.tier || "Premium"}</div></div>
+    <div class="row"><div>Status</div><div>${billing.plan?.active ? "Active" : "Trial/Inactive"}</div></div>
+    <div class="row"><div>Payment method</div><div>${(billing.methods.find(m=>m.isDefault)?.brand || "CARD")} •••• ${(billing.methods.find(m=>m.isDefault)?.last4 || "0000")}</div></div>
+    <div class="row total"><div>Amount</div><div>₹${price}</div></div>
+    <a class="btn" href="javascript:window.print()">Print / Save as PDF</a>
   </div>
-);
-}
+</body></html>`;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank", "noopener");
+    setTimeout(() => URL.revokeObjectURL(url), 20000);
+  };
+  const choosePlan = (tier, price) => {
+    setBilling((b) => ({ ...b, plan: { tier, price, active: true } }));
+    setShowPlans(false);
+  };
 
-/* ---------- ACCESSIBILITY ---------- */
-function AccessibilityPanel({ setMsg }) {
-  const [prefs, setPrefs] = useState({
-    textSize:"md", contrast:"normal", voice:false, reader:false,
-    rideNoMusic:false, ridePetFriendly:false, rideWomenOnly:false
-  });
-
-  const save = useDebounced(async (payload)=>{
-    try{
-      if (API.settings?.updateAccessibility) await API.settings.updateAccessibility(payload);
-      setMsg({ ok:"Accessibility settings saved.", err:"" });
-    }catch(e){ setMsg({ ok:"", err:String(e?.message || e) }); }
-  }, 400);
-
-  useEffect(()=>{ save(prefs); }, [prefs]);
+  if (loading) return <div className="settings-page">Loading…</div>;
 
   return (
-    <>
-      <h1 className="sh-h1">Accessibility</h1>
+    <div className="settings-page settings-layout">
+      {/* Sidebar */}
+      <aside className="side">
+        <h2 className="side-title">Settings</h2>
+        <ul className="side-list">
+          {tabs.map((t) => (
+            <li
+              key={t.key}
+              className={`side-item ${activeTab === t.key ? "active" : ""}`}
+              onClick={() => setActiveTab(t.key)}
+            >
+              <span className="icon">{t.icon}</span><span>{t.key}</span>
+            </li>
+          ))}
+        </ul>
+      </aside>
 
-      <div className="sh-2col">
-        <Group title="Text size / Contrast">
-          <div className="sh-row">
-            <Select label="Text size" value={prefs.textSize} onChange={v=>setPrefs({...prefs, textSize:v})}
-              options={[{value:"sm",label:"Small"},{value:"md",label:"Medium"},{value:"lg",label:"Large"},{value:"xl",label:"Extra large"}]}/>
-            <Select label="Contrast" value={prefs.contrast} onChange={v=>setPrefs({...prefs, contrast:v})}
-              options={[{value:"normal",label:"Normal"},{value:"high",label:"High"}]}/>
+      {/* Main */}
+      <main className="main">
+        <header className="main-header">
+          <h3>{activeTab}</h3>
+          <p className="sub">Manage your preferences and defaults.</p>
+        </header>
+
+        {/* ===== GENERAL ===== */}
+        {activeTab === "General" && (
+          <section className="card fill">
+            <div className="rows">
+              <div className="row">
+                <div className="row-label">
+                  <span className="title">Language</span>
+                  <span className="hint">Used for menus, labels, and messages</span>
+                </div>
+                <div className="row-control">
+                  <select
+                    value={settings.language}
+                    onChange={(e) => onPrefChange("language", e.target.value)}
+                  >
+                    {options.languages.map((v) => <option key={v}>{v}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="row">
+                <div className="row-label">
+                  <span className="title">Region</span>
+                  <span className="hint">Formats numbers, dates, and addresses</span>
+                </div>
+                <div className="row-control">
+                  <select
+                    value={settings.region}
+                    onChange={(e) => onPrefChange("region", e.target.value)}
+                  >
+                    {options.regions.map((v) => <option key={v}>{v}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="row">
+                <div className="row-label">
+                  <span className="title">Time zone & format</span>
+                  <span className="hint">Affects schedules and receipts</span>
+                </div>
+                <div className="row-control">
+                  <select
+                    value={settings.timezone}
+                    onChange={(e) => onPrefChange("timezone", e.target.value)}
+                  >
+                    {options.timezones.map((v) => <option key={v}>{v}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="row">
+                <div className="row-label">
+                  <span className="title">Theme</span>
+                  <span className="hint">Light, Dark, or System</span>
+                </div>
+                <div className="row-control">
+                  <select
+                    value={settings.theme}
+                    onChange={(e) => onPrefChange("theme", e.target.value)}
+                  >
+                    {options.themes.map((v) => <option key={v}>{v}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="row">
+                <div className="row-label">
+                  <span className="title">Ride preferences</span>
+                  <span className="hint">Enable quick preferences for rides</span>
+                </div>
+                <div className="row-control">
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      checked={settings.ridePref}
+                      onChange={(e) => onPrefChange("ridePref", e.target.checked)}
+                    />
+                    <span className="slider" />
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="card-actions">
+              <button onClick={resetPrefs} className="btn ghost">Reset to defaults</button>
+            </div>
+          </section>
+        )}
+
+        {/* ===== ACCOUNT ===== */}
+        {activeTab === "Account" && (
+          <section className="card fill">
+            <div className="rows">
+              <div className="row">
+                <div className="row-label">
+                  <span className="title">Name</span>
+                  <span className="hint">Shown on your profile</span>
+                </div>
+                <div className="row-control">
+                  <input
+                    type="text"
+                    value={account.name}
+                    onChange={(e) => onAccountChange("name", e.target.value)}
+                    placeholder="Your full name"
+                  />
+                </div>
+              </div>
+
+              <div className="row">
+                <div className="row-label">
+                  <span className="title">Email</span>
+                  <span className="hint">Used for receipts and notifications</span>
+                </div>
+                <div className="row-control">
+                  <input
+                    type="email"
+                    value={account.email}
+                    onChange={(e) => onAccountChange("email", e.target.value)}
+                    placeholder="name@example.com"
+                  />
+                </div>
+              </div>
+
+              <div className="row">
+                <div className="row-label">
+                  <span className="title">Phone number</span>
+                  <span className="hint">For trip updates and security</span>
+                </div>
+                <div className="row-control">
+                  <input
+                    type="tel"
+                    value={account.phone}
+                    onChange={(e) => onAccountChange("phone", e.target.value)}
+                    placeholder="e.g., 9898989898"
+                  />
+                </div>
+              </div>
+
+              {/* Vehicle header + Add */}
+              <div className="row">
+                <div className="row-label">
+                  <span className="title">Vehicle info</span>
+                  <span className="hint">Add up to 3 vehicles</span>
+                </div>
+                <div className="row-control" style={{ justifyContent: "space-between", gap: 12 }}>
+                  <button
+                    onClick={addVehicle}
+                    disabled={account.vehicles.length >= 3}
+                    className="btn ghost"
+                    style={{
+                      marginLeft: "auto",
+                      cursor: account.vehicles.length >= 3 ? "not-allowed" : "pointer",
+                      opacity: account.vehicles.length >= 3 ? 0.6 : 1,
+                    }}
+                  >
+                    Add vehicle
+                  </button>
+                </div>
+              </div>
+
+              {/* Vehicle list */}
+              {account.vehicles.map((v, idx) => (
+                <div key={idx} className="row" style={{ gridTemplateColumns: "1fr" }}>
+                  <div className="vehicle-grid">
+                    <div className="field">
+                      <label>Vehicle {idx + 1}</label>
+                      <input
+                        type="text"
+                        value={v.label}
+                        onChange={(e) => onVehicleChange(idx, "label", e.target.value)}
+                        placeholder="e.g., Swift, City"
+                      />
+                    </div>
+                    <div className="field">
+                      <label>Model</label>
+                      <input
+                        type="text"
+                        value={v.model}
+                        onChange={(e) => onVehicleChange(idx, "model", e.target.value)}
+                        placeholder="e.g., 2019 VXI"
+                      />
+                    </div>
+                    <div className="field">
+                      <label>Plate no.</label>
+                      <input
+                        type="text"
+                        value={v.plate}
+                        onChange={(e) => onVehicleChange(idx, "plate", e.target.value)}
+                        placeholder="e.g., DL 09 AB 1234"
+                      />
+                    </div>
+                    <div className="field">
+                      <label>Seats</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="8"
+                        value={v.seats}
+                        onChange={(e) => onVehicleChange(idx, "seats", e.target.value)}
+                        placeholder="4"
+                      />
+                    </div>
+                    <div className="field" style={{ alignSelf: "end" }}>
+                      <button onClick={() => removeVehicle(idx)} className="btn ghost">Remove</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {(limitMsg || account.vehicles.length >= 3) && (
+                <div className="row" style={{ gridTemplateColumns: "1fr" }}>
+                  <div className="notice">{limitMsg || "Maximum number of vehicles reached (3)."}</div>
+                </div>
+              )}
+
+              {/* Delete account */}
+              <div className="row" style={{ gridTemplateColumns: "1fr auto" }}>
+                <div className="row-label">
+                  <span className="title">Delete account</span>
+                  <span className="hint">GDPR-compliant delete — removes your data and logs</span>
+                </div>
+                <div className="row-control">
+                  <button onClick={() => setShowDeleteModal(true)} className="btn danger">Delete</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ===== NOTIFICATIONS (unchanged) ===== */}
+        {activeTab === "Notifications" && (
+          <section className="card fill">
+            <div className="rows grid-2">
+              {/* Left */}
+              <div className="col">
+                <h4 className="section-title">General notifications</h4>
+                {["push", "email"].map((k) => (
+                  <div className="row" key={k}>
+                    <div className="row-label"><span className="title">
+                      {k === "push" ? "Push notifications" : "Email notifications"}
+                    </span></div>
+                    <div className="row-control">
+                      <label className="switch">
+                        <input type="checkbox" checked={settings.notifications[k]}
+                               onChange={(e) => onNotifChange(k, e.target.checked)} />
+                        <span className="slider" />
+                      </label>
+                    </div>
+                  </div>
+                ))}
+                <h4 className="section-title">Ride Updates</h4>
+                {[
+                  ["booking", "Booking confirmations"],
+                  ["cancellations", "Ride cancellations"],
+                  ["driverArrival", "Driver arrival"],
+                  ["rideStatus", "Ride status changes"],
+                  ["fareUpdates", "Fare updates"],
+                ].map(([k, label]) => (
+                  <div className="row" key={k}>
+                    <div className="row-label"><span className="title">{label}</span></div>
+                    <div className="row-control">
+                      <label className="switch">
+                        <input type="checkbox" checked={settings.notifications[k]}
+                               onChange={(e) => onNotifChange(k, e.target.checked)} />
+                        <span className="slider" />
+                      </label>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Right */}
+              <div className="col">
+                <h4 className="section-title">Reviews & Ratings</h4>
+                {[
+                  ["rateReminder", "Rate your ride reminder"],
+                  ["newReview", "New review received"],
+                ].map(([k, label]) => (
+                  <div className="row" key={k}>
+                    <div className="row-label"><span className="title">{label}</span></div>
+                    <div className="row-control">
+                      <label className="switch">
+                        <input type="checkbox" checked={settings.notifications[k]}
+                               onChange={(e) => onNotifChange(k, e.target.checked)} />
+                        <span className="slider" />
+                      </label>
+                    </div>
+                  </div>
+                ))}
+                <h4 className="section-title">Safety & Security</h4>
+                {[
+                  ["emergency", "Emergency alerts"],
+                  ["accountSecurity", "Account security notifications"],
+                ].map(([k, label]) => (
+                  <div className="row" key={k}>
+                    <div className="row-label"><span className="title">{label}</span></div>
+                    <div className="row-control">
+                      <label className="switch">
+                        <input type="checkbox" checked={settings.notifications[k]}
+                               onChange={(e) => onNotifChange(k, e.target.checked)} />
+                        <span className="slider" />
+                      </label>
+                    </div>
+                  </div>
+                ))}
+                <h4 className="section-title">Control Preferences</h4>
+                <div className="row">
+                  <div className="row-label">
+                    <span className="title">Notification channels</span>
+                    <span className="hint">Choose delivery method</span>
+                  </div>
+                  <div className="row-control">
+                    <select
+                      value={settings.notifications.channel}
+                      onChange={(e) => onNotifChange("channel", e.target.value)}
+                    >
+                      {options.channels.map((c) => <option key={c}>{c}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="row-label"><span className="title">Do not disturb</span></div>
+                  <div className="row-control">
+                    <label className="switch">
+                      <input type="checkbox" checked={settings.notifications.doNotDisturb}
+                             onChange={(e) => onNotifChange("doNotDisturb", e.target.checked)} />
+                      <span className="slider" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="card-actions">
+              <button onClick={resetPrefs} className="btn ghost">Reset to defaults</button>
+            </div>
+          </section>
+        )}
+
+        {/* ===== BILLING (unchanged from your last step) ===== */}
+        {activeTab === "Billing" && (
+          <section className="card fill">
+            <div className="rows billing-grid">
+              {/* LEFT side */}
+              <div className="billing-col">
+                <div className="billing-card">
+                  <div className="billing-card-header"><h4>Payment Methods</h4></div>
+                  <div className="billing-card-body">
+                    <div className="pm-list">
+                      {billing.methods.map((m) => (
+                        <div key={m.id} className="pm-card">
+                          <div className="pm-left">
+                            <span className={`brand-pill brand-${m.brand?.toLowerCase?.() || "card"}`}>
+                              {m.brand || "CARD"}
+                            </span>
+                            <span className="pm-digits">•••• {m.last4}</span>
+                            <span className="pm-exp">Exp {m.exp}</span>
+                            {m.isDefault && <span className="badge default">Default</span>}
+                          </div>
+                          <div className="pm-actions">
+                            {!m.isDefault && (
+                              <button className="btn tiny" onClick={() => setDefaultMethod(m.id)}>
+                                Make default
+                              </button>
+                            )}
+                            <button className="btn tiny ghost" onClick={() => removeMethod(m.id)}>
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <button className="btn ghost add-method" onClick={() => setShowAddCard(true)}>
+                      <span className="add-plus">＋</span> Add payment method
+                    </button>
+                  </div>
+                </div>
+
+                <div className="billing-card">
+                  <div className="billing-card-header"><h4>Transcriptions</h4></div>
+                  <div className="billing-card-body">
+                    <input type="text" placeholder="Search" />
+                  </div>
+                </div>
+
+                <div className="billing-card">
+                  <div className="billing-card-header"><h4>Subscription Plan</h4></div>
+                  <div className="billing-card-body row-like">
+                    <div className="row-label"><span className="title">{billing.plan.tier}</span></div>
+                    <div className="row-control" style={{ display: "flex", gap: 8 }}>
+                      <button className="btn ghost" onClick={togglePlan}>
+                        {billing.plan.active ? "Disable" : "Enable"}
+                      </button>
+                      <button className="btn" onClick={() => setShowPlans(true)}>
+                        Choose plan
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* RIGHT side */}
+              <div className="billing-col">
+                <div className="billing-card">
+                  <div className="billing-card-header"><h4>Receipts</h4></div>
+                  <div className="billing-card-body">
+                    <button className="btn primary" onClick={openDemoReceipt}>
+                      Download receipt
+                    </button>
+                  </div>
+                </div>
+
+                <div className="billing-card">
+                  <div className="billing-card-header"><h4>Subscription Plan</h4></div>
+                  <div className="billing-card-body row-like">
+                    <div className="row-label"><span className="title">{billing.plan.tier}</span></div>
+                    <div className="row-control" style={{ justifyContent: "flex-end" }}>
+                      <strong>₹{billing.plan.price.toFixed(2)}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="billing-card">
+                  <div className="billing-card-header"><h4>Credits & Discounts</h4></div>
+                  <div className="billing-card-body">
+                    <div className="promo-row">
+                      <input
+                        type="text"
+                        value={promo}
+                        onChange={(e) => setPromo(e.target.value)}
+                        placeholder="Promo code (e.g., SAVE50)"
+                      />
+                      <button className="btn" onClick={applyPromo}>Apply</button>
+                    </div>
+                    {!!promoMsg && <div className="notice" style={{ marginTop: 10 }}>{promoMsg}</div>}
+                    <div className="muted" style={{ marginTop: 10 }}>
+                      Available credits: ₹{billing.credits}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ===== ACCESSIBILITY (NEW) ===== */}
+        {activeTab === "Accessibility" && (
+          <section className="card fill">
+            <div className="rows grid-2">
+              {/* Left column */}
+              <div className="col">
+                <h4 className="section-title">Visual & Text</h4>
+
+                <div className="row">
+                  <div className="row-label">
+                    <span className="title">Font size</span>
+                    <span className="hint">Applies to labels, menus and forms</span>
+                  </div>
+                  <div className="row-control">
+                    <select
+                      value={settings.accessibility.fontSize}
+                      onChange={(e) => onA11yChange("fontSize", e.target.value)}
+                    >
+                      {options.fontSizes.map((f) => <option key={f}>{f}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="row-label"><span className="title">High contrast mode</span></div>
+                  <div className="row-control">
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={settings.accessibility.highContrast}
+                        onChange={(e) => onA11yChange("highContrast", e.target.checked)}
+                      />
+                      <span className="slider" />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="row-label"><span className="title">Screen reader support</span></div>
+                  <div className="row-control">
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={settings.accessibility.screenReader}
+                        onChange={(e) => onA11yChange("screenReader", e.target.checked)}
+                      />
+                      <span className="slider" />
+                    </label>
+                  </div>
+                </div>
+
+                <h4 className="section-title">Audio & Alerts</h4>
+
+                <div className="row">
+                  <div className="row-label"><span className="title">Sound alerts</span></div>
+                  <div className="row-control">
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={settings.accessibility.soundAlerts}
+                        onChange={(e) => onA11yChange("soundAlerts", e.target.checked)}
+                      />
+                      <span className="slider" />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="row-label"><span className="title">Vibration alerts</span></div>
+                  <div className="row-control">
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={settings.accessibility.vibrationAlerts}
+                        onChange={(e) => onA11yChange("vibrationAlerts", e.target.checked)}
+                      />
+                      <span className="slider" />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="row-label"><span className="title">Speech announcements</span></div>
+                  <div className="row-control">
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={settings.accessibility.speechAnnouncements}
+                        onChange={(e) => onA11yChange("speechAnnouncements", e.target.checked)}
+                      />
+                      <span className="slider" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right column */}
+              <div className="col">
+                <h4 className="section-title">Interaction & Input</h4>
+
+                <div className="row">
+                  <div className="row-label"><span className="title">Reduced motion</span></div>
+                  <div className="row-control">
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={settings.accessibility.reducedMotion}
+                        onChange={(e) => onA11yChange("reducedMotion", e.target.checked)}
+                      />
+                      <span className="slider" />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="row-label"><span className="title">Keyboard navigation</span></div>
+                  <div className="row-control">
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={settings.accessibility.keyboardNavigation}
+                        onChange={(e) => onA11yChange("keyboardNavigation", e.target.checked)}
+                      />
+                      <span className="slider" />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="row-label"><span className="title">Focus outline</span></div>
+                  <div className="row-control">
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={settings.accessibility.focusOutline}
+                        onChange={(e) => onA11yChange("focusOutline", e.target.checked)}
+                      />
+                      <span className="slider" />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="row-label"><span className="title">Voice control</span></div>
+                  <div className="row-control">
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={settings.accessibility.voiceControl}
+                        onChange={(e) => onA11yChange("voiceControl", e.target.checked)}
+                      />
+                      <span className="slider" />
+                    </label>
+                  </div>
+                </div>
+
+                <h4 className="section-title">Language & Display</h4>
+
+                <div className="row">
+                  <div className="row-label"><span className="title">Accessible language mode</span></div>
+                  <div className="row-control">
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={settings.accessibility.langMode}
+                        onChange={(e) => onA11yChange("langMode", e.target.checked)}
+                      />
+                      <span className="slider" />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="row-label"><span className="title">Auto contrast for dark mode</span></div>
+                  <div className="row-control">
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={settings.accessibility.autoContrastDark}
+                        onChange={(e) => onA11yChange("autoContrastDark", e.target.checked)}
+                      />
+                      <span className="slider" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="card-actions">
+              <button onClick={resetPrefs} className="btn ghost">Reset to defaults</button>
+            </div>
+          </section>
+        )}
+
+        {/* ===== MODALS (same as before) ===== */}
+        {showAddCard && (
+          <div className="modal-backdrop" onClick={() => setShowAddCard(false)} aria-hidden="true">
+            <div className="modal modal-appear" role="dialog" aria-modal="true"
+                 aria-labelledby="addpm-title" aria-describedby="addpm-desc"
+                 onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div className="warn-icon" aria-hidden="true">💳</div>
+                <div className="header-text">
+                  <h4 id="addpm-title">Add payment method</h4>
+                  <p id="addpm-desc" className="muted">Your details are stored securely.</p>
+                </div>
+              </div>
+              <form className="modal-body pm-form" onSubmit={addMethod}>
+                <label>Cardholder name
+                  <input type="text" value={newCard.name}
+                         onChange={(e) => setNewCard((c) => ({ ...c, name: e.target.value }))}
+                         placeholder="Name on card" required />
+                </label>
+                <label>Card number
+                  <input inputMode="numeric" value={newCard.number}
+                         onChange={(e) => setNewCard((c) => ({ ...c, number: e.target.value }))}
+                         placeholder="1234 5678 9012 3456" required />
+                </label>
+                <div className="pm-inline">
+                  <label>Expiry (MM/YY)
+                    <input value={newCard.exp}
+                           onChange={(e) => setNewCard((c) => ({ ...c, exp: e.target.value }))}
+                           placeholder="12/27" required />
+                  </label>
+                  <label>CVC
+                    <input inputMode="numeric" value={newCard.cvc}
+                           onChange={(e) => setNewCard((c) => ({ ...c, cvc: e.target.value }))}
+                           placeholder="123" required />
+                  </label>
+                </div>
+                <div className="muted">Brand detected: {detectBrand(newCard.number)}</div>
+              </form>
+              <div className="modal-actions">
+                <button onClick={() => setShowAddCard(false)} className="btn ghost">Cancel</button>
+                <button onClick={addMethod} className="btn">Save card</button>
+              </div>
+            </div>
           </div>
-        </Group>
+        )}
 
-        <Group title="Assistive tech">
-          <div className="sh-row">
-            <Switch label="Voice Assist" checked={prefs.voice} onChange={v=>setPrefs({...prefs, voice:v})}/>
-            <Switch label="Screen Reader Mode" checked={prefs.reader} onChange={v=>setPrefs({...prefs, reader:v})}/>
+        {showPlans && (
+          <div className="modal-backdrop" onClick={() => setShowPlans(false)} aria-hidden="true">
+            <div className="modal modal-appear" role="dialog" aria-modal="true"
+                 aria-labelledby="plans-title" aria-describedby="plans-desc"
+                 onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div className="warn-icon" aria-hidden="true">⭐</div>
+                <div className="header-text">
+                  <h4 id="plans-title">Choose a subscription</h4>
+                  <p id="plans-desc" className="muted">Select a plan that fits your needs.</p>
+                </div>
+              </div>
+              <div className="modal-body">
+                <div className="plans-grid">
+                  <PlanCard title="Basic" price={199}
+                            perks={["Standard matching", "Email support", "Limited history"]}
+                            current={billing.plan.tier === "Basic"}
+                            onSelect={() => choosePlan("Basic", 199)} />
+                  <PlanCard title="Standard" price={299} highlight
+                            perks={["Priority matching", "Push + Email alerts", "Extended history", "Faster support"]}
+                            current={billing.plan.tier === "Standard"}
+                            onSelect={() => choosePlan("Standard", 299)} />
+                  <PlanCard title="Premium" price={500}
+                            perks={["Top priority", "All channels notifications", "Advanced analytics", "24×7 support"]}
+                            current={billing.plan.tier === "Premium"}
+                            onSelect={() => choosePlan("Premium", 500)} />
+                </div>
+              </div>
+              <div className="modal-actions">
+                <button onClick={() => setShowPlans(false)} className="btn ghost">Close</button>
+              </div>
+            </div>
           </div>
-        </Group>
-      </div>
+        )}
 
-      <Group title="Ride preferences">
-        <div className="sh-row">
-          <Switch label="No music"        checked={prefs.rideNoMusic}      onChange={v=>setPrefs({...prefs, rideNoMusic:v})}/>
-          <Switch label="Pet friendly"    checked={prefs.ridePetFriendly}  onChange={v=>setPrefs({...prefs, ridePetFriendly:v})}/>
-          <Switch label="Women only rides"checked={prefs.rideWomenOnly}    onChange={v=>setPrefs({...prefs, rideWomenOnly:v})}/>
-        </div>
-      </Group>
-    </>
+        {showDeleteModal && (
+          <div className="modal-backdrop" onClick={() => setShowDeleteModal(false)} aria-hidden="true">
+            <div className="modal modal-appear" role="dialog" aria-modal="true"
+                 aria-labelledby="del-title" aria-describedby="del-desc"
+                 onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div className="warn-icon" aria-hidden="true">!</div>
+                <div className="header-text">
+                  <h4 id="del-title">Delete your account?</h4>
+                  <p id="del-desc" className="muted">This action is permanent and will log you out immediately.</p>
+                </div>
+              </div>
+              <div className="modal-body">
+                <ul className="bullet">
+                  <li>All profile data, vehicles, and preferences will be removed.</li>
+                  <li>You will be signed out on this device.</li>
+                  <li>This cannot be undone.</li>
+                </ul>
+              </div>
+              <div className="modal-actions">
+                <button onClick={() => setShowDeleteModal(false)} disabled={deleting} className="btn ghost">Cancel</button>
+                <button onClick={handleDeleteAccount} disabled={deleting} className="btn danger">
+                  {deleting ? "Deleting…" : "Confirm delete"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
   );
 }
 
-/* ---------- SECURITY (real-time) ---------- */
-function SecurityPanel({ setMsg }) {
-  const [pwd, setPwd] = useState({ current:"", next:"", confirm:"" });
-
-  // 2FA
-  const [twoFA, setTwoFA] = useState({
-    enabled: false,
-    secret: "",
-    otpauthUrl: "",
-    verified: false,
-  });
-  const [showSetup, setShowSetup] = useState(false);
-  const [otp, setOtp] = useState("");
-  const qrCanvasRef = useRef(null);
-  const [qrDrawn, setQrDrawn] = useState(false);
-
-  // Sessions
-  const [sessions, setSessions] = useState([]);
-
-  // Identity
-  const [idv, setIdv] = useState({ license: null, aadhaar: null });
-  const [uploading, setUploading] = useState(false);
-  const [uploadPct, setUploadPct] = useState(0);
-
-  useEffect(()=>{ (async()=>{
-    try{
-      const fa = await API.security?.get2FA?.().catch(()=>null);
-      const dfa = fa?.data || fa || {};
-      setTwoFA(s=>({ ...s, enabled: !!dfa.enabled, verified: !!dfa.enabled, secret: dfa.secret || "", otpauthUrl: dfa.otpauthUrl || "" }));
-
-      const ses = await API.security?.getSessions?.().catch(()=>null);
-      setSessions(ses?.data || ses || []);
-
-      const id = await API.security?.getIdentity?.().catch(()=>null);
-      const di = id?.data || id || {};
-      const norm = (v)=> (v && typeof v === "object") ? v : (v ? { url:v, status:"uploaded" } : null);
-      setIdv({ license: norm(di.license), aadhaar: norm(di.aadhaar) });
-    }catch{}
-  })(); }, []);
-
-  useEffect(()=>{
-    const load = async ()=> {
-      try{
-        const ses = await API.security?.getSessions?.().catch(()=>null);
-        if (ses) setSessions(ses?.data || ses || []);
-      }catch{}
-    };
-    const t1 = setInterval(load, 15000);
-    const t2 = setInterval(()=>{ setSessions(s => [...s]); }, 60000);
-    return ()=>{ clearInterval(t1); clearInterval(t2); };
-  }, []);
-
-  useEffect(()=>{
-    const needs = (x)=> !!x && typeof x === "object" && ["pending","review","verifying"].includes((x.status||"").toLowerCase());
-    if (!needs(idv.license) && !needs(idv.aadhaar)) return;
-    const load = async ()=>{
-      try{
-        const id = await API.security?.getIdentity?.().catch(()=>null);
-        const di = id?.data || id || {};
-        const norm = (v)=> (v && typeof v === "object") ? v : (v ? { url:v, status:"uploaded" } : null);
-        setIdv({ license:norm(di.license), aadhaar:norm(di.aadhaar) });
-      }catch{}
-    };
-    const t = setInterval(load, 10000);
-    return ()=> clearInterval(t);
-  }, [idv.license?.status, idv.aadhaar?.status]);
-
-  useEffect(()=>{
-    (async ()=>{
-      if (!showSetup || !twoFA.otpauthUrl || !qrCanvasRef.current) return;
-      setQrDrawn(false);
-      try{
-        const QR = await import(/* webpackIgnore: true */'qrcode');
-        await QR.toCanvas(qrCanvasRef.current, twoFA.otpauthUrl, { width: 180, margin: 1 });
-        setQrDrawn(true);
-      }catch{}
-    })();
-  }, [showSetup, twoFA.otpauthUrl]);
-
-  const rel = (ts)=>{
-    const d = new Date(ts || Date.now());
-    const mins = Math.round((Date.now() - d.getTime())/60000);
-    if (mins < 1) return "just now";
-    if (mins < 60) return `${mins}m ago`;
-    const h = Math.floor(mins/60);
-    return `${h}h ${mins%60}m ago`;
-  };
-
-  const changePwd = async ()=>{
-    try{
-      if(!pwd.current || !pwd.next || pwd.next!==pwd.confirm) throw new Error("Fill password fields correctly.");
-      await API.users?.changePassword?.({ currentPassword:pwd.current, newPassword:pwd.next });
-      setPwd({ current:"", next:"", confirm:"" });
-      setMsg({ ok:"Password changed.", err:"" });
-    }catch(e){ setMsg({ ok:"", err:String(e?.message || e) }); }
-  };
-
-  const startEnable2FA = async ()=>{
-    try{
-      const r = await (API.security?.provision2FA?.() || API.security?.get2FASecret?.())?.catch(()=>null);
-      const d = r?.data || r || {};
-      const secret = d.secret || twoFA.secret || "";
-      const email = (await API.users?.me?.().catch(()=>({})))?.user?.email || "";
-      const issuer = (d.issuer || document.title || "App").replace(/\s+/g, "_");
-      const otpauthUrl = d.otpauthUrl || (secret ? `otpauth://totp/${issuer}:${encodeURIComponent(email)}?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30` : "");
-      setTwoFA(s=>({ ...s, secret, otpauthUrl, enabled:false, verified:false }));
-      setShowSetup(true);
-      setMsg({ ok:"Scan the QR and verify to enable 2FA.", err:"" });
-    }catch(e){
-      try{
-        await API.security?.set2FA?.({ enabled:true });
-        setTwoFA(s=>({ ...s, enabled:true, verified:true }));
-        setShowSetup(false);
-        setMsg({ ok:"Two-factor enabled.", err:"" });
-      }catch(err){ setMsg({ ok:"", err:String(err?.message||err) }); }
-    }
-  };
-
-  const verify2FA = async ()=>{
-    try{
-      if (!otp || otp.trim().length < 6) throw new Error("Enter 6-digit code.");
-      const r = await API.security?.verify2FA?.({ code: otp }).catch(()=>({ success:true }));
-      const ok = r?.success ?? r?.verified ?? true;
-      if (!ok) throw new Error("Invalid code.");
-      setTwoFA(s=>({ ...s, enabled:true, verified:true }));
-      setShowSetup(false);
-      setOtp("");
-      setMsg({ ok:"Two-factor enabled.", err:"" });
-    }catch(e){ setMsg({ ok:"", err:String(e?.message||e) }); }
-  };
-
-  const disable2FA = async ()=>{
-    try{
-      await API.security?.set2FA?.({ enabled:false });
-      setTwoFA({ enabled:false, secret:"", otpauthUrl:"", verified:false });
-      setShowSetup(false);
-      setOtp("");
-      setMsg({ ok:"Two-factor disabled.", err:"" });
-    }catch(e){ setMsg({ ok:"", err:String(e?.message||e) }); }
-  };
-
-  const logoutSession = async (id)=>{
-    try{
-      await API.security?.revokeSession?.(id);
-      setSessions(s=>s.filter(x=>x.id!==id));
-    }catch(e){ setMsg({ ok:"", err:String(e?.message||e) }); }
-  };
-
-  const onUpload = async (e, field)=>{
-    const file = e.target.files?.[0]; if(!file) return;
-    setUploading(true); setUploadPct(0);
-    try{
-      const fd = new FormData(); fd.append("file", file);
-      const up = API.security?.uploadIdentity;
-      if (up?.length >= 3) {
-        const r = await up(field, fd, (pct)=> setUploadPct(pct));
-        const url = r?.data?.url || r?.url || "(uploaded)";
-        setIdv(v=>({ ...v, [field]: { url, status:"uploaded" } }));
-      } else {
-        const r = await up?.(field, fd).catch(()=>null);
-        const url = r?.data?.url || r?.url || "(uploaded)";
-        setIdv(v=>({ ...v, [field]: { url, status:"uploaded" } }));
-      }
-      setMsg({ ok:"Document uploaded.", err:"" });
-    }catch(e){ setMsg({ ok:"", err:String(e?.message||e) }); }
-    finally{ setUploading(false); setUploadPct(0); e.target.value=""; }
-  };
-
+/* ---------- Plan card component ---------- */
+function PlanCard({ title, price, perks, highlight = false, current = false, onSelect }) {
   return (
-    <div className="sh-security">
-      <h1 className="sh-h1">Security</h1>
-
-      <section className="sh-card">
-        <div className="sh-card-head">
-          <div className="sh-card-title">Change password</div>
-          <Button onClick={changePwd}>Update</Button>
-        </div>
-        <div className="sh-line" />
-        <div className="sh-grid-3" style={{marginTop:10}}>
-          <div className="sh-field">
-            <label>Current password</label>
-            <input type="password" value={pwd.current} onChange={e=>setPwd({...pwd,current:e.target.value})}/>
-          </div>
-          <div className="sh-field">
-            <label>New password</label>
-            <input type="password" value={pwd.next} onChange={e=>setPwd({...pwd,next:e.target.value})}/>
-          </div>
-          <div className="sh-field">
-            <label>Confirm new password</label>
-            <input type="password" value={pwd.confirm} onChange={e=>setPwd({...pwd,confirm:e.target.value})}/>
-          </div>
-        </div>
-      </section>
-
-      <section className="sh-card">
-        <div className="sh-card-head">
-          <div className="sh-card-title">Two-Factor Authentication (2FA)</div>
-        </div>
-        <div className="sh-line" />
-
-        <div className="sh-row-between" style={{padding:"16px 4px"}}>
-          <div>
-            <div style={{fontWeight:600,color:"var(--txt)"}}>Enable 2FA (TOTP/OTP)</div>
-            {twoFA.enabled && twoFA.verified && <div className="sh-badge ok">Enabled</div>}
-            {!twoFA.enabled && !showSetup && <div className="sh-help">Protect your account with an authenticator app.</div>}
-          </div>
-
-          <div>
-            {twoFA.enabled ? (
-              <Switch checked={true} onChange={()=>disable2FA()} />
-            ) : (
-              <Switch checked={false} onChange={()=>startEnable2FA()} />
-            )}
-          </div>
-        </div>
-
-        {showSetup && (
-          <>
-            <div className="sh-line" />
-            <div className="sh-2fa-setup">
-              <div className="sh-qr-wrap">
-                <canvas ref={qrCanvasRef} className="sh-qr" style={{display: qrDrawn ? "block":"none"}} />
-                {!qrDrawn && twoFA.otpauthUrl && (
-                  <img
-                    className="sh-qr"
-                    alt="QR"
-                    src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(twoFA.otpauthUrl)}&size=180x180`}
-                  />
-                )}
-              </div>
-              <div className="sh-setup-right">
-                <div className="sh-help">Scan this QR in your authenticator app.</div>
-                <div className="sh-help">Or enter the key manually:</div>
-                <div className="sh-kbd">{twoFA.secret || "••••••••"}</div>
-                <div className="sh-setup-verify">
-                  <Input label="Enter 6-digit code" value={otp} onChange={setOtp} inputMode="numeric" maxLength={6} />
-                  <Button onClick={verify2FA}>Verify & enable</Button>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-      </section>
-
-      <section className="sh-card">
-        <div className="sh-card-head">
-          <div className="sh-card-title">Login devices / sessions</div>
-        </div>
-        <div className="sh-line" />
-        <div className="sh-card-body">
-          <div className="sh-table">
-            <div className="sh-tr sh-th"><div>Device</div><div>IP</div><div>Last Active</div><div></div></div>
-            {sessions.map(s=>(
-              <div className="sh-tr" key={s.id}>
-                <div>{s.device || "Unknown"}</div>
-                <div>{s.ip || "—"}</div>
-                <div title={new Date(s.lastActive||Date.now()).toLocaleString()}>
-                  {rel(s.lastActive)}
-                </div>
-                <div className="sh-right">
-                  {s.current ? <span className="sh-tag">Current</span> :
-                    <Button variant="ghost" onClick={()=>logoutSession(s.id)}>Log out</Button>}
-                </div>
-              </div>
-            ))}
-            {!sessions.length && <div className="sh-empty">No active sessions.</div>}
-          </div>
-        </div>
-      </section>
-
-      <section className="sh-card">
-        <div className="sh-card-head">
-          <div className="sh-card-title">Identity verification</div>
-        </div>
-        <div className="sh-line" />
-
-        <div className="sh-grid-2">
-          <div className="sh-field">
-            <label>Driver license</label>
-            <div className="sh-row">
-              <Button variant="secondary" onClick={()=>document.getElementById("licUp").click()} disabled={uploading}>Upload</Button>
-              <span className="sh-help">{idv.license ? (idv.license.status || "Uploaded") : "Not uploaded"}</span>
-              {idv.license?.url && <a href={idv.license.url} target="_blank" rel="noreferrer" className="sh-link">View</a>}
-            </div>
-            <input id="licUp" type="file" accept="image/*,application/pdf" hidden onChange={e=>onUpload(e,"license")}/>
-          </div>
-
-          <div className="sh-field">
-            <label>Aadhaar / ID</label>
-            <div className="sh-row">
-              <Button variant="secondary" onClick={()=>document.getElementById("aadUp").click()} disabled={uploading}>Upload</Button>
-              <span className="sh-help">{idv.aadhaar ? (idv.aadhaar.status || "Uploaded") : "Not uploaded"}</span>
-              {idv.aadhaar?.url && <a href={idv.aadhaar.url} target="_blank" rel="noreferrer" className="sh-link">View</a>}
-            </div>
-            <input id="aadUp" type="file" accept="image/*,application/pdf" hidden onChange={e=>onUpload(e,"aadhaar")}/>
-          </div>
-        </div>
-
-        {uploading && (
-          <div className="sh-uploadbar">
-            <div className="sh-uploadbar-fill" style={{width:`${uploadPct||30}%`}} />
-            <span>{uploadPct ? `${uploadPct}%` : "Uploading…"}</span>
-          </div>
-        )}
-      </section>
+    <div className={`plan-card ${highlight ? "highlight" : ""}`}>
+      <div className="plan-head">
+        <h5>{title}</h5>
+        <div className="plan-price">₹{price}</div>
+      </div>
+      <ul className="plan-perks">
+        {perks.map((p, i) => <li key={i}>{p}</li>)}
+      </ul>
+      <button
+        className={`btn ${highlight ? "primary" : ""}`}
+        onClick={onSelect}
+        disabled={current}
+        aria-disabled={current}
+      >
+        {current ? "Current plan" : "Select"}
+      </button>
     </div>
   );
 }
