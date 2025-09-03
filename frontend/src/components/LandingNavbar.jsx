@@ -1,3 +1,4 @@
+// frontend/src/components/LandingNavbar.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./LandingNavbar.css";
@@ -9,12 +10,10 @@ function LandingNavbar({ onShowLogin, onShowRegister, user: userProp, onLogout }
   const [me, setMe] = useState(userProp || null);
   const ddRef = useRef(null);
 
-  // keep in sync with parent user
   useEffect(() => {
     setMe(userProp || null);
   }, [userProp]);
 
-  // when menu opens, pull latest profile (avatarUrl may have just changed)
   useEffect(() => {
     if (!open) return;
     (async () => {
@@ -25,7 +24,6 @@ function LandingNavbar({ onShowLogin, onShowRegister, user: userProp, onLogout }
     })();
   }, [open]);
 
-  // close dropdown on outside click / ESC
   useEffect(() => {
     const onDocClick = (e) => {
       if (ddRef.current && !ddRef.current.contains(e.target)) setOpen(false);
@@ -58,14 +56,12 @@ function LandingNavbar({ onShowLogin, onShowRegister, user: userProp, onLogout }
   return (
     <header className="lnav">
       <nav className="lnav__inner" aria-label="Primary">
-        {/* Left: Logo */}
         <div className="lnav__left">
           <Link to="/" className="lnav__logo" aria-label="CarpoolX Home">
             <span className="lnav__brand">CarpoolX</span>
           </Link>
         </div>
 
-        {/* Center: Links */}
         <div className="lnav__center">
           <Link to="/about" className="lnav__link">About</Link>
           <Link to="/team" className="lnav__link">Our Team</Link>
@@ -76,7 +72,6 @@ function LandingNavbar({ onShowLogin, onShowRegister, user: userProp, onLogout }
           <Link to="/faq" className="lnav__link">FAQ</Link>
         </div>
 
-        {/* Right: Dashboard + User */}
         <div className="lnav__right">
           {!me ? (
             <>
@@ -89,10 +84,8 @@ function LandingNavbar({ onShowLogin, onShowRegister, user: userProp, onLogout }
                 Dashboard
               </button>
 
-              {/* Push user to extreme right */}
               <div className="lnav__spacer" />
 
-              {/* Username trigger + dropdown */}
               <div className="userdd" ref={ddRef}>
                 <button
                   className="userdd__trigger"
@@ -101,7 +94,6 @@ function LandingNavbar({ onShowLogin, onShowRegister, user: userProp, onLogout }
                   onClick={() => setOpen((v) => !v)}
                   title="Account"
                 >
-                  {/* 👇 Avatar circle in the trigger (real-time) */}
                   <span className="userdd__avatar">
                     {avatar ? (
                       <img src={avatar} alt="Profile" />
@@ -141,7 +133,8 @@ function LandingNavbar({ onShowLogin, onShowRegister, user: userProp, onLogout }
                       View Profile
                     </button>
 
-                    <button className="userdd_item userdd_logout" onClick={handleLogoutClick}>
+                    {/* ✅ fixed classes here */}
+                    <button className="userdd__item userdd__logout" onClick={handleLogoutClick}>
                       Logout
                     </button>
                   </div>
@@ -156,3 +149,4 @@ function LandingNavbar({ onShowLogin, onShowRegister, user: userProp, onLogout }
 }
 
 export default LandingNavbar;
+

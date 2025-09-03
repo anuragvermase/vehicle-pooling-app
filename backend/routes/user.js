@@ -1,4 +1,3 @@
-// backend/routes/user.js
 import express from "express";
 import path from "path";
 import fs from "fs";
@@ -85,7 +84,7 @@ router.put("/me/settings", protect, async (req, res) => {
   res.json({ success: true, settings: user.settings });
 });
 
-// POST /api/users/me/avatar  (field: "avatar") -> { success, url, avatarUrl }
+// POST /api/users/me/avatar  (field: "avatar")
 router.post("/me/avatar", protect, upload.single("avatar"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ success: false, message: "No file" });
@@ -131,6 +130,31 @@ router.post("/me/password", protect, async (req, res) => {
   } catch (e) {
     console.error(e);
     return res.status(500).json({ success: false, message: "Password update failed" });
+  }
+});
+
+/* === NEW === DELETE /api/users/me — permanently delete the current user */
+router.delete("/me", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("profilePicture avatar avatarUrl");
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    // Optional: try to remove local avatar file if it’s under /uploads/avatars
+    const url = user.profilePicture || user.avatarUrl || user.avatar;
+    try {
+      if (url && url.includes("/uploads/avatars/")) {
+        const fileName = url.split("/uploads/avatars/")[1];
+        const filePath = path.join(__dirname, "..", "uploads", "avatars", fileName);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      }
+    } catch { /* ignore file errors */ }
+
+    await User.findByIdAndDelete(req.user.id);
+
+    return res.status(204).end(); // No content
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ success: false, message: "Delete failed" });
   }
 });
 
