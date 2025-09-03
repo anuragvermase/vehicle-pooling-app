@@ -16,7 +16,7 @@
     "seed": "node scripts/seedData.js",
     "build": "npm run lint && npm test",
     "docker:build": "docker build -t rideshare-backend .",
-    "docker:run": "docker run -p 5000:5000 rideshare-backend"
+    "docker:run": "docker run -p 5001:5001 rideshare-backend"
   },
   "dependencies": {
     "axios": "^1.11.0",
