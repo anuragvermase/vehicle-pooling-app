@@ -11,6 +11,7 @@ import Login from "../screens/Login";
 import Register from "../screens/Register";
 import Dashboard from "../screens/Dashboard";
 import FindRides from "../screens/FindRides";
+import Settings from "../screens/Settings";
 import CreateRide from "../screens/CreateRide";
 import MyRides from "../screens/MyRides";
 import Profile from "../screens/Profile";
@@ -25,6 +26,7 @@ export type RootParams = {
   CreateRide: undefined;
   MyRides: undefined;
   Profile: undefined;
+  Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootParams>();
@@ -69,6 +71,7 @@ export default function RootNavigator() {
       <Stack.Screen name="CreateRide" component={CreateRide} options={{ title: "Offer a Ride" }} />
       <Stack.Screen name="MyRides" component={MyRides} options={{ title: "My Rides" }} />
       <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
+      <Stack.Screen name="Settings" component={Settings} options={{ title: "Settings" }} />
 
     </Stack.Navigator>
   );

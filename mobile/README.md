@@ -48,3 +48,14 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Maps setup
+
+- API keys: Configure `GOOGLE_MAPS_API_KEY` in `mobile/app.config.ts` (under `extra` and platform-specific `ios.config.googleMapsApiKey` / `android.config.googleMaps.apiKey`). The mobile app reads this key to call Google Directions and Places APIs.
+- Libraries already included: `react-native-maps` for the map view and `react-native-google-places-autocomplete` for place search.
+- New component: `mobile/components/EnhancedMap.tsx` mirrors web `EnhancedMap.jsx`. It supports:
+  - origin/destination directions with optional via points
+  - ride markers and selection
+  - user location marker
+- Usage example:
+  - See `mobile/src/screens/FindRides.tsx` where `EnhancedMap` renders the route between selected places and returns `distanceText`/`durationText` via `onRouteInfo`.

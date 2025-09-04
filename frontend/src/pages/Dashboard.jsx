@@ -386,8 +386,9 @@ const Dashboard = ({ user, onLogout }) => {
           <div>
             <div style={{ fontSize: 24, fontWeight: 800 }}>Dashboard</div>
             <div style={{ fontSize: 12, color: "#9ca3af" }}>
-              Welcome back, {user?.name || me?.name || "User"} •{" "}
-              {isConnected ? "Live" : "Offline"}
+              Welcome back, {user?.name || me?.name || "User"} 
+              {/* •{" "} */}
+              {/* {isConnected ? "Live" : "Offline"} */}
             </div>
           </div>
 

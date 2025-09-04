@@ -9,3 +9,7 @@ package.json
 
 # To also ignore in subdirectories:
 **/package.json
+
+# Ignore log files
+/backend/logs/
+*.log

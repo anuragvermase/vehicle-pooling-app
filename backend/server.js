@@ -14,7 +14,7 @@ import connectDB from './config/database.js';
 import authRoutes from './routes/auth.js';
 import usersRoutes from './routes/user.js';
 import dashboardRoutes from './routes/dashboard.js';
-import rideRoutes from './routes/rides.js';       // includes POST /api/rides/create and POST /api/rides
+import rideRoutes from './routes/rides.js';
 import bookingRoutes from './routes/bookings.js';
 import chatRoutes from './routes/chat.js';
 import auth from './middleware/auth.js';
@@ -29,7 +29,10 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const server = createServer(app);
 const isProd = process.env.NODE_ENV === 'production';
-const PORT = process.env.PORT || 5001;
+
+/* ----------------- IMPORTANT: listen on 5000 (not 5001) ------------------ */
+const PORT = Number(process.env.PORT) || 5000;
+const HOST = '0.0.0.0';
 
 /* ------------------------------- Hardening ------------------------------- */
 app.disable('x-powered-by');
@@ -46,7 +49,7 @@ const frontends =
   process.env.FRONTEND_URLS?.split(',').map(s => s.trim()).filter(Boolean) ||
   (process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []);
 
-const expressCorsOrigin = isProd ? frontends : true; // true = reflect request origin (dev)
+const expressCorsOrigin = isProd ? frontends : true; // true = reflect request origin in dev
 const socketCorsOrigin = isProd ? frontends : true;
 
 /* -------------------------------- Socket.IO ------------------------------ */
@@ -67,10 +70,10 @@ app.use(
     origin: expressCorsOrigin,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    // allow header your app sends
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
   })
 );
-// Explicit preflight for all routes
 app.options('*', cors({ origin: expressCorsOrigin, credentials: true }));
 
 /* ------------------------------- Parsers ---------------------------------- */
@@ -78,7 +81,6 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 /* --------------------------- Static file serving -------------------------- */
-// serve uploaded avatars: /uploads/avatars/<file>
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 /* ---------------------------- Request logger ------------------------------ */
@@ -151,11 +153,11 @@ app.get('/api/auth/me', auth, async (req, res, next) => {
 
     const User = (await import('./models/User.js')).default;
     const user = await User.findById(uid).select(
-      'name fullName username firstName lastName email avatarUrl profilePicture avatar' // include avatar
+      'name fullName username firstName lastName email avatarUrl profilePicture avatar'
     );
 
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    res.set('Cache-Control', 'no-store'); // avoid stale caches
+    res.set('Cache-Control', 'no-store');
     res.json({ user });
   } catch (e) {
     next(e);
@@ -173,7 +175,7 @@ app.post('/api/auth/avatar', auth, uploadAvatar.single('avatar'), async (req, re
     const User = (await import('./models/User.js')).default;
     const user = await User.findByIdAndUpdate(
       uid,
-      { avatarUrl: fileUrl, profilePicture: fileUrl, avatar: fileUrl }, // set all three
+      { avatarUrl: fileUrl, profilePicture: fileUrl, avatar: fileUrl },
       { new: true }
     ).select('name email avatarUrl profilePicture avatar');
 
@@ -218,12 +220,21 @@ const startServer = async () => {
   try {
     await connectDB();
 
-    // Bind to 0.0.0.0 so phones on your LAN can reach it
-    server.listen(PORT, '0.0.0.0', () => {
+    // helpful error if port is busy (or other errors)
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        logger.error(`Port ${PORT} is already in use. Close the other process or pick a free port.`);
+      } else {
+        logger.error('HTTP server error:', err);
+      }
+      process.exit(1);
+    });
+
+    server.listen(PORT, HOST, () => {
       const ip = getLanIPv4();
       const origins = expressCorsOrigin === true ? '(any - dev)' : JSON.stringify(frontends);
 
-      logger.info(`🚗 RideShare Pro Server running on port ${PORT}`);
+      logger.info(`🚗 RideShare Pro Server running on http://${HOST}:${PORT}`);
       logger.info(`🔗 Local Health:  http://localhost:${PORT}/api/health`);
       logger.info(`📱 Phone Health:  http://${ip}:${PORT}/api/health`);
       logger.info(`🔌 WebSocket: Active`);
