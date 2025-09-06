@@ -162,4 +162,10 @@ export const RideAPI = {
       return await postFirst<RideDto[]>(postPaths, q);
     }
   },
+  async upcomingMe(): Promise<any | null> {
+    try {
+      const { data } = await http.get("/rides/upcoming/me");
+      return data?.ride ?? data ?? null;
+    } catch { return null; }
+  },
 };

@@ -26,3 +26,7 @@ dist-ssr
 # Ignore log files
 /backend/logs/
 *.log
+
+# Ignore uploaded avatars
+backend/uploads/avatars/
+
