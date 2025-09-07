@@ -1,3 +1,4 @@
+// src/services/api.js
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -10,7 +11,7 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 30000,
-  withCredentials: false,
+  withCredentials: false, // tokens via Authorization header
 });
 
 // Inject auth + cache-buster
@@ -23,7 +24,8 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error));
+  (error) => Promise.reject(error)
+);
 
 // Normalize errors + auto-redirect on 401
 apiClient.interceptors.response.use(
@@ -43,7 +45,8 @@ apiClient.interceptors.response.use(
       if (window.location.pathname !== '/login') window.location.href = '/login';
     }
     return Promise.reject(new Error(msg));
-  });
+  }
+);
 
 const API = {
   raw: apiClient,
@@ -58,12 +61,11 @@ const API = {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
     },
-    // ✅ Canonical change password endpoint used by Settings
+    // Canonical change password endpoint used by Settings
     updatePassword: (currentPassword, newPassword) =>
       apiClient.post('/users/me/password', { currentPassword, newPassword }),
-
     changePassword: (payload) => apiClient.post('/users/me/password', payload),
-
+    // Delete account matches backend route
     deleteMe: () => apiClient.delete('/users/me'),
   },
 
@@ -76,7 +78,7 @@ const API = {
     verifyEmail: (token) => apiClient.post('/auth/verify-email', { token }),
     refreshToken: () => apiClient.post('/auth/refresh-token'),
     logout: () => apiClient.post('/auth/logout'),
-    // ✅ Added missing Google login method
+    // Added Google login method
     loginWithGoogle: (data) => apiClient.post('/auth/google', data),
   },
 
@@ -101,8 +103,7 @@ const API = {
       return apiClient.get(`/rides/suggestions?${params.toString()}`);
     },
     getRideDetails: (rideId) => apiClient.get(`/rides/${rideId}`),
-    cancelRide: (rideId, reason) =>
-      apiClient.put(`/rides/${rideId}/cancel`, { reason }),
+    cancelRide: (rideId, reason) => apiClient.put(`/rides/${rideId}/cancel`, { reason }),
     getRideBookings: (rideId) => apiClient.get(`/rides/${rideId}/bookings`),
     getUserRides: (status = 'all') => apiClient.get(`/rides/user?status=${status}`),
   },
