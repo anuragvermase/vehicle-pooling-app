@@ -4,8 +4,8 @@ import type { ExpoConfig } from 'expo/config';
 
 export default ({ config }: { config: ExpoConfig }) => {
   // Use your server's Phone Health IP from the backend logs
-  const API_BASE = process.env.API_BASE_URL ?? 'http://192.168.132.193:5000/api';
-  const SOCKET = process.env.SOCKET_URL ?? 'http://192.168.132.193:5000';
+  const API_BASE = process.env.API_BASE_URL ?? 'http://192.168.132.193:5001/api';
+  const SOCKET = process.env.SOCKET_URL ?? 'http://192.168.132.193:5001';
 
   // One Google key used everywhere (Expo Go + JS Places/Directions + native maps)
   const MOBILE_KEY =

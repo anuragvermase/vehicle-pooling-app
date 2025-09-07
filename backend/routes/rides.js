@@ -9,7 +9,7 @@ import {
   geocodeAddress,
   calculateRoute,
   getLocationSuggestions,
-  calculateDistance, // used for Haversine fallback
+  calculateDistance, // used for Haversine fallback & end-distance
 } from '../services/googleMapsService.js';
 import { ensureOp } from '../services/idempotency.js'; // idempotency (Redis/memory), safe if present
 
@@ -309,154 +309,378 @@ router.post('/', protect, createRideHandler);
 router.get('/search', protect, async (req, res) => {
   try {
     const {
-      from,
-      to,
-      via,
-      date,
-      passengers = 1,
-      maxPrice,
-      departure_time_start,
-      departure_time_end,
-      radius = 10, // km
-      amenities,
-      vehicleType,
-      instantBooking,
+      from, to, via, date, passengers = 1, maxPrice,
+      departure_time_start, departure_time_end,
+      radius = 10, amenities, vehicleType, instantBooking,
       sortBy = 'price',
-      // NEW: if client sends coordinates, we can skip geocoding:
-      fromLat,
-      fromLng,
-      toLat,
-      toLng,
-      viaLat,
-      viaLng,
-      trustCoordinates,
+      fromLat, fromLng, toLat, toLng, viaLat, viaLng, trustCoordinates,
+      group = 'false',
+      includeOwn = 'false',               // <-- NEW
     } = req.query;
 
-    const query = {
+    const pax = Math.max(1, parseInt(passengers, 10) || 1);
+    const radMeters = Number(radius) * 1000;
+    const radSphere = Number(radius) / 6378.1;
+
+    // Base match
+    const baseMatch = {
       status: 'active',
-      availableSeats: { $gte: parseInt(passengers) },
-      driver: { $ne: req.user.id },
+      availableSeats: { $gte: pax },
     };
-
-    // Helper to add $near queries
-    const addNear = (field, lat, lng) => {
-      if (!isNumber(lat) || !isNumber(lng)) return;
-      query[field] = {
-        $near: {
-          $geometry: { type: 'Point', coordinates: [Number(lng), Number(lat)] },
-          $maxDistance: Number(radius) * 1000,
-        },
-      };
-    };
-
-    // Prefer coordinates if provided
-    if (trustCoordinates === 'true' || trustCoordinates === true) {
-      addNear('startLocation.coordinates', Number(fromLat), Number(fromLng));
-      addNear('endLocation.coordinates', Number(toLat), Number(toLng));
-      addNear('viaLocations.coordinates', Number(viaLat), Number(viaLng));
-    } else {
-      // Otherwise, geocode the text inputs
-      if (from) {
-        try {
-          const g = await geocodeAddress(from);
-          addNear('startLocation.coordinates', g.coordinates.lat, g.coordinates.lng);
-        } catch {
-          query['startLocation.name'] = { $regex: from, $options: 'i' };
-        }
-      }
-
-      if (to) {
-        try {
-          const g = await geocodeAddress(to);
-          addNear('endLocation.coordinates', g.coordinates.lat, g.coordinates.lng);
-        } catch {
-          query['endLocation.name'] = { $regex: to, $options: 'i' };
-        }
-      }
-
-      if (via) {
-        try {
-          const g = await geocodeAddress(via);
-          addNear('viaLocations.coordinates', g.coordinates.lat, g.coordinates.lng);
-        } catch {
-          query['viaLocations.name'] = { $regex: via, $options: 'i' };
-        }
-      }
+    if (includeOwn !== 'true') {
+      baseMatch.driver = { $ne: req.user.id };         // <-- keep default behavior
     }
 
-    // Date filter (same-day window)
+    // Date window (UTC-safe same-day)
     if (date) {
-      const searchDate = new Date(date);
-      const nextDay = new Date(searchDate);
-      nextDay.setDate(nextDay.getDate() + 1);
-      query.departureTime = { $gte: searchDate, $lt: nextDay };
+      const start = new Date(date);
+      start.setUTCHours(0,0,0,0);
+      const end = new Date(start); end.setUTCDate(end.getUTCDate() + 1);
+      baseMatch.departureTime = { $gte: start, $lt: end };
     }
 
-    if (maxPrice) query.pricePerSeat = { $lte: parseInt(maxPrice) };
-
+    // Departure time window (optional)
     if (departure_time_start && departure_time_end) {
-      query.departureTime = {
-        ...(query.departureTime || {}),
+      baseMatch.departureTime = {
+        ...(baseMatch.departureTime || {}),
         $gte: new Date(departure_time_start),
         $lte: new Date(departure_time_end),
       };
     }
 
-    if (amenities) {
-      const arr = Array.isArray(amenities) ? amenities : String(amenities).split(',');
-      query['vehicle.amenities'] = { $all: arr };
-    }
+    if (maxPrice) baseMatch.pricePerSeat = { $lte: parseInt(maxPrice, 10) };
 
-    if (vehicleType) {
-      query['vehicle.type'] = vehicleType;
+    if (vehicleType && vehicleType !== 'any') {
+      baseMatch['vehicle.type'] = vehicleType;
     }
 
     if (instantBooking === 'true') {
-      query['bookingPolicy.instantBooking'] = true;
+      baseMatch['bookingPolicy.instantBooking'] = true;
     }
 
-    let sortOptions = {};
-    switch (sortBy) {
-      case 'price':
-        sortOptions = { pricePerSeat: 1 };
-        break;
-      case 'rating':
-        sortOptions = { 'rating.average': -1 };
-        break;
-      case 'time':
-        sortOptions = { departureTime: 1 };
-        break;
-      case 'duration':
-        sortOptions = { duration: 1 };
-        break;
-      case 'distance':
-        sortOptions = { distance: 1 };
-        break;
-      default:
-        sortOptions = { departureTime: 1 };
+    if (amenities) {
+      const arr = Array.isArray(amenities) ? amenities : String(amenities).split(',').map((s) => s.trim());
+      if (arr.length) baseMatch['vehicle.amenities'] = { $all: arr };
     }
 
-    const rides = await Ride.find(query)
-      .populate('driver', 'name rating phone profilePicture vehicle stats')
-      .sort(sortOptions)
-      .limit(50);
+    // Resolve coordinates (prefer trusted coordinates)
+    async function getCoords(text, latStr, lngStr) {
+      const lat = Number(latStr);
+      const lng = Number(lngStr);
+      if ((trustCoordinates === 'true' || trustCoordinates === true) && isNumber(lat) && isNumber(lng)) {
+        return { lat, lng };
+      }
+      if (isNumber(lat) && isNumber(lng)) return { lat, lng };
+      if (!text) return null;
+      try {
+        const g = await geocodeAddress(text);
+        if (g?.coordinates && isNumber(g.coordinates.lat) && isNumber(g.coordinates.lng)) {
+          return { lat: g.coordinates.lat, lng: g.coordinates.lng };
+        }
+      } catch { /* noop */ }
+      return null;
+    }
 
-    const enriched = rides.map((ride) => {
-      const obj = ride.toObject();
-      const dynamic = ride.calculateDynamicPrice?.() ?? ride.pricePerSeat;
-      return {
-        ...obj,
-        canBook: ride.availableSeats >= parseInt(passengers),
-        currentPrice: dynamic,
-        estimatedArrival: new Date(ride.departureTime.getTime() + (ride.duration || 0) * 60000),
-        totalCost: dynamic * parseInt(passengers),
-      };
-    });
+    const origin = await getCoords(from, fromLat, fromLng);
+    const dest   = await getCoords(to, toLat, toLng);
+    const viaPt  = await getCoords(via, viaLat, viaLng);
 
-    res.json({ success: true, count: enriched.length, rides: enriched });
+    const canUseGeo = !!origin;
+
+    let docs = [];
+    if (canUseGeo) {
+      // --- Preferred path: $geoNear on start, then $geoWithin on end/via + attribute filters
+      const pipeline = [
+        {
+          $geoNear: {
+            near: { type: 'Point', coordinates: [origin.lng, origin.lat] },
+            key: 'startLocation.coordinates',
+            distanceField: '_distanceFromStart',
+            spherical: true,
+            maxDistance: radMeters,
+          },
+        },
+        { $match: baseMatch },
+      ];
+
+      if (dest) {
+        pipeline.push({
+          $match: {
+            'endLocation.coordinates': {
+              $geoWithin: {
+                $centerSphere: [[dest.lng, dest.lat], radSphere],
+              },
+            },
+          },
+        });
+      }
+
+      if (viaPt) {
+        pipeline.push({
+          $match: {
+            'viaLocations.coordinates': {
+              $geoWithin: {
+                $centerSphere: [[viaPt.lng, viaPt.lat], radSphere],
+              },
+            },
+          },
+        });
+      }
+
+      pipeline.push(
+        { $sort: { departureTime: 1 } },
+        { $limit: 80 }
+      );
+
+      const raw = await Ride.aggregate(pipeline);
+
+      // Hydrate driver + compute end distance + currentPrice + relevance
+      const rideIds = raw.map((r) => r._id);
+      const ridesFull = await Ride.find({ _id: { $in: rideIds } })
+        .populate('driver', 'name rating phone profilePicture vehicle stats');
+
+      const ridesById = new Map(ridesFull.map((r) => [String(r._id), r]));
+      docs = raw.map((doc) => {
+        const ride = ridesById.get(String(doc._id));
+        if (!ride) return null;
+        const startKm = (doc._distanceFromStart || 0) / 1000;
+        const endKm = dest
+          ? calculateDistance(
+              ride.endLocation?.lat ?? ride.endLocation?.coordinates?.coordinates?.[1],
+              ride.endLocation?.lng ?? ride.endLocation?.coordinates?.coordinates?.[0],
+              dest.lat,
+              dest.lng
+            )
+          : 0;
+
+        const currentPrice = ride.calculateDynamicPrice?.() ?? ride.pricePerSeat;
+        const relevance =
+          (1 / (1 + startKm)) * 0.35 +
+          (1 / (1 + endKm)) * 0.35 +
+          (1 / (1 + Math.max(0, (ride.duration || 0) / 60))) * 0.10 +
+          (1 / (1 + currentPrice / 1000)) * 0.20;
+
+        return {
+          ...ride.toObject(),
+          startDistanceKm: Number(startKm.toFixed(2)),
+          endDistanceKm: Number(endKm.toFixed(2)),
+          canBook: ride.availableSeats >= pax,
+          currentPrice,
+          totalCost: currentPrice * pax,
+          estimatedArrival: new Date(ride.departureTime.getTime() + (ride.duration || 0) * 60000),
+          _relevance: relevance,
+        };
+      }).filter(Boolean);
+
+      // Sorting
+      switch (sortBy) {
+        case 'price':
+          docs.sort((a, b) => (a.currentPrice ?? a.pricePerSeat) - (b.currentPrice ?? b.pricePerSeat));
+          break;
+        case 'rating':
+          docs.sort((a, b) => (b.driver?.rating?.average ?? 0) - (a.driver?.rating?.average ?? 0));
+          break;
+        case 'time':
+          docs.sort((a, b) => new Date(a.departureTime) - new Date(b.departureTime));
+          break;
+        case 'duration':
+          docs.sort((a, b) => (a.duration ?? 0) - (b.duration ?? 0));
+          break;
+        case 'distance':
+          docs.sort((a, b) => (a.startDistanceKm + a.endDistanceKm) - (b.startDistanceKm + b.endDistanceKm));
+          break;
+        case 'relevance':
+        default:
+          docs.sort((a, b) => (b._relevance ?? 0) - (a._relevance ?? 0));
+      }
+
+      docs = docs.slice(0, 50);
+    } else {
+      // --- Fallback path: no origin coords — name regex + attribute filters + simple sorts
+      const q = { ...baseMatch };
+      if (from) q['startLocation.name'] = { $regex: from, $options: 'i' };
+      if (to) q['endLocation.name'] = { $regex: to, $options: 'i' };
+      if (via) q['viaLocations.name'] = { $regex: via, $options: 'i' };
+
+      let sortOptions = {};
+      switch (sortBy) {
+        case 'price': sortOptions = { pricePerSeat: 1 }; break;
+        case 'rating': sortOptions = { 'rating.average': -1 }; break;
+        case 'time': sortOptions = { departureTime: 1 }; break;
+        case 'duration': sortOptions = { duration: 1 }; break;
+        default: sortOptions = { departureTime: 1 };
+      }
+
+      const rides = await Ride.find(q)
+        .populate('driver', 'name rating phone profilePicture vehicle stats')
+        .sort(sortOptions)
+        .limit(50);
+
+      docs = rides.map((ride) => {
+        const currentPrice = ride.calculateDynamicPrice?.() ?? ride.pricePerSeat;
+        return {
+          ...ride.toObject(),
+          startDistanceKm: undefined,
+          endDistanceKm: undefined,
+          canBook: ride.availableSeats >= pax,
+          currentPrice,
+          totalCost: currentPrice * pax,
+          estimatedArrival: new Date(ride.departureTime.getTime() + (ride.duration || 0) * 60000),
+        };
+      });
+    }
+
+    // --- NEW: optional grouping of near-duplicate results (same route & ±15 min)
+    if (group === 'true') {
+      const timeWindowMin = 15;              // +/- minutes to consider "same time"
+      const coordBucket = (lat, lng) => [
+        Math.round((lat ?? 0) * 100) / 100,  // ~1.1km buckets
+        Math.round((lng ?? 0) * 100) / 100,
+      ].join(',');
+
+      const groups = new Map();
+      for (const r of docs) {
+        const sl = r.startLocation || {};
+        const el = r.endLocation || {};
+        const keyStart = coordBucket(sl.lat, sl.lng);
+        const keyEnd   = coordBucket(el.lat, el.lng);
+        const depMs    = new Date(r.departureTime).getTime();
+        const slot     = Math.round(depMs / (timeWindowMin * 60 * 1000)); // bucket by window
+        const key      = `${keyStart}|${keyEnd}|${slot}`;
+
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(r);
+      }
+
+      const collapsed = [];
+      for (const list of groups.values()) {
+        // pick best representative: lowest currentPrice, then highest rating, then earliest
+        list.sort((a, b) =>
+          (a.currentPrice ?? a.pricePerSeat) - (b.currentPrice ?? b.pricePerSeat) ||
+          (b.driver?.rating?.average ?? 0) - (a.driver?.rating?.average ?? 0) ||
+          new Date(a.departureTime) - new Date(b.departureTime)
+        );
+        const head = { ...list[0], groupCount: list.length };
+        collapsed.push(head);
+      }
+
+      // preserve requested sort after grouping
+      switch (sortBy) {
+        case 'price':
+          collapsed.sort((a, b) => (a.currentPrice ?? a.pricePerSeat) - (b.currentPrice ?? b.pricePerSeat));
+          break;
+        case 'rating':
+          collapsed.sort((a, b) => (b.driver?.rating?.average ?? 0) - (a.driver?.rating?.average ?? 0));
+          break;
+        case 'time':
+          collapsed.sort((a, b) => new Date(a.departureTime) - new Date(b.departureTime));
+          break;
+        case 'duration':
+          collapsed.sort((a, b) => (a.duration ?? 0) - (b.duration ?? 0));
+          break;
+        case 'distance':
+          collapsed.sort((a, b) => (a.startDistanceKm ?? 0) + (a.endDistanceKm ?? 0) - ((b.startDistanceKm ?? 0) + (b.endDistanceKm ?? 0)));
+          break;
+        case 'relevance':
+        default:
+          collapsed.sort((a, b) => (b._relevance ?? 0) - (a._relevance ?? 0));
+      }
+
+      docs = collapsed.slice(0, 50);
+    }
+
+    res.json({ success: true, count: docs.length, rides: docs });
   } catch (error) {
     logger.error('Search rides error:', error);
     res.status(500).json({ success: false, message: 'Failed to search rides' });
+  }
+});
+
+/* ------------------------------ nearby (NEW) ------------------------------ */
+// GET /api/rides/nearby?lat=..&lng=..&radius=10&includeOwn=true
+router.get('/nearby', protect, async (req, res) => {
+  try {
+    const { lat, lng, radius = 10, date, includeOwn = 'false' } = req.query;
+    const latN = Number(lat), lngN = Number(lng);
+    if (!isNumber(latN) || !isNumber(lngN)) {
+      return res.status(400).json({ success: false, message: 'lat and lng are required numbers' });
+    }
+    const radMeters = Number(radius) * 1000;
+
+    const baseMatch = { status: 'active' };
+    if (includeOwn !== 'true') {
+      baseMatch.driver = { $ne: req.user.id };         // <-- hide own by default
+    }
+    if (date) {
+      const d0 = new Date(date); d0.setUTCHours(0,0,0,0);
+      const d1 = new Date(d0); d1.setUTCDate(d1.getUTCDate() + 1);
+      baseMatch.departureTime = { $gte: d0, $lt: d1 };
+    }
+    
+    // 1) rides starting near the point
+    const startPipe = [
+      {
+        $geoNear: {
+          near: { type: 'Point', coordinates: [lngN, latN] },
+          key: 'startLocation.coordinates',
+          distanceField: '_distanceFromStart',
+          spherical: true,
+          maxDistance: radMeters,
+        },
+      },
+      { $match: baseMatch },
+      { $project: { driver: 1, startLocation: 1, endLocation: 1, departureTime: 1, pricePerSeat: 1, duration: 1, distance: 1, rating: 1, vehicle: 1 } },
+      { $limit: 80 },
+    ];
+
+    const startHits = await Ride.aggregate(startPipe);
+
+    // 2) rides with a VIA near the point (within radius)
+    const viaPipe = [
+      {
+        $geoNear: {
+          near: { type: 'Point', coordinates: [lngN, latN] },
+          key: 'viaLocations.coordinates',
+          distanceField: '_distanceFromVia',
+          spherical: true,
+          maxDistance: radMeters,
+        },
+      },
+      { $match: baseMatch },
+      { $project: { driver: 1, startLocation: 1, endLocation: 1, departureTime: 1, pricePerSeat: 1, duration: 1, distance: 1, rating: 1, vehicle: 1 } },
+      { $limit: 80 },
+    ];
+
+    const viaHits = await Ride.aggregate(viaPipe);
+
+    // De-duplicate by _id (prefer startHits distance measure)
+    const map = new Map();
+    for (const d of [...startHits, ...viaHits]) {
+      const key = String(d._id);
+      if (!map.has(key)) map.set(key, d);
+    }
+    const ids = Array.from(map.keys());
+    const rides = await Ride.find({ _id: { $in: ids } })
+      .populate('driver', 'name rating phone profilePicture vehicle stats')
+      .sort({ departureTime: 1 })
+      .limit(100);
+
+    const out = rides.map((r) => ({
+      _id: r._id,
+      start: { name: r.startLocation?.name, lat: r.startLocation?.lat, lng: r.startLocation?.lng },
+      end:   { name: r.endLocation?.name,   lat: r.endLocation?.lat,   lng: r.endLocation?.lng },
+      departureTime: r.departureTime,
+      pricePerSeat: r.pricePerSeat,
+      duration: r.duration,
+      distance: r.distance,
+      driver: r.driver ? { name: r.driver.name, rating: r.driver.rating?.average } : undefined,
+      vehicle: r.vehicle ? { type: r.vehicle.type, model: r.vehicle.model } : undefined,
+    }));
+
+    res.json({ success: true, count: out.length, rides: out });
+  } catch (error) {
+    logger.error('Nearby rides error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch nearby rides' });
   }
 });
 
