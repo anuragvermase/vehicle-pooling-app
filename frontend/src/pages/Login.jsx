@@ -10,11 +10,11 @@ const Login = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
+  
   // Google state
   const [googleReady, setGoogleReady] = useState(false);
   const gisInitialized = useRef(false);
-
+  const googleButtonRef = useRef(null);
   const navigate = useNavigate();
 
   // Handle input changes
@@ -34,16 +34,13 @@ const Login = ({ onLogin }) => {
 
     try {
       const response = await API.auth.login(formData);
-
       // Ensure response contains token and user object
       if (response.token) {
         // store ONLY token; parent will fetch live user
         localStorage.setItem('token', response.token);
-
         if (typeof onLogin === 'function') {
           onLogin(response.user || null, response.token);
         }
-
         navigate('/');
       } else {
         throw new Error('Invalid response from server.');
@@ -58,13 +55,42 @@ const Login = ({ onLogin }) => {
         message = err.message;
       }
       setError(message);
-      console.error(err);
+      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // --- Google Identity Services (ID Token flow) ---
+  // Google callback function
+  const handleGoogleResponse = async (response) => {
+    const idToken = response?.credential;
+    if (!idToken) {
+      setError('Google sign-in failed. No token received.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      console.log('Sending Google token to backend...');
+      const res = await API.auth.loginWithGoogle({ idToken });
+      
+      if (res?.token) {
+        localStorage.setItem('token', res.token);
+        if (typeof onLogin === 'function') onLogin(res.user || null, res.token);
+        navigate('/');
+      } else {
+        throw new Error('Invalid response from server.');
+      }
+    } catch (err) {
+      console.error('Google login error:', err);
+      const msg = err?.message || 'Google sign-in failed. Please try again.';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initialize Google Sign-In
   useEffect(() => {
     const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!CLIENT_ID) {
@@ -72,69 +98,113 @@ const Login = ({ onLogin }) => {
       return;
     }
 
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
+    // Check if script already exists
+    const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    
+    const initializeGoogle = () => {
       if (window.google && !gisInitialized.current) {
-        gisInitialized.current = true;
-        setGoogleReady(true);
+        try {
+          gisInitialized.current = true;
+          
+          // Initialize Google Identity Services
+          window.google.accounts.id.initialize({
+            client_id: CLIENT_ID,
+            callback: handleGoogleResponse,
+            auto_select: false,
+            cancel_on_tap_outside: true,
+            context: 'signin',
+            ux_mode: 'popup',
+            use_fedcm_for_prompt: false, // Changed to false for better compatibility
+          });
+
+          // Render the button if the ref exists
+          if (googleButtonRef.current) {
+            window.google.accounts.id.renderButton(
+              googleButtonRef.current,
+              {
+                theme: 'outline',
+                size: 'large',
+                type: 'standard',
+                text: 'signin_with',
+                shape: 'rectangular',
+                logo_alignment: 'left',
+                width: 200,
+              }
+            );
+          }
+
+          setGoogleReady(true);
+          console.log('Google Sign-In initialized successfully');
+        } catch (error) {
+          console.error('Error initializing Google Sign-In:', error);
+          setGoogleReady(false);
+        }
       }
     };
-    script.onerror = () => {
-      console.error('Failed to load Google Identity script.');
-      setGoogleReady(false);
-    };
-    document.body.appendChild(script);
+
+    if (existingScript) {
+      // Script already loaded
+      initializeGoogle();
+    } else {
+      // Load the script
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = initializeGoogle;
+      script.onerror = () => {
+        console.error('Failed to load Google Identity script.');
+        setGoogleReady(false);
+      };
+
+      document.body.appendChild(script);
+    }
 
     return () => {
-      document.body.removeChild(script);
+      // Cleanup - but don't remove the script to avoid re-loading
+      if (gisInitialized.current && window.google) {
+        try {
+          // Clean up any Google Sign-In state if needed
+        } catch (error) {
+          console.warn('Error during Google Sign-In cleanup:', error);
+        }
+      }
     };
   }, []);
 
+  // Manual Google Sign-In trigger (fallback)
   const handleGoogleClick = () => {
     const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    
     if (!googleReady || !window.google || !CLIENT_ID) {
-      setError('Google Login is not ready. Please refresh and try again.');
+      setError('Google Login is not ready. Please refresh the page and try again.');
       return;
     }
+
     setError('');
+    setLoading(true);
 
-    window.google.accounts.id.initialize({
-      client_id: CLIENT_ID,
-      callback: async (response) => {
-        const idToken = response?.credential;
-        if (!idToken) {
-          setError('Google sign-in failed. Please try again.');
-          return;
-        }
-
-        setLoading(true);
-        try {
-          const res = await API.auth.loginWithGoogle?.({ idToken });
-          if (res?.token) {
-            localStorage.setItem('token', res.token);
-            if (typeof onLogin === 'function') onLogin(res.user || null, res.token);
-            navigate('/');
-          } else {
-            throw new Error('Invalid response from server.');
-          }
-        } catch (err) {
-          const msg = err?.message || 'Google sign-in failed. Please try again.';
-          setError(msg);
-          console.error(err);
-        } finally {
+    try {
+      // Try to trigger the Google Sign-In flow
+      window.google.accounts.id.prompt((notification) => {
+        console.log('Google prompt notification:', notification);
+        
+        if (notification.isNotDisplayed()) {
           setLoading(false);
+          setError('Google sign-in popup was blocked. Please allow popups and try again.');
+        } else if (notification.isSkippedMoment()) {
+          setLoading(false);
+          setError('Google sign-in was cancelled.');
+        } else if (notification.isDismissedMoment()) {
+          setLoading(false);
+          setError('Google sign-in was dismissed.');
         }
-      },
-      auto_select: false,
-      cancel_on_tap_outside: true,
-      context: 'signin',
-      use_fedcm_for_prompt: true,
-    });
-
-    window.google.accounts.id.prompt();
+      });
+    } catch (err) {
+      console.error('Google prompt error:', err);
+      setError('Failed to open Google sign-in. Please try again.');
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -167,6 +237,19 @@ const Login = ({ onLogin }) => {
           gap: '0.5rem'
         }} className="animate-fadeIn">
           <span>❌</span> {error}
+          <button
+            onClick={() => setError('')}
+            style={{
+              marginLeft: 'auto',
+              background: 'none',
+              border: 'none',
+              color: '#dc2626',
+              cursor: 'pointer',
+              fontSize: '1rem'
+            }}
+          >
+            ×
+          </button>
         </div>
       )}
 
@@ -306,6 +389,7 @@ const Login = ({ onLogin }) => {
 
         <button
           type="submit"
+          disabled={loading}
           style={{
             width: '100%',
             padding: '0.875rem',
@@ -315,18 +399,19 @@ const Login = ({ onLogin }) => {
             borderRadius: '8px',
             fontSize: '1rem',
             fontWeight: '600',
-            cursor: 'pointer',
+            cursor: loading ? 'not-allowed' : 'pointer',
             transition: 'all 0.3s ease',
-            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
+            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+            opacity: loading ? 0.7 : 1
           }}
           className="hover-scale"
         >
-          Sign In
+          {loading ? 'Signing In...' : 'Sign In'}
         </button>
 
         <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem' }}>
           <span style={{ color: '#6b7280' }}>
-            Don’t have an account?{' '}
+            Don't have an account?{' '}
           </span>
           <a
             href="/register"
@@ -347,33 +432,46 @@ const Login = ({ onLogin }) => {
         <p style={{ color: '#6b7280', marginBottom: '1rem', fontSize: '0.9rem' }}>
           Or continue with
         </p>
-
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <button
-            style={{
-              padding: '0.5rem 1rem',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              background: 'white',
-              cursor: googleReady ? 'pointer' : 'not-allowed',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              fontSize: '0.9rem',
-              transition: 'all 0.3s ease',
-              opacity: googleReady ? 1 : 0.6
-            }}
-            className="hover-scale"
-            onClick={handleGoogleClick}
-            title={googleReady ? 'Sign in with Google' : 'Google Login not ready'}
-          >
-            <img
-              src={googleLogo}
-              alt="Google Logo"
-              style={{ width: '15px', height: '15px', objectFit: 'contain' }}
+        
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', alignItems: 'center' }}>
+          {/* Google Sign-In Button Container */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+            {/* Official Google Button (rendered by Google) */}
+            <div 
+              ref={googleButtonRef}
+              style={{ 
+                opacity: googleReady ? 1 : 0.6,
+                transition: 'opacity 0.3s ease'
+              }}
             />
-            Google
-          </button>
+            
+            {/* Fallback Custom Button */}
+            {!googleReady && (
+              <button
+                style={{
+                  padding: '0.5rem 1rem',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  background: 'white',
+                  cursor: 'not-allowed',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.9rem',
+                  opacity: 0.6
+                }}
+                disabled
+                title="Google Login is loading..."
+              >
+                <img
+                  src={googleLogo}
+                  alt="Google Logo"
+                  style={{ width: '15px', height: '15px', objectFit: 'contain' }}
+                />
+                Loading Google...
+              </button>
+            )}
+          </div>
 
           <button
             style={{
@@ -394,6 +492,30 @@ const Login = ({ onLogin }) => {
             <span role="img" aria-label="phone">📱</span> Phone
           </button>
         </div>
+
+        {/* Debug info in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#6b7280' }}>
+            <p>Google Ready: {googleReady ? '✅' : '❌'}</p>
+            <p>Client ID: {import.meta.env.VITE_GOOGLE_CLIENT_ID ? '✅' : '❌'}</p>
+            {!googleReady && (
+              <button
+                onClick={handleGoogleClick}
+                style={{
+                  marginTop: '0.5rem',
+                  padding: '0.25rem 0.5rem',
+                  fontSize: '0.8rem',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  background: 'white',
+                  cursor: 'pointer'
+                }}
+              >
+                Try Manual Google Login
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
