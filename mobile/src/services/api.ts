@@ -7,7 +7,7 @@ import { Storage } from "./storage";
 export const API_BASE_URL: string =
   ((Constants?.expoConfig?.extra as any)?.API_BASE_URL as string) ||
   process.env.EXPO_PUBLIC_API_BASE_URL ||
-  "http://10.170.176.193:5000/api";
+  "http://10.0.2.2:5000/api"; // emulator-safe fallback
 
 const BASE = API_BASE_URL.replace(/\/$/, "");
 
@@ -64,9 +64,7 @@ async function getWithFallback<T>(paths: string[]): Promise<T> {
   for (const p of paths) {
     try {
       return await unwrap<T>(http.get(p));
-    } catch (e) {
-      lastErr = e;
-    }
+    } catch (e) { lastErr = e; }
   }
   throw lastErr;
 }
@@ -97,14 +95,77 @@ export const AuthAPI = {
    ========================= */
 export const UserAPI = {
   uploadAvatar(form: FormData) {
-    // backend route we added: POST /api/auth/avatar
     return unwrap<{ success: boolean; url: string; user: any }>(
       http.post("/auth/avatar", form, {
         headers: { "Content-Type": "multipart/form-data" },
       })
     );
   },
-  updateProfile(body: { name?: string; phone?: string; avatarUrl?: string; profilePicture?: string; avatar?: string }) {
+  updateProfile(body: {
+    name?: string;
+    phone?: string;
+    avatarUrl?: string;
+    profilePicture?: string;
+    avatar?: string;
+  }) {
     return unwrap<any>(http.put("/auth/profile", body));
+  },
+};
+
+/* =========================
+   RIDES API
+   ========================= */
+
+// Minimal shape used by FindRides UI
+export type RideDto = {
+  _id: string;
+  startLocation?: { name?: string };
+  endLocation?: { name?: string };
+  departureTime: string;
+  pricePerSeat: number;
+  availableSeats: number;
+  driver?: { name?: string };
+};
+
+// helper: GET with params across multiple paths
+async function getFirst<T>(paths: string[], params?: any): Promise<T> {
+  let lastErr: any;
+  for (const p of paths) {
+    try {
+      return await unwrap<T>(http.get(p, { params }));
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr;
+}
+
+// helper: POST with same params (fallback if server expects body)
+async function postFirst<T>(paths: string[], body?: any): Promise<T> {
+  let lastErr: any;
+  for (const p of paths) {
+    try {
+      return await unwrap<T>(http.post(p, body));
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr;
+}
+
+export const RideAPI = {
+  /**
+   * q can include: from, to, fromLat, fromLng, toLat, toLng, date, seats, etc.
+   */
+  async list(q: any): Promise<RideDto[]> {
+    const getPaths = ["/rides/search", "/rides", "/rides/list"];
+    try {
+      return await getFirst<RideDto[]>(getPaths, q);
+    } catch {
+      const postPaths = ["/rides/search", "/rides/list", "/rides"];
+      return await postFirst<RideDto[]>(postPaths, q);
+    }
+  },
+  async upcomingMe(): Promise<any | null> {
+    try {
+      const { data } = await http.get("/rides/upcoming/me");
+      return data?.ride ?? data ?? null;
+    } catch { return null; }
   },
 };

@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { View, ActivityIndicator } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import ScreenSafeArea from "../../components/ScreenSafeArea";
 import { AuthAPI } from "../services/api";
 import { Storage } from "../services/storage";
 
@@ -11,6 +12,7 @@ import Login from "../screens/Login";
 import Register from "../screens/Register";
 import Dashboard from "../screens/Dashboard";
 import FindRides from "../screens/FindRides";
+import Settings from "../screens/Settings";
 import CreateRide from "../screens/CreateRide";
 import MyRides from "../screens/MyRides";
 import Profile from "../screens/Profile";
@@ -25,9 +27,24 @@ export type RootParams = {
   CreateRide: undefined;
   MyRides: undefined;
   Profile: undefined;
+  Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootParams>();
+
+// Small HOC to inject ScreenSafeArea around any screen
+function withSafeArea(
+  Component: React.ComponentType<any>,
+  edges?: Array<"top" | "bottom" | "left" | "right">
+) {
+  return function Wrapped(props: any) {
+    return (
+      <ScreenSafeArea style={{ backgroundColor: "#0B0F14" }} edges={edges}>
+        <Component {...props} />
+      </ScreenSafeArea>
+    );
+  };
+}
 
 function Splash({ navigation }: any) {
   useEffect(() => {
@@ -35,7 +52,6 @@ function Splash({ navigation }: any) {
       try {
         const token = await Storage.getToken();
         if (token) {
-          // optionally validate token
           await AuthAPI.me();
           navigation.reset({ index: 0, routes: [{ name: "Landing" }] });
         } else {
@@ -60,16 +76,23 @@ export default function RootNavigator() {
       initialRouteName="Splash"
       screenOptions={{ headerBackTitleVisible: false, headerTitleAlign: "center" }}
     >
-      <Stack.Screen name="Splash" component={Splash} options={{ headerShown: false }} />
-      <Stack.Screen name="Login" component={Login} options={{ title: "Login" }} />
-      <Stack.Screen name="Register" component={Register} options={{ title: "Create Account" }} />
-      <Stack.Screen name="Landing" component={Landing} options={{ title: "Welcome" }} />
-      <Stack.Screen name="Dashboard" component={Dashboard} />
-      <Stack.Screen name="FindRides" component={FindRides} options={{ title: "Find Rides" }} />
-      <Stack.Screen name="CreateRide" component={CreateRide} options={{ title: "Offer a Ride" }} />
-      <Stack.Screen name="MyRides" component={MyRides} options={{ title: "My Rides" }} />
-      <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
+      <Stack.Screen name="Splash" component={withSafeArea(Splash)} options={{ headerShown: false }} />
+      <Stack.Screen name="Login" component={withSafeArea(Login)} options={{ title: "Login" }} />
+      <Stack.Screen name="Register" component={withSafeArea(Register)} options={{ title: "Create Account" }} />
 
+      {/* Landing has custom top bar and sticky bottom CTA; keep header hidden.
+         Default safe-area (top+bottom) is applied by the wrapper. */}
+<Stack.Screen
+  name="Landing"
+  component={withSafeArea(Landing, ["left", "right"])}
+  options={{ headerShown: false }}
+/>
+      <Stack.Screen name="Dashboard" component={withSafeArea(Dashboard)} />
+      <Stack.Screen name="FindRides" component={withSafeArea(FindRides)} options={{ title: "Find Rides" }} />
+      <Stack.Screen name="CreateRide" component={withSafeArea(CreateRide)} options={{ title: "Offer a Ride" }} />
+      <Stack.Screen name="MyRides" component={withSafeArea(MyRides)} options={{ title: "My Rides" }} />
+      <Stack.Screen name="Profile" component={withSafeArea(Profile)} options={{ headerShown: false }} />
+      <Stack.Screen name="Settings" component={withSafeArea(Settings)} options={{ title: "Settings" }} />
     </Stack.Navigator>
   );
 }

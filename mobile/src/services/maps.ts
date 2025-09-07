@@ -46,3 +46,40 @@ export async function getRoute(
     durationText: legs0?.duration?.text,
   };
 }
+
+/**
+ * Same as getRoute but supports intermediate waypoints.
+ * When viaPoints is provided, requests Google Directions with waypoints (optimize).
+ */
+export async function getRouteWithWaypoints(
+  origin: { lat: number; lng: number },
+  dest: { lat: number; lng: number },
+  viaPoints?: Array<{ lat: number; lng: number }>
+): Promise<{ points: LatLng[]; distanceText?: string; durationText?: string }> {
+  if (!KEY) return { points: [] };
+  const params = new URLSearchParams({
+    origin: `${origin.lat},${origin.lng}`,
+    destination: `${dest.lat},${dest.lng}`,
+    mode: "driving",
+    key: KEY,
+  });
+
+  let url = `${DIRECTIONS_URL}?${params.toString()}`;
+  if (viaPoints && viaPoints.length > 0) {
+    // Build waypoints=optimize:true|lat,lng|lat,lng
+    const wp = ["optimize:true", ...viaPoints.map(v => `${v.lat},${v.lng}`)].join("|");
+    url += `&waypoints=${encodeURIComponent(wp)}`;
+  }
+
+  const res = await fetch(url);
+  const json = await res.json();
+  const route = json?.routes?.[0];
+  if (!route) return { points: [] };
+  const poly = route.overview_polyline?.points;
+  const legs0 = route.legs?.[0];
+  return {
+    points: poly ? decodePolyline(poly) : [],
+    distanceText: legs0?.distance?.text,
+    durationText: legs0?.duration?.text,
+  };
+}

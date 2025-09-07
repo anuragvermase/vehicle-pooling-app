@@ -1,8 +1,7 @@
-// src/screens/Profile.tsx
+// src/screens/Settings.tsx
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  View, Text, ScrollView, Image, Pressable, TextInput, Modal,
-  Alert, DeviceEventEmitter,
+  View, Text, ScrollView, Image, Pressable, TextInput, Modal, Alert, DeviceEventEmitter,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
@@ -10,6 +9,7 @@ import * as Clipboard from "expo-clipboard";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Auth } from "../services/auth";
 import { UserAPI, asMessage, http } from "../services/api";
+
 
 type Me = {
   name?: string;
@@ -22,7 +22,7 @@ type Me = {
   stats?: { totalRidesCompleted?: number; completionRate?: number };
 };
 
-export default function Profile() {
+export default function Settings() {
   const [me, setMe] = useState<Me | null>(null);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -66,9 +66,9 @@ export default function Profile() {
       });
       if (res.canceled || !res.assets?.length) return;
       setSaving(true);
-      const fd = new FormData();
-      fd.append("avatar", { uri: res.assets[0].uri, name: "avatar.jpg", type: "image/jpeg" } as any);
-      const { url, user } = await (UserAPI as any).uploadAvatar(fd);
+      const formData = new FormData();
+      formData.append("avatar", { uri: res.assets[0].uri, name: "avatar.jpg", type: "image/jpeg" } as any);
+      const { url, user } = await (UserAPI as any).uploadAvatar(formData);
       const merged = { ...(user ?? {}), avatarUrl: url };
       setMe(merged);
       DeviceEventEmitter.emit("user:updated");
@@ -87,13 +87,11 @@ export default function Profile() {
       setEditing(false);
       DeviceEventEmitter.emit("user:updated");
       Alert.alert("Saved", "Profile updated");
-    } catch (e) {
-      Alert.alert("Save failed", asMessage(e));
-    } finally { setSaving(false); }
+    } catch (e) { Alert.alert("Save failed", asMessage(e)); }
+    finally { setSaving(false); }
   };
 
   async function changePassword(current: string, next: string) {
-    // Try common routes; succeed on the first that exists
     const attempts: Array<{ method: "post" | "put"; url: string; body: any }> = [
       { method: "post", url: "/auth/change-password", body: { currentPassword: current, newPassword: next } },
       { method: "put",  url: "/users/password",       body: { currentPassword: current, newPassword: next } },
@@ -116,9 +114,8 @@ export default function Profile() {
       await changePassword(pw.current, pw.next);
       setPwOpen(false); setPw({ current: "", next: "", confirm: "" });
       Alert.alert("Password changed");
-    } catch (e) {
-      Alert.alert("Change failed", asMessage(e));
-    } finally { setPwSaving(false); }
+    } catch (e) { Alert.alert("Change failed", asMessage(e)); }
+    finally { setPwSaving(false); }
   };
 
   const Card = ({ title, children }: any) => (
@@ -151,21 +148,16 @@ export default function Profile() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#0B0F14" }} contentContainerStyle={{ paddingBottom: 24 }}>
-      {/* HERO */}
       <LinearGradient colors={["#0f172a","#0b1220"]} start={{x:0,y:0}} end={{x:1,y:1}}
         style={{ paddingTop: 36, paddingBottom: 18, paddingHorizontal: 16, borderBottomLeftRadius: 18, borderBottomRightRadius: 18, borderBottomColor: "#23314a", borderBottomWidth: 1 }}>
         <View style={{ alignItems: "center" }}>
           <View style={{ width: 110, height: 110, borderRadius: 60, borderWidth: 2, borderColor: "#2d3b52", overflow: "hidden", backgroundColor: "#1a2230" }}>
-            {me?.avatarUrl ? (
-              <Image source={{ uri: me.avatarUrl }} style={{ width: "100%", height: "100%" }} />
-            ) : (
+            {me?.avatarUrl ? <Image source={{ uri: me.avatarUrl }} style={{ width: "100%", height: "100%" }} /> :
               <View style={{ flex:1, alignItems:"center", justifyContent:"center" }}>
                 <Text style={{ color: "white", fontWeight: "900", fontSize: 32 }}>{initials}</Text>
-              </View>
-            )}
+              </View>}
           </View>
 
-          {/* Change photo pill */}
           <Pressable onPress={onChangePhoto} disabled={saving}
             style={{ marginTop: 10, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: "#1a2230", borderWidth: 1, borderColor: "#23314a", borderRadius: 999, flexDirection: "row", gap: 8, alignItems: "center" }}>
             <Ionicons name="image-outline" size={16} color="#e5e7eb" />
@@ -175,7 +167,6 @@ export default function Profile() {
           <Text style={{ color: "white", fontWeight: "900", fontSize: 24, marginTop: 10 }}>{me?.name || "—"}</Text>
           <Text style={{ color: "#9aa4b2", marginTop: 2 }}>{me?.email || "—"}</Text>
 
-          {/* Stats row */}
           <View style={{ flexDirection: "row", gap: 28, marginTop: 14 }}>
             <View style={{ alignItems: "center" }}>
               <Text style={{ color: "white", fontWeight: "900" }}>{me?.stats?.totalRidesCompleted ?? "—"}</Text>
@@ -189,7 +180,6 @@ export default function Profile() {
         </View>
       </LinearGradient>
 
-      {/* CONTENT */}
       <View style={{ padding: 16 }}>
         <Card title="Contact">
           <Row label="Name" value={form.name} editable={editing} onChangeText={(v: string) => setForm(f => ({ ...f, name: v }))} placeholder="Your name" />

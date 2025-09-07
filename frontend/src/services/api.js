@@ -23,8 +23,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
-);
+  (error) => Promise.reject(error));
 
 // Normalize errors + auto-redirect on 401
 apiClient.interceptors.response.use(
@@ -44,8 +43,7 @@ apiClient.interceptors.response.use(
       if (window.location.pathname !== '/login') window.location.href = '/login';
     }
     return Promise.reject(new Error(msg));
-  }
-);
+  });
 
 const API = {
   raw: apiClient,
@@ -78,6 +76,8 @@ const API = {
     verifyEmail: (token) => apiClient.post('/auth/verify-email', { token }),
     refreshToken: () => apiClient.post('/auth/refresh-token'),
     logout: () => apiClient.post('/auth/logout'),
+    // ✅ Added missing Google login method
+    loginWithGoogle: (data) => apiClient.post('/auth/google', data),
   },
 
   dashboard: {

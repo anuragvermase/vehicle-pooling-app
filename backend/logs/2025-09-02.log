@@ -1,0 +1,166 @@
+[2025-09-02T16:27:42.997Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-02T16:27:43.000Z] INFO: Database Name: rideshare
+[2025-09-02T16:27:43.008Z] ERROR: Uncaught Exception:
+Data: {
+  "name": "Error",
+  "message": "listen EADDRINUSE: address already in use 0.0.0.0:5000",
+  "stack": "Error: listen EADDRINUSE: address already in use 0.0.0.0:5000\n    at Server.setupListenHandle [as _listen2] (node:net:1940:16)\n    at listenInCluster (node:net:1997:12)\n    at node:net:2206:7\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)",
+  "code": "EADDRINUSE",
+  "errno": -48,
+  "syscall": "listen",
+  "address": "0.0.0.0",
+  "port": 5000
+}
+[2025-09-02T16:29:57.634Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-02T16:29:57.636Z] INFO: Database Name: rideshare
+[2025-09-02T16:29:57.638Z] ERROR: Uncaught Exception:
+Data: {
+  "name": "Error",
+  "message": "listen EADDRINUSE: address already in use 0.0.0.0:5000",
+  "stack": "Error: listen EADDRINUSE: address already in use 0.0.0.0:5000\n    at Server.setupListenHandle [as _listen2] (node:net:1940:16)\n    at listenInCluster (node:net:1997:12)\n    at node:net:2206:7\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)",
+  "code": "EADDRINUSE",
+  "errno": -48,
+  "syscall": "listen",
+  "address": "0.0.0.0",
+  "port": 5000
+}
+[2025-09-02T16:29:59.257Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-02T16:29:59.258Z] INFO: Database Name: rideshare
+[2025-09-02T16:29:59.262Z] ERROR: Uncaught Exception:
+Data: {
+  "name": "Error",
+  "message": "listen EADDRINUSE: address already in use 0.0.0.0:5000",
+  "stack": "Error: listen EADDRINUSE: address already in use 0.0.0.0:5000\n    at Server.setupListenHandle [as _listen2] (node:net:1940:16)\n    at listenInCluster (node:net:1997:12)\n    at node:net:2206:7\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)",
+  "code": "EADDRINUSE",
+  "errno": -48,
+  "syscall": "listen",
+  "address": "0.0.0.0",
+  "port": 5000
+}
+[2025-09-02T16:30:31.549Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-02T16:30:31.552Z] INFO: Database Name: rideshare
+[2025-09-02T16:30:31.556Z] INFO: 🚗 RideShare Pro Server running on port 5001
+[2025-09-02T16:30:31.557Z] INFO: 🔗 Local Health:  http://localhost:5001/api/health
+[2025-09-02T16:30:31.557Z] INFO: 📱 Phone Health:  http://192.168.1.7:5001/api/health
+[2025-09-02T16:30:31.557Z] INFO: 🔌 WebSocket: Active
+[2025-09-02T16:30:31.557Z] INFO: 🌍 Environment: development
+[2025-09-02T16:30:31.557Z] INFO: 🌐 CORS Origins: (any - dev)
+[2025-09-02T16:30:57.723Z] INFO: GET /api/auth/me?_t=1756830657715 - 127.0.0.1
+[2025-09-02T16:30:57.777Z] INFO: GET /api/auth/me?_t=1756830657715 - 127.0.0.1
+[2025-09-02T16:31:03.470Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-02T16:31:03.473Z] INFO: Login attempt for email: sumeetharsh2003@gmail.com
+[2025-09-02T16:31:03.511Z] WARN: Login failed - user not found: sumeetharsh2003@gmail.com
+[2025-09-02T16:31:08.143Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-02T16:31:08.146Z] INFO: Login attempt for email: sumeetharsh2003@gmail.com
+[2025-09-02T16:31:08.181Z] WARN: Login failed - user not found: sumeetharsh2003@gmail.com
+[2025-09-02T16:31:09.812Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-02T16:31:09.814Z] INFO: Login attempt for email: sumeetharsh2003@gmail.com
+[2025-09-02T16:31:09.860Z] WARN: Login failed - user not found: sumeetharsh2003@gmail.com
+[2025-09-02T16:31:16.863Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-02T16:31:16.865Z] INFO: Login attempt for email: sumeetharsh2003@gmail.com
+[2025-09-02T16:31:16.909Z] WARN: Login failed - user not found: sumeetharsh2003@gmail.com
+[2025-09-02T16:31:27.327Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-02T16:31:27.332Z] INFO: Login attempt for email: sumeetharsh2003@gmail.com
+[2025-09-02T16:31:27.385Z] WARN: Login failed - user not found: sumeetharsh2003@gmail.com
+[2025-09-02T16:31:44.762Z] INFO: POST /api/auth/register - 127.0.0.1
+[2025-09-02T16:32:47.212Z] INFO: POST /api/auth/register - 127.0.0.1
+[2025-09-02T16:33:02.027Z] INFO: POST /api/auth/register - 127.0.0.1
+[2025-09-02T16:33:21.778Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-02T16:33:21.780Z] INFO: Login attempt for email: sumeetharsh2003@gmail.com
+[2025-09-02T16:33:21.817Z] WARN: Login failed - user not found: sumeetharsh2003@gmail.com
+[2025-09-02T16:33:30.410Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-02T16:33:30.411Z] INFO: Login attempt for email: sumeetharsh2003@gmail.com
+[2025-09-02T16:33:30.453Z] WARN: Login failed - user not found: sumeetharsh2003@gmail.com
+[2025-09-02T16:34:00.463Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-02T16:34:00.466Z] INFO: Login attempt for email: sumeetharsh2003@gmail.com
+[2025-09-02T16:34:00.516Z] WARN: Login failed - user not found: sumeetharsh2003@gmail.com
+[2025-09-02T16:34:45.998Z] INFO: POST /api/auth/register - 127.0.0.1
+[2025-09-02T16:34:46.002Z] INFO: Registration attempt for email: sumeet1123@gmail.com
+[2025-09-02T16:34:46.436Z] INFO: GET /api/auth/me?_t=1756830886405 - 127.0.0.1
+[2025-09-02T16:35:38.966Z] INFO: POST /api/rides/create - 127.0.0.1
+[2025-09-02T16:35:39.510Z] ERROR: Route calculation error:
+Data: Google API request denied (check key, referrer, or restrictions)
+[2025-09-02T16:35:39.511Z] WARN: Directions API unavailable — using Haversine fallback
+Data: {
+  "distanceKm": 141,
+  "durationMin": 212
+}
+[2025-09-02T16:35:39.604Z] INFO: New ride created by user 68b71ca602e9c29a5c555bb1: 68b71cdb02e9c29a5c555bb7
+[2025-09-02T16:35:39.628Z] INFO: GET /api/rides/68b71cdb02e9c29a5c555bb7?_t=1756830939624 - 127.0.0.1
+[2025-09-02T16:35:39.755Z] INFO: GET /api/rides/68b71cdb02e9c29a5c555bb7?_t=1756830939624 - 127.0.0.1
+[2025-09-02T16:35:46.034Z] INFO: GET /api/rides/68b71cdb02e9c29a5c555bb7?_t=1756830946024 - 127.0.0.1
+[2025-09-02T16:35:46.187Z] INFO: GET /api/rides/68b71cdb02e9c29a5c555bb7?_t=1756830946024 - 127.0.0.1
+[2025-09-02T16:35:50.468Z] INFO: GET /api/rides/68b71cdb02e9c29a5c555bb7?_t=1756830950458 - 127.0.0.1
+[2025-09-02T16:35:50.636Z] INFO: GET /api/rides/68b71cdb02e9c29a5c555bb7?_t=1756830950458 - 127.0.0.1
+[2025-09-02T16:35:56.405Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756830956396 - 127.0.0.1
+[2025-09-02T16:35:56.409Z] INFO: GET /api/dashboard/stats?_t=1756830956396 - 127.0.0.1
+[2025-09-02T16:35:56.413Z] INFO: GET /api/users/me?_t=1756830956396 - 127.0.0.1
+[2025-09-02T16:35:56.513Z] INFO: GET /api/users/me?_t=1756830956396 - 127.0.0.1
+[2025-09-02T16:35:56.580Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756830956396 - 127.0.0.1
+[2025-09-02T16:35:57.282Z] INFO: GET /api/dashboard/stats?_t=1756830956396 - 127.0.0.1
+[2025-09-02T16:36:43.607Z] INFO: GET /api/dashboard/stats?_t=1756831003594 - 127.0.0.1
+[2025-09-02T16:36:43.609Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756831003594 - 127.0.0.1
+[2025-09-02T16:36:43.611Z] INFO: GET /api/users/me?_t=1756831003594 - 127.0.0.1
+[2025-09-02T16:36:43.690Z] INFO: GET /api/users/me?_t=1756831003594 - 127.0.0.1
+[2025-09-02T16:36:43.720Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756831003594 - 127.0.0.1
+[2025-09-02T16:36:44.360Z] INFO: GET /api/dashboard/stats?_t=1756831003594 - 127.0.0.1
+[2025-09-02T16:36:49.208Z] INFO: GET /api/dashboard/stats?_t=1756831009204 - 127.0.0.1
+[2025-09-02T16:36:49.214Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756831009204 - 127.0.0.1
+[2025-09-02T16:36:50.133Z] INFO: GET /api/dashboard/ride-history?page=1&limit=10&filter=all&_t=1756831010130 - 127.0.0.1
+[2025-09-02T16:36:56.302Z] INFO: GET /api/dashboard/stats?_t=1756831016293 - 127.0.0.1
+[2025-09-02T16:36:56.306Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756831016293 - 127.0.0.1
+[2025-09-02T16:36:56.309Z] INFO: GET /api/users/me?_t=1756831016293 - 127.0.0.1
+[2025-09-02T16:36:56.418Z] INFO: GET /api/users/me?_t=1756831016293 - 127.0.0.1
+[2025-09-02T16:36:56.447Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756831016293 - 127.0.0.1
+[2025-09-02T16:36:57.159Z] INFO: GET /api/dashboard/stats?_t=1756831016293 - 127.0.0.1
+[2025-09-02T18:15:30.872Z] INFO: GET /api/auth/me?_t=1756836930868 - 127.0.0.1
+[2025-09-02T18:15:30.956Z] INFO: GET /api/auth/me?_t=1756836930868 - 127.0.0.1
+[2025-09-02T18:15:30.964Z] INFO: GET /api/dashboard/stats?_t=1756836930962 - 127.0.0.1
+[2025-09-02T18:15:30.967Z] INFO: GET /api/users/me?_t=1756836930962 - 127.0.0.1
+[2025-09-02T18:15:30.968Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756836930962 - 127.0.0.1
+[2025-09-02T18:15:31.037Z] INFO: GET /api/users/me?_t=1756836931031 - 127.0.0.1
+[2025-09-02T18:15:31.038Z] INFO: GET /api/users/me?_t=1756836930962 - 127.0.0.1
+[2025-09-02T18:15:31.080Z] INFO: GET /api/dashboard/upcoming-rides?_t=1756836930962 - 127.0.0.1
+[2025-09-02T18:15:32.519Z] INFO: GET /api/dashboard/stats?_t=1756836930962 - 127.0.0.1
+[2025-09-02T18:30:40.771Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T18:30:50.907Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T18:46:51.510Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T18:47:01.672Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T19:03:02.196Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T19:03:12.343Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T19:15:30.697Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T19:15:41.075Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T19:36:31.347Z] INFO: GET /api/auth/me?_t=1756841791346 - 127.0.0.1
+[2025-09-02T19:36:31.678Z] INFO: GET /api/auth/me?_t=1756841791346 - 127.0.0.1
+[2025-09-02T19:38:33.304Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T19:38:52.794Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T21:01:17.396Z] INFO: GET /api/auth/me?_t=1756846877391 - 127.0.0.1
+[2025-09-02T21:01:17.676Z] INFO: GET /api/auth/me?_t=1756846877391 - 127.0.0.1
+[2025-09-02T21:02:46.006Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T21:02:56.162Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T21:10:06.642Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T21:25:41.715Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T21:36:04.751Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T21:36:14.897Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T21:36:15.723Z] INFO: GET /api/auth/me?_t=1756848975718 - 127.0.0.1
+[2025-09-02T21:36:16.009Z] INFO: GET /api/auth/me?_t=1756848975718 - 127.0.0.1
+[2025-09-02T21:51:46.641Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T21:51:56.807Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T21:54:25.280Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T21:54:35.639Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T21:56:47.309Z] INFO: GET /api/auth/me?_t=1756850207307 - 127.0.0.1
+[2025-09-02T21:56:47.633Z] INFO: GET /api/auth/me?_t=1756850207307 - 127.0.0.1
+[2025-09-02T22:12:18.267Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T22:12:28.405Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T22:28:33.848Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T22:28:44.218Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T22:44:28.762Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T22:44:38.917Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T23:00:44.319Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T23:00:54.472Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T23:17:00.681Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T23:17:10.836Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T23:32:56.454Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T23:33:06.688Z] INFO: Mongoose connected to MongoDB
+[2025-09-02T23:49:12.821Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-02T23:49:22.966Z] INFO: Mongoose connected to MongoDB
