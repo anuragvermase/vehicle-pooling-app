@@ -111,29 +111,36 @@ router.post("/me/avatar", protect, upload.single("avatar"), async (req, res) => 
 router.post("/me/password", protect, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body || {};
-    if (!currentPassword || !newPassword)
-      return res.status(400).json({ success: false, message: "Missing password fields" });
-    if (String(newPassword).length < 8)
-      return res.status(400).json({ success: false, message: "New password must be at least 8 characters" });
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: "Both fields are required." });
+    }
+    if (String(newPassword).length < 8) {
+      return res.status(400).json({ success: false, message: "New password must be at least 8 characters." });
+    }
 
+    // Fetch user with password for comparison
     const user = await User.findById(req.user.id).select("+password");
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (!user) return res.status(404).json({ success: false, message: "User not found." });
 
+    // Verify current password against stored hash
     const ok = await bcrypt.compare(String(currentPassword), String(user.password || ""));
-    if (!ok) return res.status(401).json({ success: false, message: "Current password incorrect" });
+    if (!ok) {
+      // <<< explicit message for wrong current password
+      return res.status(401).json({ success: false, message: "Current password does not match." });
+    }
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(String(newPassword), salt);
+    // Set plaintext new password; model pre('save') will hash it ONCE
+    user.password = String(newPassword);
     await user.save();
 
-    return res.json({ success: true });
+    return res.json({ success: true, message: "Password updated successfully." });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ success: false, message: "Password update failed" });
+    return res.status(500).json({ success: false, message: "Password update failed." });
   }
 });
 
-/* === NEW === DELETE /api/users/me — permanently delete the current user */
+/* === DELETE /api/users/me — permanently delete the current user */
 router.delete("/me", protect, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("profilePicture avatar avatarUrl");

@@ -1,0 +1,261 @@
+/* ==========================================================================
+   Subscription.css  (scoped styles)
+   Scope all variables & rules under .subscription-root to avoid bleed-through
+   ========================================================================== */
+
+.subscription-root {
+  /* Theme tokens (dark, business-oriented gradient) */
+  --bg: #0b0f15;
+  --panel: #0f1420;
+  --text: #e9eef7;
+  --muted: #a7b1c2;
+  --line: #1e2432;
+
+  --brand-start: #6e5bff;
+  --brand-end: #00c2ff;
+  --accent: #8b7dff;
+  --success: #4ade80;
+
+  --ring: 0 0 0 3px rgba(0, 194, 255, 0.28);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+
+  /* Typography (modern, business-friendly) */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter,
+    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* Optional: load Inter just for this page (safe—selectors still scoped) */
+/* Comment out if you prefer no external fetch */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+.subscription-root {
+  min-height: 100svh;
+  font-family: var(--font-sans);
+  color: var(--text);
+  background:
+    radial-gradient(1200px 800px at 70% -100px, rgba(0, 194, 255, 0.14), transparent 60%),
+    radial-gradient(1000px 700px at 10% -150px, rgba(110, 91, 255, 0.1), transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg) 100%);
+}
+
+/* Layout wrapper */
+.subscription-root .subscription-wrapper {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 48px);
+}
+
+/* Header */
+.subscription-root .subscription-header {
+  text-align: left;
+  margin-bottom: clamp(20px, 3vw, 32px);
+}
+.subscription-root .subscription-header h1 {
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  margin: 0 0 6px;
+  line-height: 1.1;
+  font-size: clamp(28px, 3.8vw, 48px);
+}
+.subscription-root .subscription-header p {
+  color: var(--muted);
+  font-weight: 500;
+  margin: 0;
+  font-size: clamp(14px, 1.5vw, 18px);
+}
+
+/* Grid (3 columns -> 1 column) */
+.subscription-root .subscription-grid {
+  display: grid;
+  gap: clamp(16px, 2vw, 24px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch; /* keep all cards same height */
+}
+@media (max-width: 980px) {
+  .subscription-root .subscription-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Cards */
+.subscription-root .subscription-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 520px;
+
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: clamp(18px, 2.4vw, 26px);
+  box-shadow: var(--shadow);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+  isolation: isolate; /* ensures overlay effects stay inside */
+}
+
+.subscription-root .subscription-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(139, 125, 255, 0.55);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Popular (middle) */
+.subscription-root .subscription-card.card-popular {
+  border-color: rgba(139, 125, 255, 0.7);
+  box-shadow: 0 14px 50px rgba(110, 91, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.subscription-root .subscription-card.card-popular::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(140deg, var(--brand-start), var(--brand-end));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: -1;
+}
+.subscription-root .popular-chip {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: linear-gradient(
+    140deg,
+    rgba(139, 125, 255, 0.2),
+    rgba(0, 194, 255, 0.2)
+  );
+  border: 1px solid rgba(139, 125, 255, 0.45);
+  color: #dfe5ff;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 6px 10px;
+  backdrop-filter: blur(6px);
+}
+
+/* Card header (plan + price) */
+.subscription-root .card-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.subscription-root .plan {
+  font-size: clamp(20px, 2.4vw, 28px);
+  font-weight: 700;
+  margin: 6px 0;
+}
+.subscription-root .price {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(18px, 2.2vw, 22px);
+  font-weight: 600;
+}
+.subscription-root .price .amount {
+  color: var(--text);
+  font-weight: 800;
+  font-size: clamp(26px, 3vw, 36px);
+  margin-right: 4px;
+}
+.subscription-root .price .per {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* Features */
+.subscription-root .features {
+  display: grid;
+  gap: 12px;
+  margin: 14px 0 22px;
+  padding: 0;
+  list-style: none;
+}
+.subscription-root .feature {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+}
+.subscription-root .tick {
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+/* CTA buttons */
+.subscription-root .cta-row {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.subscription-root .btn {
+  --h: 44px;
+  height: var(--h);
+  padding: 0 18px;
+  border-radius: 12px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  outline: none;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.2s ease;
+  will-change: transform, filter;
+}
+.subscription-root .btn:active {
+  transform: translateY(1px);
+}
+.subscription-root .btn:focus-visible {
+  box-shadow: var(--ring);
+}
+
+.subscription-root .btn-primary {
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand-start), var(--brand-end));
+}
+.subscription-root .btn-primary:hover {
+  filter: brightness(1.06);
+}
+
+.subscription-root .btn-outline {
+  background: transparent;
+  border-color: #2b3347;
+  color: #d9e2ff;
+}
+.subscription-root .btn-outline:hover {
+  border-color: rgba(0, 194, 255, 0.6);
+}
+
+.subscription-root .btn-ghost {
+  background: rgba(255, 255, 255, 0.03);
+  color: #e2e8ff;
+  border-color: #232a3a;
+}
+.subscription-root .btn-ghost:hover {
+  border-color: rgba(110, 91, 255, 0.5);
+}
+
+/* Footnote */
+.subscription-root .footnote {
+  color: var(--muted);
+  text-align: left;
+  margin-top: clamp(10px, 1.5vw, 16px);
+  font-size: 13.5px;
+}
+
+/* Motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .subscription-root .subscription-card,
+  .subscription-root .btn {
+    transition: none !important;
+  }
+}
