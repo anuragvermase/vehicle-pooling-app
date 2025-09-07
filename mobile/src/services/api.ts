@@ -7,7 +7,7 @@ import { Storage } from "./storage";
 export const API_BASE_URL: string =
   ((Constants?.expoConfig?.extra as any)?.API_BASE_URL as string) ||
   process.env.EXPO_PUBLIC_API_BASE_URL ||
-  "http://10.0.2.2:5000/api"; // emulator-safe fallback
+  "http://10.0.2.2:5001/api"; // emulator-safe fallback
 
 const BASE = API_BASE_URL.replace(/\/$/, "");
 

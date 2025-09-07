@@ -201,3 +201,113 @@ Data: querySrv ECONNREFUSED _mongodb._tcp.carpool.zdprcoy.mongodb.net
 [2025-09-07T18:57:20.323Z] INFO: GET /api/users/me?_t=1757271440313 - 127.0.0.1
 [2025-09-07T18:57:20.493Z] INFO: GET /api/users/me?_t=1757271440313 - 127.0.0.1
 [2025-09-07T18:57:20.942Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-07T20:41:22.111Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-07T20:41:22.112Z] INFO: Database Name: rideshare
+[2025-09-07T20:41:22.115Z] ERROR: Port 5000 is already in use. Close the other process or pick a free port.
+[2025-09-07T20:49:52.162Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-07T20:49:52.165Z] INFO: Database Name: rideshare
+[2025-09-07T20:49:55.134Z] ERROR: Port 5000 is already in use. Close the other process or pick a free port.
+[2025-09-07T20:50:26.411Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-07T20:50:26.412Z] INFO: Database Name: rideshare
+[2025-09-07T20:50:26.785Z] ERROR: Port 5000 is already in use. Close the other process or pick a free port.
+[2025-09-07T20:52:28.810Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-07T20:52:28.812Z] INFO: Database Name: rideshare
+[2025-09-07T20:52:29.112Z] ERROR: Port 5000 is already in use. Close the other process or pick a free port.
+[2025-09-07T20:52:48.380Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-07T20:52:48.382Z] INFO: Database Name: rideshare
+[2025-09-07T20:52:48.929Z] ERROR: Port 5000 is already in use. Close the other process or pick a free port.
+[2025-09-07T20:52:50.996Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-07T20:52:50.998Z] INFO: Database Name: rideshare
+[2025-09-07T20:52:51.314Z] ERROR: Port 5000 is already in use. Close the other process or pick a free port.
+[2025-09-07T20:52:57.600Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-07T20:52:57.601Z] INFO: Database Name: rideshare
+[2025-09-07T20:52:57.893Z] ERROR: Port 5000 is already in use. Close the other process or pick a free port.
+[2025-09-07T20:53:18.182Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-07T20:53:18.184Z] INFO: Database Name: rideshare
+[2025-09-07T20:53:18.520Z] INFO: 🚗 RideShare Pro Server running on http://0.0.0.0:5001
+[2025-09-07T20:53:18.520Z] INFO: 🔗 Local Health:  http://localhost:5001/api/health
+[2025-09-07T20:53:18.521Z] INFO: 📱 Phone Health:  http://192.168.1.7:5001/api/health
+[2025-09-07T20:53:18.521Z] INFO: 🔌 WebSocket: Active
+[2025-09-07T20:53:18.521Z] INFO: 🌍 Environment: development
+[2025-09-07T20:53:18.521Z] INFO: 🌐 CORS Origins: (any - dev)
+[2025-09-07T20:53:43.173Z] INFO: POST /api/auth/google - 127.0.0.1
+[2025-09-07T20:53:43.401Z] INFO: GET /api/auth/me?_t=1757278423389 - 127.0.0.1
+[2025-09-07T20:53:46.090Z] INFO: GET /api/users/me?_t=1757278426086 - 127.0.0.1
+[2025-09-07T20:54:13.720Z] INFO: POST /api/auth/google - 127.0.0.1
+[2025-09-07T20:54:13.951Z] INFO: GET /api/auth/me?_t=1757278453943 - 127.0.0.1
+[2025-09-07T20:54:15.451Z] INFO: GET /api/users/me?_t=1757278455443 - 127.0.0.1
+[2025-09-07T20:54:15.455Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757278455442&_t=1757278455443 - 127.0.0.1
+[2025-09-07T20:54:15.459Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757278455443&_t=1757278455443 - 127.0.0.1
+[2025-09-07T20:54:15.527Z] INFO: GET /api/users/me?_t=1757278455443 - 127.0.0.1
+[2025-09-07T20:54:15.606Z] INFO: GET /api/rides/user?status=all&_t=1757278455601&_t=1757278455601 - 127.0.0.1
+[2025-09-07T20:54:15.610Z] INFO: GET /api/rides/user?status=all&_t=1757278455602&_t=1757278455603 - 127.0.0.1
+[2025-09-07T20:54:38.360Z] INFO: GET /api/users/me?_t=1757278478353 - 127.0.0.1
+[2025-09-07T20:54:40.116Z] INFO: GET /api/users/me?_t=1757278480109 - 127.0.0.1
+[2025-09-07T20:54:40.119Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757278480106&_t=1757278480109 - 127.0.0.1
+[2025-09-07T20:54:40.120Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757278480108&_t=1757278480109 - 127.0.0.1
+[2025-09-07T20:54:40.207Z] INFO: GET /api/users/me?_t=1757278480109 - 127.0.0.1
+[2025-09-07T20:54:40.293Z] INFO: GET /api/rides/user?status=all&_t=1757278480289&_t=1757278480289 - 127.0.0.1
+[2025-09-07T20:54:40.296Z] INFO: GET /api/rides/user?status=all&_t=1757278480290&_t=1757278480290 - 127.0.0.1
+[2025-09-07T20:54:43.489Z] INFO: GET /api/users/me?_t=1757278483485 - 127.0.0.1
+[2025-09-07T20:55:28.065Z] INFO: POST /api/rides/create - 127.0.0.1
+[2025-09-07T20:55:28.340Z] ERROR: Route calculation error:
+Data: Google API request denied (check key, referrer, or restrictions)
+[2025-09-07T20:55:28.341Z] WARN: Directions API unavailable — using Haversine fallback
+Data: {
+  "distanceKm": 316,
+  "durationMin": 474
+}
+[2025-09-07T20:55:28.470Z] INFO: New ride created by user 68bdceed2dc9b92080b2dfa1: 68bdf140684e3037c9d68eb6
+[2025-09-07T20:55:28.483Z] INFO: GET /api/rides/68bdf140684e3037c9d68eb6?_t=1757278528480 - 127.0.0.1
+[2025-09-07T20:55:28.593Z] INFO: GET /api/rides/68bdf140684e3037c9d68eb6?_t=1757278528480 - 127.0.0.1
+[2025-09-07T20:55:32.527Z] INFO: User connected: Car Pool (68bdceed2dc9b92080b2dfa1)
+[2025-09-07T20:55:43.243Z] INFO: GET /api/rides/search?from=Mathura%2C+Uttar+Pradesh%2C+India&to=Dehradun%2C+Uttarakhand%2C+India&via=&date=2025-09-10&time=&passengers=1&radius=10&userLocation=%5Bobject+Object%5D&group=true&fromLat=27.4924134&fromLng=77.673673&toLat=30.3164945&toLng=78.03219179999999&trustCoordinates=true&_t=1757278543239 - 127.0.0.1
+[2025-09-07T20:56:03.168Z] INFO: User disconnected: Car Pool (68bdceed2dc9b92080b2dfa1)
+[2025-09-07T20:56:09.191Z] INFO: GET /api/users/me?_t=1757278569187 - 127.0.0.1
+[2025-09-07T20:56:10.502Z] INFO: GET /api/users/me?_t=1757278570493 - 127.0.0.1
+[2025-09-07T20:56:10.504Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757278570490&_t=1757278570493 - 127.0.0.1
+[2025-09-07T20:56:10.508Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757278570493&_t=1757278570493 - 127.0.0.1
+[2025-09-07T20:56:10.582Z] INFO: GET /api/users/me?_t=1757278570493 - 127.0.0.1
+[2025-09-07T20:56:10.663Z] INFO: GET /api/rides/user?status=all&_t=1757278570660&_t=1757278570661 - 127.0.0.1
+[2025-09-07T20:56:10.675Z] INFO: GET /api/rides/user?status=all&_t=1757278570673&_t=1757278570673 - 127.0.0.1
+[2025-09-07T20:56:13.716Z] INFO: GET /api/users/me?_t=1757278573711 - 127.0.0.1
+[2025-09-07T20:56:13.805Z] INFO: GET /api/users/me?_t=1757278573711 - 127.0.0.1
+[2025-09-07T20:56:14.317Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-07T20:56:31.126Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-07T20:56:31.573Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-07T20:56:40.806Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-07T20:56:44.883Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-07T20:56:49.205Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-07T20:56:52.303Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-07T20:56:54.034Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-07T20:56:55.836Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-07T20:57:06.980Z] INFO: GET /api/users/me?_t=1757278626975 - 127.0.0.1
+[2025-09-07T20:57:06.983Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757278626975&_t=1757278626975 - 127.0.0.1
+[2025-09-07T20:57:07.054Z] INFO: GET /api/users/me?_t=1757278626975 - 127.0.0.1
+[2025-09-07T20:57:07.119Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757278626975&_t=1757278626975 - 127.0.0.1
+[2025-09-07T20:57:07.122Z] INFO: GET /api/rides/user?status=all&_t=1757278627119&_t=1757278627119 - 127.0.0.1
+[2025-09-07T20:57:07.270Z] INFO: GET /api/rides/user?status=all&_t=1757278627269&_t=1757278627269 - 127.0.0.1
+[2025-09-07T20:59:27.754Z] INFO: GET /api/users/me?_t=1757278767743 - 127.0.0.1
+[2025-09-07T20:59:27.758Z] INFO: GET /api/dashboard/upcoming-rides?_t=1757278767743 - 127.0.0.1
+[2025-09-07T20:59:27.760Z] INFO: GET /api/dashboard/stats?_t=1757278767743 - 127.0.0.1
+[2025-09-07T20:59:27.818Z] INFO: GET /api/users/me?_t=1757278767743 - 127.0.0.1
+[2025-09-07T20:59:27.884Z] INFO: GET /api/dashboard/upcoming-rides?_t=1757278767743 - 127.0.0.1
+[2025-09-07T20:59:28.476Z] INFO: GET /api/dashboard/stats?_t=1757278767743 - 127.0.0.1
+[2025-09-07T20:59:36.599Z] INFO: GET /api/dashboard/upcoming-rides?_t=1757278776591 - 127.0.0.1
+[2025-09-07T20:59:36.600Z] INFO: GET /api/users/me?_t=1757278776591 - 127.0.0.1
+[2025-09-07T20:59:36.602Z] INFO: GET /api/dashboard/stats?_t=1757278776591 - 127.0.0.1
+[2025-09-07T20:59:36.664Z] INFO: GET /api/users/me?_t=1757278776591 - 127.0.0.1
+[2025-09-07T20:59:36.688Z] INFO: GET /api/dashboard/upcoming-rides?_t=1757278776591 - 127.0.0.1
+[2025-09-07T20:59:37.259Z] INFO: GET /api/dashboard/stats?_t=1757278776591 - 127.0.0.1
+[2025-09-07T20:59:39.433Z] INFO: GET /api/dashboard/stats?_t=1757278779423 - 127.0.0.1
+[2025-09-07T20:59:39.436Z] INFO: GET /api/dashboard/upcoming-rides?_t=1757278779423 - 127.0.0.1
+[2025-09-07T20:59:39.439Z] INFO: GET /api/users/me?_t=1757278779423 - 127.0.0.1
+[2025-09-07T20:59:39.497Z] INFO: GET /api/users/me?_t=1757278779423 - 127.0.0.1
+[2025-09-07T20:59:39.522Z] INFO: GET /api/dashboard/upcoming-rides?_t=1757278779423 - 127.0.0.1
+[2025-09-07T20:59:40.106Z] INFO: GET /api/dashboard/stats?_t=1757278779423 - 127.0.0.1
+[2025-09-07T20:59:43.084Z] INFO: GET /api/dashboard/stats?_t=1757278783075 - 127.0.0.1
+[2025-09-07T20:59:43.087Z] INFO: GET /api/dashboard/upcoming-rides?_t=1757278783075 - 127.0.0.1
+[2025-09-07T20:59:43.089Z] INFO: GET /api/users/me?_t=1757278783075 - 127.0.0.1
+[2025-09-07T20:59:43.147Z] INFO: GET /api/users/me?_t=1757278783075 - 127.0.0.1
+[2025-09-07T20:59:43.173Z] INFO: GET /api/dashboard/upcoming-rides?_t=1757278783075 - 127.0.0.1
+[2025-09-07T20:59:43.730Z] INFO: GET /api/dashboard/stats?_t=1757278783075 - 127.0.0.1

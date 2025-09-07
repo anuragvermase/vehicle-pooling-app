@@ -1,7 +1,6 @@
 // FindRides.jsx (single file — keep imports the same)
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useJsApiLoader } from '@react-google-maps/api';
-import { useLocation } from 'react-router-dom'; // <-- added
 import EnhancedMap from '../components/maps/EnhancedMap';
 import LocationSearchInput from '../components/maps/LocationSearchInput';
 import API from '../services/api';
@@ -16,8 +15,6 @@ const FindRides = ({ user, onLogout }) => {
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
     libraries,
   });
-
-  const location = useLocation(); // <-- added
 
   // ---------- State ----------
   const [searchData, setSearchData] = useState({
@@ -42,6 +39,45 @@ const FindRides = ({ user, onLogout }) => {
   const [showViaInput, setShowViaInput] = useState(false);
   const lastSearchParamsRef = useRef(null);
 
+  const [recent, setRecent] = useState([]);            // NEW
+  const [recentOpen, setRecentOpen] = useState(true);  // NEW
+
+  const quickRoutes = [                                 // NEW
+    { from: 'New Delhi', to: 'Gurugram' },
+    { from: 'Noida', to: 'Connaught Place' },
+    { from: 'Bengaluru', to: 'Airport' },
+    { from: 'Pune', to: 'Hinjawadi' },
+  ];
+
+  // NEW: amenity options + resetFilters (for modal)
+  const amenityOptions = [
+    { id: 'ac', label: 'AC' },
+    { id: 'music', label: 'Music' },
+    { id: 'charging', label: 'Charging' },
+    { id: 'wifi', label: 'Wi-Fi' },
+    { id: 'water', label: 'Water' },
+    { id: 'sanitizer', label: 'Sanitizer' },
+  ];
+  const resetFilters = () => {
+    setFilters({
+      maxPrice: '',
+      minRating: 4.0,
+      vehicleType: '',
+      amenities: [],
+      instantBooking: false,
+      sortBy: 'price',
+      priceRange: [0, 2000],
+      departureTimeRange: ['00:00', '23:59'],
+    });
+  };
+
+  const searchFormRef = useRef(null);
+  const { socket, notifications, removeNotification } = useWebSocket(
+    import.meta.env.VITE_SOCKET_URL || 'http://localhost:5001',
+    user
+  );
+
+  // ---------- Derived rides (filters + sort) ----------
   const [filters, setFilters] = useState({
     maxPrice: '',
     minRating: 4.0,
@@ -53,13 +89,6 @@ const FindRides = ({ user, onLogout }) => {
     departureTimeRange: ['00:00', '23:59'],
   });
 
-  const searchFormRef = useRef(null);
-  const { socket, notifications, removeNotification } = useWebSocket(
-    import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000',
-    user
-  );
-
-  // ---------- Derived rides (filters + sort) ----------
   const filteredRides = useMemo(() => {
     let filtered = [...rides];
 
@@ -212,16 +241,27 @@ const FindRides = ({ user, onLogout }) => {
         time: searchData.time,
         passengers: searchData.passengers,
         radius: 10,
-        // pass coords if we have them so backend skips geocoding
-        fromLat: locationData.from?.coordinates?.lat,
-        fromLng: locationData.from?.coordinates?.lng,
-        toLat: locationData.to?.coordinates?.lat,
-        toLng: locationData.to?.coordinates?.lng,
-        viaLat: locationData.via?.coordinates?.lat,
-        viaLng: locationData.via?.coordinates?.lng,
-        trustCoordinates:
-          !!(locationData.from?.coordinates && locationData.to?.coordinates),
+        userLocation: locationData.from?.coordinates,
+        group: true,
       };
+
+      // ✅ add trusted coordinates if available
+      if (locationData.from?.coordinates?.lat && locationData.from?.coordinates?.lng) {
+        params.fromLat = locationData.from.coordinates.lat;
+        params.fromLng = locationData.from.coordinates.lng;
+      }
+      if (locationData.to?.coordinates?.lat && locationData.to?.coordinates?.lng) {
+        params.toLat = locationData.to.coordinates.lat;
+        params.toLng = locationData.to.coordinates.lng;
+      }
+      if (locationData.via?.coordinates?.lat && locationData.via?.coordinates?.lng) {
+        params.viaLat = locationData.via.coordinates.lat;
+        params.viaLng = locationData.via.coordinates.lng;
+      }
+      if (params.fromLat && params.fromLng && params.toLat && params.toLng) {
+        params.trustCoordinates = true;     // tell backend to skip geocoding and use geo search
+      }
+
 
       lastSearchParamsRef.current = params;
 
@@ -232,6 +272,7 @@ const FindRides = ({ user, onLogout }) => {
         setSearchStep('results');
         if (list.length) setSelectedRide(list[0]);
         await saveSearchToHistory(params);
+        loadRecent(); // NEW
       } else {
         setSearchStep('form');
       }
@@ -243,101 +284,6 @@ const FindRides = ({ user, onLogout }) => {
     }
   };
 
-  // ---------- Auto-prefill & auto-search from query params ----------
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const from = params.get('from') || '';
-    const to = params.get('to') || '';
-    const via = params.get('via') || '';
-    const date = params.get('date') || '';
-    const passengers = Number(params.get('passengers') || 1);
-
-    const fromLat = parseFloat(params.get('fromLat'));
-    const fromLng = parseFloat(params.get('fromLng'));
-    const toLat = parseFloat(params.get('toLat'));
-    const toLng = parseFloat(params.get('toLng'));
-    const viaLat = parseFloat(params.get('viaLat'));
-    const viaLng = parseFloat(params.get('viaLng'));
-    const trustCoordinates = params.get('trustCoordinates') === 'true';
-
-    const hasQuery = from || to || date || params.get('fromLat') || params.get('toLat');
-
-    if (!hasQuery) return;
-
-    // Pre-fill fields
-    setSearchData((prev) => ({
-      ...prev,
-      from,
-      to,
-      via,
-      date: date || prev.date,
-      passengers: isFinite(passengers) && passengers > 0 ? passengers : prev.passengers,
-    }));
-
-    // Set coordinates & center
-    setLocationData((prev) => ({
-      ...prev,
-      from:
-        isFinite(fromLat) && isFinite(fromLng)
-          ? { name: from, address: from, coordinates: { lat: fromLat, lng: fromLng } }
-          : prev.from,
-      to:
-        isFinite(toLat) && isFinite(toLng)
-          ? { name: to, address: to, coordinates: { lat: toLat, lng: toLng } }
-          : prev.to,
-      via:
-        isFinite(viaLat) && isFinite(viaLng)
-          ? { name: via, address: via, coordinates: { lat: viaLat, lng: viaLng } }
-          : prev.via,
-    }));
-
-    if (isFinite(fromLat) && isFinite(fromLng)) {
-      setMapCenter({ lat: fromLat, lng: fromLng });
-    }
-
-    // Auto-run search with coords
-    (async () => {
-      try {
-        setSearchStep('searching');
-        setIsSearching(true);
-
-        const searchParams = {
-          from,
-          to,
-          via,
-          date: date || new Date().toISOString().split('T')[0],
-          passengers: isFinite(passengers) && passengers > 0 ? passengers : 1,
-          radius: 10,
-          fromLat: isFinite(fromLat) ? fromLat : undefined,
-          fromLng: isFinite(fromLng) ? fromLng : undefined,
-          toLat: isFinite(toLat) ? toLat : undefined,
-          toLng: isFinite(toLng) ? toLng : undefined,
-          viaLat: isFinite(viaLat) ? viaLat : undefined,
-          viaLng: isFinite(viaLng) ? viaLng : undefined,
-          trustCoordinates,
-        };
-
-        lastSearchParamsRef.current = searchParams;
-
-        const res = await API.rides.search(searchParams);
-        if (res?.success) {
-          const list = res.rides || [];
-          setRides(list);
-          setSearchStep('results');
-          if (list.length) setSelectedRide(list[0]);
-        } else {
-          setSearchStep('form');
-        }
-      } catch (err) {
-        console.error('Auto-search error:', err);
-        setSearchStep('form');
-      } finally {
-        setIsSearching(false);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.search]);
-
   // ---------- Realtime refresh ----------
   useEffect(() => {
     if (!socket || searchStep !== 'results') return;
@@ -345,7 +291,7 @@ const FindRides = ({ user, onLogout }) => {
     const refresh = async () => {
       try {
         if (!lastSearchParamsRef.current) return;
-        const res = await API.rides.search(lastSearchParamsRef.current);
+        const res = await API.rides.search({ ...lastSearchParamsRef.current, group: true }); // ✅ keep grouped
         if (res?.success) setRides(res.rides || []);
       } catch (e) {
         console.error('Realtime refresh error:', e);
@@ -440,6 +386,72 @@ const FindRides = ({ user, onLogout }) => {
     }
   };
 
+  const loadRecent = () => {                   // NEW
+    try {
+      const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+      setRecent(history);
+    } catch { }
+  };
+
+  const clearForm = () => {                    // NEW
+    setSearchData((p) => ({ ...p, from: '', to: '', via: '' }));
+    setLocationData((p) => ({ ...p, from: null, to: null, via: null }));
+    setRouteInfo(null);
+    setPriceEstimate(null);
+  };
+
+  const applyQuickRoute = (q) => {             // NEW
+    setSearchData((p) => ({ ...p, from: q.from, to: q.to }));
+  };
+
+  useEffect(loadRecent, []);                    // NEW
+
+  /* ===================== NEW helpers for 0-results actions ===================== */
+  const rerunSearch = async (overrides = {}) => {
+    if (!lastSearchParamsRef.current) return;
+    const params = { ...lastSearchParamsRef.current, ...overrides, group: true }; // ✅ keep grouped
+    lastSearchParamsRef.current = params;
+    setIsSearching(true);
+    try {
+      const res = await API.rides.search(params);
+      if (res?.success) {
+        setRides(res.rides || []);
+        if ((res.rides || []).length) setSelectedRide(res.rides[0]);
+      }
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const tryNearbyDate = async (deltaDays) => {
+    const cur = new Date(searchData.date);
+    const next = new Date(cur.getTime() + deltaDays * 86400000);
+    const nx = next.toISOString().slice(0, 10);
+    setSearchData((p) => ({ ...p, date: nx }));
+    await rerunSearch({ date: nx });
+  };
+
+  const expandRadius = async () => {
+    const current = Number(lastSearchParamsRef.current?.radius || 10);
+    const next = current < 25 ? 25 : current < 50 ? 50 : 75;
+    await rerunSearch({ radius: next });
+  };
+
+  const relaxFiltersOnce = () => {
+    setFilters((p) => ({
+      ...p,
+      minRating: 0,
+      vehicleType: '',
+      priceRange: [0, 5000],
+      instantBooking: false,
+    }));
+  };
+
+  const postARide = () => {
+    window.location.assign('/offer-ride');
+  };
+  /* ============================================================================ */
+
   // ---------- Loading ----------
   if (!isLoaded) {
     return (
@@ -476,6 +488,21 @@ const FindRides = ({ user, onLogout }) => {
           </button>
         </div>
       </header>
+
+      {/* NEW: small stats strip under header */}
+      {/* Stats strip */}
+      <div className="rs-stats">
+        <div className="rs-stat">
+          <span>👥</span><b>2,340</b><small>active drivers</small>
+        </div>
+        <div className="rs-stat">
+          <span>🧭</span><b>48</b><small>cities covered</small>
+        </div>
+        <div className="rs-stat">
+          <span>⭐</span><b>4.7</b><small>avg. driver rating</small>
+        </div>
+      </div>
+
 
       {/* MAIN */}
       <main className="rs-main">
@@ -574,6 +601,25 @@ const FindRides = ({ user, onLogout }) => {
                         </button>
                       </div>
                     )}
+
+                    {/* NEW: clear form */}
+                    <button
+                      type="button"
+                      className="rs-ghost"
+                      onClick={clearForm}
+                      title="Clear pickup, drop-off and stop"
+                    >
+                      Clear
+                    </button>
+                  </div>
+
+                  {/* NEW: quick routes */}
+                  <div className="rs-quick">
+                    {quickRoutes.map((q) => (
+                      <button key={q.from + q.to} className="rs-chip" onClick={() => applyQuickRoute(q)}>
+                        {q.from} → {q.to}
+                      </button>
+                    ))}
                   </div>
 
                   {/* route + price preview */}
@@ -597,6 +643,72 @@ const FindRides = ({ user, onLogout }) => {
                     {isSearching ? 'Searching…' : 'Search rides'}
                   </button>
                 </form>
+
+                {/* NEW: Recent searches (uses your existing localStorage history) */}
+                {recent.length > 0 && (
+                  <div className="rs-recent">
+                    <button className="rs-recent-toggle" onClick={() => setRecentOpen((v) => !v)}>
+                      {recentOpen ? '▼' : '►'} Recent searches
+                    </button>
+                    {recentOpen && (
+                      <div className="rs-recent-list">
+                        {recent.slice(0, 6).map((r) => (
+                          <button
+                            key={r.id}
+                            className="rs-chip"
+                            onClick={async () => {
+                              // update plain strings
+                              setSearchData((p) => ({
+                                ...p,
+                                from: r.from,
+                                to: r.to,
+                                date: r.date,
+                                time: r.time || '',
+                                passengers: r.passengers || 1,
+                              }));
+
+                              // re-geocode to restore map pins
+                              const geocoder = new window.google.maps.Geocoder();
+
+                              const geocode = (addr) =>
+                                new Promise((resolve) => {
+                                  geocoder.geocode({ address: addr }, (results, status) => {
+                                    if (status === 'OK' && results[0]) {
+                                      const loc = results[0].geometry.location;
+                                      resolve({
+                                        name: addr,
+                                        address: results[0].formatted_address,
+                                        coordinates: { lat: loc.lat(), lng: loc.lng() },
+                                        placeId: results[0].place_id,
+                                      });
+                                    } else {
+                                      resolve(null);
+                                    }
+                                  });
+                                });
+
+                              const fromLoc = await geocode(r.from);
+                              const toLoc = await geocode(r.to);
+
+                              setLocationData((p) => ({
+                                ...p,
+                                from: fromLoc,
+                                to: toLoc,
+                              }));
+
+                              if (fromLoc?.coordinates) setMapCenter(fromLoc.coordinates);
+                            }}
+                            title={`${r.from} → ${r.to}`}
+                          >
+                            {r.from} → {r.to}
+                          </button>
+                        ))}
+
+
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* RIGHT: map */}
@@ -605,20 +717,43 @@ const FindRides = ({ user, onLogout }) => {
                   <EnhancedMap
                     rides={[]}
                     selectedRide={null}
-                    onRideSelect={() => {}}
+                    onRideSelect={() => { }}
                     center={mapCenter}
                     origin={locationData.from?.coordinates}
                     destination={locationData.to?.coordinates}
                     viaPoints={locationData.via ? [locationData.via.coordinates] : []}
                     showDirections={Boolean(locationData.from && locationData.to)}
                   />
+                  {/* NEW: subtle overlay badges */}
+                  <div className="rs-mapoverlay">
+                    {locationData.from && <span className="rs-tag sm">Start pinned</span>}
+                    {locationData.to && <span className="rs-tag sm">Destination set</span>}
+                  </div>
                 </div>
 
-                {/* Compact teaser style under map (empty state) */}
-                <div className="rs-teaser">
-                  <div className="rs-teaser-row skeleton" />
-                  <div className="rs-teaser-row skeleton" />
-                  <div className="rs-teaser-row skeleton" />
+                {/* NEW: Helpful tips */}
+                <div className="rs-tips">
+                  <div className="rs-tip">
+                    <span>🛡</span>
+                    <div>
+                      <b>Verified drivers</b>
+                      <small>KYC & vehicle checks on all drivers</small>
+                    </div>
+                  </div>
+                  <div className="rs-tip">
+                    <span>⚡</span>
+                    <div>
+                      <b>Instant booking</b>
+                      <small>Book seats in one tap—no calls needed</small>
+                    </div>
+                  </div>
+                  <div className="rs-tip">
+                    <span>📍</span>
+                    <div>
+                      <b>Live route view</b>
+                      <small>Preview distance and ETA before you search</small>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -682,83 +817,157 @@ const FindRides = ({ user, onLogout }) => {
               </div>
             </div>
 
+            {/* MODAL FILTERS */}
             {showFilters && (
-              <div className="rs-filters">
-                <div className="rs-filter">
-                  <label>Sort by</label>
-                  <select
-                    value={filters.sortBy}
-                    onChange={(e) => setFilters((p) => ({ ...p, sortBy: e.target.value }))}
-                  >
-                    <option value="relevance">Best match</option>
-                    <option value="price">Lowest price</option>
-                    <option value="rating">Highest rated</option>
-                    <option value="time">Departure time</option>
-                    <option value="duration">Shortest trip</option>
-                  </select>
-                </div>
+              <div className="rs-filters-modal" role="dialog" aria-modal="true" onClick={() => setShowFilters(false)}>
+                <div className="rs-filters-card" onClick={(e) => e.stopPropagation()}>
+                  <div className="rs-fhead">
+                    <h3>Filters</h3>
+                    <button className="rs-x" aria-label="Close" onClick={() => setShowFilters(false)}>✕</button>
+                  </div>
 
-                <div className="rs-filter">
-                  <label>Price max</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="2000"
-                    value={filters.priceRange[1]}
-                    onChange={(e) =>
-                      setFilters((p) => ({
-                        ...p,
-                        priceRange: [p.priceRange[0], parseInt(e.target.value, 10)],
-                      }))
-                    }
-                  />
-                  <div className="rs-dim">
-                    ₹{filters.priceRange[0]} – ₹{filters.priceRange[1]}
+                  <div className="rs-fgrid">
+                    {/* Sort by */}
+                    <div className="rs-filter">
+                      <label>Sort by</label>
+                      <select
+                        value={filters.sortBy}
+                        onChange={(e) => setFilters((p) => ({ ...p, sortBy: e.target.value }))}
+                      >
+                        <option value="relevance">Best match</option>
+                        <option value="price">Lowest price</option>
+                        <option value="rating">Highest rated</option>
+                        <option value="time">Departure time</option>
+                        <option value="duration">Shortest trip</option>
+                      </select>
+                    </div>
+
+                    {/* Price max (uses priceRange[1]) */}
+                    <div className="rs-filter">
+                      <label>Price max</label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="2000"
+                        value={filters.priceRange[1]}
+                        onChange={(e) =>
+                          setFilters((p) => ({
+                            ...p,
+                            priceRange: [p.priceRange[0], parseInt(e.target.value, 10)],
+                          }))
+                        }
+                      />
+                      <div className="rs-dim">₹{filters.priceRange[0]} – ₹{filters.priceRange[1]}</div>
+                    </div>
+
+                    {/* Min rating */}
+                    <div className="rs-filter">
+                      <label>Min rating</label>
+                      <div className="rs-chiprow">
+                        {[3.0, 3.5, 4.0, 4.5].map((r) => (
+                          <button
+                            key={r}
+                            className={`rs-chip ${filters.minRating === r ? 'active' : ''}`}
+                            onClick={() => setFilters((p) => ({ ...p, minRating: r }))}
+                          >
+                            {r}+ ⭐
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Vehicle type */}
+                    <div className="rs-filter">
+                      <label>Vehicle</label>
+                      <div className="rs-chiprow">
+                        {['', 'hatchback', 'sedan', 'suv', 'luxury'].map((t) => (
+                          <button
+                            key={t || 'any'}
+                            className={`rs-chip ${filters.vehicleType === t ? 'active' : ''}`}
+                            onClick={() => setFilters((p) => ({ ...p, vehicleType: t }))}
+                          >
+                            {t ? t : 'Any'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Amenities */}
+                    <div className="rs-filter rs-amenities">
+                      <label>Amenities</label>
+                      <div className="rs-chiprow">
+                        {amenityOptions.map((a) => {
+                          const active = filters.amenities.includes(a.id);
+                          return (
+                            <button
+                              key={a.id}
+                              className={`rs-chip ${active ? 'active' : ''}`}
+                              onClick={() =>
+                                setFilters((p) => ({
+                                  ...p,
+                                  amenities: active
+                                    ? p.amenities.filter((x) => x !== a.id)
+                                    : [...p.amenities, a.id],
+                                }))
+                              }
+                            >
+                              {a.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Departure window */}
+                    <div className="rs-filter">
+                      <label>Departure window</label>
+                      <div className="rs-timebox">
+                        <input
+                          type="time"
+                          value={filters.departureTimeRange[0]}
+                          onChange={(e) =>
+                            setFilters((p) => ({
+                              ...p,
+                              departureTimeRange: [e.target.value, p.departureTimeRange[1]],
+                            }))
+                          }
+                        />
+                        <span className="rs-sep">—</span>
+                        <input
+                          type="time"
+                          value={filters.departureTimeRange[1]}
+                          onChange={(e) =>
+                            setFilters((p) => ({
+                              ...p,
+                              departureTimeRange: [p.departureTimeRange[0], e.target.value],
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    {/* Instant booking */}
+                    <div className="rs-filter">
+                      <label className="rs-check">
+                        <input
+                          type="checkbox"
+                          checked={filters.instantBooking}
+                          onChange={(e) =>
+                            setFilters((p) => ({ ...p, instantBooking: e.target.checked }))
+                          }
+                        />
+                        Instant booking only
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="rs-factions">
+                    <button className="rs-ghost" onClick={resetFilters}>Reset</button>
+                    <button className="rs-primary small" onClick={() => setShowFilters(false)}>
+                      Apply
+                    </button>
                   </div>
                 </div>
-
-                <div className="rs-filter">
-                  <label>Min rating</label>
-                  {[3.0, 3.5, 4.0, 4.5].map((r) => (
-                    <button
-                      key={r}
-                      className={`rs-chip ${filters.minRating === r ? 'active' : ''}`}
-                      onClick={() => setFilters((p) => ({ ...p, minRating: r }))}
-                    >
-                      {r}+ ⭐
-                    </button>
-                  ))}
-                </div>
-
-                <div className="rs-filter">
-                  <label>Vehicle</label>
-                  {['any', 'hatchback', 'sedan', 'suv', 'luxury'].map((t) => (
-                    <button
-                      key={t}
-                      className={`rs-chip ${
-                        filters.vehicleType === t || (t === 'any' && !filters.vehicleType)
-                          ? 'active'
-                          : ''
-                      }`}
-                      onClick={() =>
-                        setFilters((p) => ({ ...p, vehicleType: t === 'any' ? '' : t }))
-                      }
-                    >
-                      {t === 'any' ? 'Any' : t}
-                    </button>
-                  ))}
-                </div>
-
-                <label className="rs-check">
-                  <input
-                    type="checkbox"
-                    checked={filters.instantBooking}
-                    onChange={(e) =>
-                      setFilters((p) => ({ ...p, instantBooking: e.target.checked }))
-                    }
-                  />
-                  Instant booking only
-                </label>
               </div>
             )}
 
@@ -796,14 +1005,37 @@ const FindRides = ({ user, onLogout }) => {
             </div>
 
             {filteredRides.length === 0 && (
-              <div className="rs-empty">
-                <div className="rs-emoji">😕</div>
-                <h3>No rides found</h3>
-                <p className="rs-dim">Try adjusting your filters or search criteria</p>
-                <button className="rs-secondary" onClick={resetSearch}>
-                  Modify search
-                </button>
-              </div>
+              <>
+                <div className="rs-empty">
+                  <div className="rs-emoji">😕</div>
+                  <h3>No rides found</h3>
+                  <p className="rs-dim">Try adjusting your filters or use one of the quick actions below</p>
+
+                  {/* Action buttons row */}
+                  <div className="rs-cta-row">
+                    <button className="rs-secondary" onClick={() => tryNearbyDate(-1)} disabled={isSearching}>
+                      ← Previous day
+                    </button>
+                    <button className="rs-secondary" onClick={() => tryNearbyDate(+1)} disabled={isSearching}>
+                      Next day →
+                    </button>
+                    <button className="rs-secondary" onClick={expandRadius} disabled={isSearching}>
+                      Expand radius
+                    </button>
+                    <button className="rs-secondary" onClick={relaxFiltersOnce}>
+                      Relax filters
+                    </button>
+                    <button className="rs-primary small" onClick={postARide}>
+                      🚀 Post a ride
+                    </button>
+                  </div>
+
+                  <button className="rs-secondary" onClick={resetSearch} style={{ marginTop: 8 }}>
+                    Modify search
+                  </button>
+                </div>
+                {/* ⬆️ Quick routes & Recent searches were intentionally removed on results page */}
+              </>
             )}
           </div>
         )}
@@ -899,9 +1131,7 @@ const RideCard = ({ ride, isSelected, onSelect, onBook, passengers, appearDelay 
 
   return (
     <div
-      className={`rs-ride ${isSelected ? 'selected' : ''} ${
-        ride.canBook ? 'bookable' : 'unavailable'
-      }`}
+      className={`rs-ride ${isSelected ? 'selected' : 'unselected'} ${ride.canBook ? 'bookable' : 'unavailable'}`}
       style={{ animationDelay: `${appearDelay}ms` }}
       onClick={onSelect}
     >
@@ -1045,7 +1275,7 @@ const StyleChunk = () => (
   .rs-spinner{width:38px; height:38px; border-radius:50%; border:3px solid rgba(255,255,255,.25); border-top-color:#fff; animation:spin 1s linear infinite; margin-bottom:12px}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  .rs-header{width:100%; max-width:1100px; margin:0 auto 24px; display:flex; align-items:center; justify-content:space-between; padding:0 20px}
+  .rs-header{width:100%; max-width:1100px; margin:0 auto 8px; display:flex; align-items:center; justify-content:space-between; padding:0 20px}
   .rs-brand{display:flex; align-items:center; gap:12px}
   .rs-logo{font-size:22px}
   .rs-title{font-weight:700; font-size:20px}
@@ -1055,11 +1285,17 @@ const StyleChunk = () => (
   .rs-hello{background:#5b6ef5; color:#fff; width:36px; height:36px; border-radius:999px; display:grid; place-items:center; font-weight:700}
   .rs-logout{background:#111; color:#fff; border:1px solid rgba(255,255,255,.2); padding:8px 12px; border-radius:12px; cursor:pointer}
 
+  /* NEW: Stats strip */
+  .rs-stats{max-width:1100px; margin:0 auto 16px; padding:0 20px; display:flex; gap:12px; flex-wrap:wrap}
+  .rs-stat{background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:8px 12px; display:flex; align-items:center; gap:8px}
+  .rs-stat b{font-size:16px}
+  .rs-stat small{color:var(--muted)}
+
   .rs-main{max-width:1100px; margin:0 auto; width:100%; padding:0 20px}
-  .rs-card{background:rgba(255,255,255,.08); backdrop-filter: blur(20px); border-radius:22px; box-shadow:0 20px 50px rgba(0,0,0,.25); padding:28px; width:100%}
+  .rs-card {background: rgba(255,255,255,.08); backdrop-filter: blur(20px); border-radius:28px; box-shadow:0 20px 50px rgba(0,0,0,.25); padding:48px; width:100%; min-height: 75vh; display:flex; flex-direction:column; justify-content:center;}
 
   /* HERO */
-  .rs-hero-grid{display:grid; grid-template-columns: 1.2fr 1fr; gap:26px}
+  .rs-hero-grid { display:grid; grid-template-columns: 1.2fr 1fr; gap:36px; align-items:center; height:100%;}
   .rs-h1{font-size:44px; line-height:1.1; margin:0 0 8px}
   .rs-sub{margin:0 0 18px; color:var(--muted)}
   .rs-form{display:flex; flex-direction:column; gap:14px}
@@ -1079,93 +1315,96 @@ const StyleChunk = () => (
   .rs-preview{display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,.12); padding:10px 12px; border-radius:12px; color:#fff}
   .rs-price{font-weight:700}
 
-  .rs-mapwrap{height:360px; border-radius:18px; overflow:hidden; background:#0a0a2a; border:1px solid rgba(255,255,255,.1)}
+  /* NEW: quick routes + recent on form page */
+  .rs-quick{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px}
+  .rs-recent{margin-top:12px}
+  .rs-recent-toggle{background:rgba(255,255,255,.1); color:#fff; border:none; padding:8px 10px; border-radius:10px; cursor:pointer}
+  .rs-recent-list{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+
+  .rs-mapwrap { height: 520px; border-radius:18px; overflow:hidden; background:#0a0a2a; border:1px solid rgba(255,255,255,.1); position:relative;}
+  .rs-mapoverlay{position:absolute; left:10px; top:10px; display:flex; gap:6px; pointer-events:none}
+  .rs-tag{background:rgba(255,255,255,.18); padding:6px 10px; border-radius:999px; font-size:12px}
+  .rs-tag.sm{font-size:11px; padding:4px 8px}
+
   .rs-teaser{margin-top:12px; background:#f8f9ff; border-radius:14px; padding:10px; display:flex; flex-direction:column; gap:8px; box-shadow:0 8px 22px rgba(17,24,39,.08)}
   .rs-teaser-row{height:46px; border-radius:12px; background:#fff}
   .skeleton{position:relative; overflow:hidden}
   .skeleton::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(0,0,0,0), rgba(17,24,39,.06), rgba(0,0,0,0)); transform:translateX(-100%); animation:shimmer 1.4s infinite}
   @keyframes shimmer{to{transform:translateX(100%)}}
 
+  /* NEW: tips below the map */
+  .rs-tips{margin-top:12px; display:flex; flex-direction:column; gap:8px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:12px}
+  .rs-tip{display:flex; gap:10px; align-items:flex-start}
+  .rs-tip b{display:block}
+  .rs-tip small{color:var(--muted)}
+
   /* RESULTS */
-  .rs-results-bar{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:18px}
+  .rs-results-bar{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:28px}
   .rs-h2{font-size:34px; margin:0 0 2px}
   .rs-line{font-size:16px}
   .rs-dim{color:var(--muted)}
   .rs-tabs{display:flex; gap:8px; align-items:center}
   .rs-tab{background:#fff; color:#111; border:none; padding:8px 12px; border-radius:12px; cursor:pointer; box-shadow:0 6px 18px rgba(17,24,39,.1)}
   .rs-tab.active{outline:3px solid rgba(255,255,255,.35)}
-  .rs-filters{display:flex; flex-wrap:wrap; gap:16px; background:rgba(255,255,255,.08); padding:14px; border-radius:16px; margin-bottom:16px}
-  .rs-filter{display:flex; flex-direction:column; gap:6px}
-  .rs-check{display:flex; align-items:center; gap:8px}
 
-  .rs-split{display:grid; gap:16px}
-  .rs-split.list{grid-template-columns:1fr}
-  .rs-split.map{grid-template-columns:1fr}
-  .rs-split.split{grid-template-columns:1.1fr 1fr}
+  /* (legacy inline filters kept out; we now use modal) */
+  .rs-filters{display:none}
 
-  .rs-list{display:flex; flex-direction:column; gap:12px; min-height:200px}
-  .rs-list.compact{gap:10px}
+  /* ===== Filters modal ===== */
+  .rs-filters-modal{
+    position: fixed; inset: 0; z-index: 60;
+    background: rgba(10,12,28,.45);
+    backdrop-filter: blur(6px);
+    display:flex; align-items:center; justify-content:center;
+    padding: 20px;
+  }
+  .rs-filters-card{
+    width: min(980px, 96vw);
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 18px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.45);
+    padding: 18px 18px 14px;
+    color: var(--text);
+  }
+  .rs-fhead{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 4px 4px 10px;
+    border-bottom: 1px solid rgba(255,255,255,.12);
+    margin-bottom: 14px;
+  }
+  .rs-fhead h3{ margin:0; font-size:20px; font-weight:800 }
+  .rs-fgrid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px 18px; }
+  .rs-filter{ display:flex; flex-direction:column; gap:8px }
+  .rs-chiprow{ display:flex; flex-wrap:wrap; gap:8px }
+  .rs-timebox{ display:flex; align-items:center; gap:8px }
+  .rs-sep{ opacity:.7 }
+  .rs-factions{ display:flex; justify-content:flex-end; gap:10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.12); }
+  .rs-filters-card select, .rs-filters-card input[type="time"], .rs-filters-card input[type="range"]{
+    background:#fff; color:#111; border:none; border-radius:10px; padding:8px 10px;
+    box-shadow:0 6px 18px rgba(17,24,39,.10);
+  }
+  .rs-filters-card input[type="range"]{ padding:0 }
+  .rs-filters-card .rs-chip{ background:#fff; color:#111; border:none; border-radius:999px; padding:8px 12px; box-shadow:0 6px 18px rgba(17,24,39,.10); }
+  .rs-filters-card .rs-chip.active{ outline:3px solid rgba(255,255,255,.35) }
 
-  .rs-empty{display:grid; place-items:center; padding:40px 10px; text-align:center; gap:10px; background:rgba(255,255,255,.06); border-radius:16px}
-  .rs-emoji{font-size:48px}
-
-  /* COMPACT ROW CARD */
-  .rs-rowcard{background:#fff; color:#111; border-radius:14px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px; box-shadow:0 12px 28px rgba(17,24,39,.08); animation:fadeIn .25s ease both}
-  .rs-rowcard.selected{outline:3px solid #7b5cf3}
-  .rs-row-left{display:flex; align-items:center; gap:10px}
-  .rs-avatar{width:44px; height:44px; border-radius:999px}
-  .rs-avatar.sm{width:36px; height:36px}
-  .rs-row-name{font-weight:700}
-  .rs-row-sub{display:flex; align-items:center; gap:6px; color:#6b7280; font-size:13px}
-  .rs-star{color:#f59e0b}
-  .rs-dotsep{opacity:.6}
-  .rs-row-right{text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:2px}
-  .rs-price-lg{font-size:20px; font-weight:800}
-  .rs-mini-book{background:#111; color:#fff; border:none; padding:6px 10px; border-radius:999px; cursor:pointer; font-size:12px; display:none}
-  .rs-rowcard:hover .rs-mini-book{display:inline-block}
-  .rs-rowcard.unavailable{opacity:.7}
-  @keyframes fadeIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none)}
-
-  /* LEGACY RIDE CARD (unchanged styles) */
-  .rs-ride{background:#fff; color:#111; border-radius:16px; padding:14px; animation:fadeIn .3s ease both}
-  .rs-ride.selected{outline:3px solid #7b5cf3}
-  .rs-ride-top{display:flex; justify-content:space-between; gap:12px}
-  .rs-driver{display:flex; gap:10px; align-items:center}
-  .rs-driver-name{font-weight:700}
-  .rs-pricebox{text-align:right}
-  .rs-badge{margin-top:6px; background:#ffe9a8; padding:2px 8px; border-radius:999px; font-size:12px; display:inline-block}
-  .rs-times{display:grid; grid-template-columns:1fr 120px 1fr; align-items:center; padding:8px 0}
-  .rs-mid{text-align:center}
-  .rs-time{font-weight:700}
-  .rs-route{display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:6px 0}
-  .rs-dot{width:8px; height:8px; border-radius:999px}
-  .rs-dot.start{background:#4f46e5}
-  .rs-dot.via{background:#0ea5e9}
-  .rs-dot.end{background:#ef4444}
-  .rs-loc{font-size:14px}
-  .rs-meta{display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; color:#333; border-top:1px dashed #e6e6e6; padding-top:10px; margin-top:6px}
-  .rs-tags{display:flex; gap:6px; flex-wrap:wrap}
-  .rs-tag{background:#f1f1ff; padding:2px 8px; border-radius:999px; font-size:12px}
-  .rs-ride-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:10px}
-
-  /* TOASTS */
-  .rs-toast{position:fixed; right:18px; bottom:18px; background:#fff; color:#111; padding:12px 14px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.25); display:flex; gap:10px; align-items:flex-start}
-  .rs-toast.error{border-left:6px solid #ef4444}
-  .rs-toast.success{border-left:6px solid #22c55e}
-  .rs-toast .rs-x{position:static; color:#333}
+  /* Empty state polish */
+  .rs-empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:60px 20px; gap:14px; background:rgba(255,255,255,.06); border-radius:16px; margin-top:30px; }
+  .rs-empty h3{ font-size:22px; margin:6px 0; }
+  .rs-empty .rs-emoji{ font-size:56px; margin-bottom:4px; }
+  .rs-cta-row{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:14px; }
 
   /* Responsive adjustments */
   @media (max-width: 768px) {
     .rs-page { padding: 16px 0; }
     .rs-main { padding: 0 16px; }
-    .rs-hero-grid { grid-template-columns: 1fr; }
     .rs-header { padding: 0 16px; }
     .rs-h1 { font-size: 32px; }
     .rs-h2 { font-size: 28px; }
     .rs-results-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .rs-hero-grid { grid-template-columns: 1fr; }
     .rs-split.split { grid-template-columns: 1fr; }
-    .rs-filters { flex-direction: column; }
-    .rs-mini-book{display:inline-block}
+    .rs-fgrid{ grid-template-columns: 1fr; }
   }
   `}</style>
 );

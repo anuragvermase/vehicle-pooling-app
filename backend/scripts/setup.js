@@ -9,7 +9,7 @@ const _dirname = path.dirname(_filename);
 const createEnvExample = () => {
   const envExamplePath = path.join(__dirname, '..', '.env.example');
   const envExampleContent = `# Server Configuration
-PORT=5000
+PORT=5001
 NODE_ENV=development
 
 # Database Configuration
