@@ -443,3 +443,11 @@ Data: {
 [2025-09-03T19:43:25.603Z] INFO: 🔌 WebSocket: Active
 [2025-09-03T19:43:25.605Z] INFO: 🌍 Environment: development
 [2025-09-03T19:43:25.606Z] INFO: 🌐 CORS Origins: (any - dev)
+[2025-09-03T20:54:37.316Z] INFO: MongoDB Connected: ac-axtossa-shard-00-01.zdprcoy.mongodb.net
+[2025-09-03T20:54:37.320Z] INFO: Database Name: rideshare
+[2025-09-03T20:54:37.343Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-09-03T20:54:37.345Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-09-03T20:54:37.346Z] INFO: 📱 Phone Health:  http://192.168.1.4:5000/api/health
+[2025-09-03T20:54:37.347Z] INFO: 🔌 WebSocket: Active
+[2025-09-03T20:54:37.348Z] INFO: 🌍 Environment: development
+[2025-09-03T20:54:37.349Z] INFO: 🌐 CORS Origins: (any - dev)

@@ -1,0 +1,213 @@
+[2025-09-04T06:08:34.578Z] INFO: MongoDB Connected: ac-axtossa-shard-00-02.zdprcoy.mongodb.net
+[2025-09-04T06:08:34.584Z] INFO: Database Name: rideshare
+[2025-09-04T06:08:34.621Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-09-04T06:08:34.623Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-09-04T06:08:34.624Z] INFO: 📱 Phone Health:  http://192.168.1.4:5000/api/health
+[2025-09-04T06:08:34.625Z] INFO: 🔌 WebSocket: Active
+[2025-09-04T06:08:34.627Z] INFO: 🌍 Environment: development
+[2025-09-04T06:08:34.628Z] INFO: 🌐 CORS Origins: (any - dev)
+[2025-09-04T06:10:28.364Z] INFO: GET /api/auth/me?_t=1756966228018 - 127.0.0.1
+[2025-09-04T06:10:28.579Z] INFO: GET /api/auth/me?_t=1756966228018 - 127.0.0.1
+[2025-09-04T06:50:52.544Z] INFO: GET /api/users/me?_t=1756968652218 - 127.0.0.1
+[2025-09-04T06:50:53.807Z] INFO: GET /api/users/me?_t=1756968653781 - 127.0.0.1
+[2025-09-04T06:50:53.820Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756968653778&_t=1756968653781 - 127.0.0.1
+[2025-09-04T06:50:54.081Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756968653781&_t=1756968653781 - 127.0.0.1
+[2025-09-04T06:50:54.105Z] INFO: GET /api/users/me?_t=1756968653781 - 127.0.0.1
+[2025-09-04T06:50:54.240Z] INFO: GET /api/rides/user?status=all&_t=1756968654226&_t=1756968654226 - 127.0.0.1
+[2025-09-04T06:50:54.430Z] INFO: GET /api/rides/user?status=all&_t=1756968654421&_t=1756968654422 - 127.0.0.1
+[2025-09-04T06:50:56.739Z] INFO: GET /api/users/me?_t=1756968656717 - 127.0.0.1
+[2025-09-04T06:50:56.944Z] INFO: GET /api/users/me?_t=1756968656717 - 127.0.0.1
+[2025-09-04T06:50:57.422Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T06:52:09.117Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-04T06:53:20.541Z] INFO: Mongoose connected to MongoDB
+[2025-09-04T07:09:04.958Z] INFO: GET /api/users/me?_t=1756969744631 - 127.0.0.1
+[2025-09-04T07:09:05.628Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:09:05.843Z] INFO: GET /api/users/me?_t=1756969744631 - 127.0.0.1
+[2025-09-04T07:09:23.616Z] INFO: GET /api/users/me?_t=1756969763601 - 127.0.0.1
+[2025-09-04T07:09:24.003Z] INFO: GET /api/users/me?_t=1756969763601 - 127.0.0.1
+[2025-09-04T07:09:24.265Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:09:34.619Z] INFO: GET /api/users/me?_t=1756969774602 - 127.0.0.1
+[2025-09-04T07:09:34.724Z] INFO: GET /api/users/me?_t=1756969774602 - 127.0.0.1
+[2025-09-04T07:09:35.432Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:09:41.236Z] INFO: GET /api/auth/me?_t=1756969781231 - 127.0.0.1
+[2025-09-04T07:09:41.318Z] INFO: GET /api/auth/me?_t=1756969781231 - 127.0.0.1
+[2025-09-04T07:09:41.330Z] INFO: GET /api/users/me?_t=1756969781326 - 127.0.0.1
+[2025-09-04T07:09:41.714Z] INFO: GET /api/users/me?_t=1756969781326 - 127.0.0.1
+[2025-09-04T07:09:41.938Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:09:57.610Z] INFO: GET /api/auth/me?_t=1756969797597 - 127.0.0.1
+[2025-09-04T07:09:57.714Z] INFO: GET /api/auth/me?_t=1756969797597 - 127.0.0.1
+[2025-09-04T07:09:57.926Z] INFO: GET /api/users/me?_t=1756969797736 - 127.0.0.1
+[2025-09-04T07:09:58.028Z] INFO: GET /api/users/me?_t=1756969797736 - 127.0.0.1
+[2025-09-04T07:09:58.596Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:10:19.076Z] INFO: GET /api/auth/me?_t=1756969819071 - 127.0.0.1
+[2025-09-04T07:10:19.152Z] INFO: GET /api/auth/me?_t=1756969819071 - 127.0.0.1
+[2025-09-04T07:10:19.162Z] INFO: GET /api/users/me?_t=1756969819158 - 127.0.0.1
+[2025-09-04T07:10:19.236Z] INFO: GET /api/users/me?_t=1756969819158 - 127.0.0.1
+[2025-09-04T07:10:19.774Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:10:37.903Z] INFO: GET /api/auth/me?_t=1756969837592 - 127.0.0.1
+[2025-09-04T07:10:38.004Z] INFO: GET /api/auth/me?_t=1756969837592 - 127.0.0.1
+[2025-09-04T07:10:38.037Z] INFO: GET /api/users/me?_t=1756969838025 - 127.0.0.1
+[2025-09-04T07:10:38.125Z] INFO: GET /api/users/me?_t=1756969838025 - 127.0.0.1
+[2025-09-04T07:10:39.497Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:10:42.933Z] INFO: GET /api/auth/me?_t=1756969842929 - 127.0.0.1
+[2025-09-04T07:10:43.020Z] INFO: GET /api/auth/me?_t=1756969842929 - 127.0.0.1
+[2025-09-04T07:10:43.027Z] INFO: GET /api/users/me?_t=1756969843024 - 127.0.0.1
+[2025-09-04T07:10:43.323Z] INFO: GET /api/auth/me?_t=1756969843319 - 127.0.0.1
+[2025-09-04T07:10:43.407Z] INFO: GET /api/auth/me?_t=1756969843319 - 127.0.0.1
+[2025-09-04T07:10:43.414Z] INFO: GET /api/users/me?_t=1756969843410 - 127.0.0.1
+[2025-09-04T07:10:43.770Z] INFO: GET /api/users/me?_t=1756969843410 - 127.0.0.1
+[2025-09-04T07:10:44.025Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:10:44.719Z] INFO: GET /api/auth/me?_t=1756969844715 - 127.0.0.1
+[2025-09-04T07:10:44.816Z] INFO: GET /api/auth/me?_t=1756969844715 - 127.0.0.1
+[2025-09-04T07:10:44.841Z] INFO: GET /api/users/me?_t=1756969844829 - 127.0.0.1
+[2025-09-04T07:10:45.119Z] INFO: GET /api/auth/me?_t=1756969845115 - 127.0.0.1
+[2025-09-04T07:10:46.941Z] INFO: GET /api/auth/me?_t=1756969845115 - 127.0.0.1
+[2025-09-04T07:10:46.964Z] INFO: GET /api/users/me?_t=1756969846953 - 127.0.0.1
+[2025-09-04T07:10:47.441Z] INFO: GET /api/users/me?_t=1756969846953 - 127.0.0.1
+[2025-09-04T07:10:47.576Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:10:58.801Z] INFO: GET /api/auth/me?_t=1756969858490 - 127.0.0.1
+[2025-09-04T07:10:58.915Z] INFO: GET /api/auth/me?_t=1756969858490 - 127.0.0.1
+[2025-09-04T07:11:01.292Z] INFO: GET /api/users/me?_t=1756969861284 - 127.0.0.1
+[2025-09-04T07:11:02.377Z] INFO: GET /api/users/me?_t=1756969862359 - 127.0.0.1
+[2025-09-04T07:11:02.388Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756969862356&_t=1756969862359 - 127.0.0.1
+[2025-09-04T07:11:02.397Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756969862359&_t=1756969862359 - 127.0.0.1
+[2025-09-04T07:11:02.498Z] INFO: GET /api/users/me?_t=1756969862359 - 127.0.0.1
+[2025-09-04T07:11:02.617Z] INFO: GET /api/rides/user?status=all&_t=1756969862609&_t=1756969862610 - 127.0.0.1
+[2025-09-04T07:11:02.623Z] INFO: GET /api/rides/user?status=all&_t=1756969862612&_t=1756969862612 - 127.0.0.1
+[2025-09-04T07:11:05.183Z] INFO: GET /api/users/me?_t=1756969865154 - 127.0.0.1
+[2025-09-04T07:11:05.552Z] INFO: GET /api/users/me?_t=1756969865154 - 127.0.0.1
+[2025-09-04T07:11:05.768Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:21:40.930Z] INFO: GET /api/auth/me?_t=1756970500605 - 127.0.0.1
+[2025-09-04T07:21:41.029Z] INFO: GET /api/auth/me?_t=1756970500605 - 127.0.0.1
+[2025-09-04T07:21:41.096Z] INFO: GET /api/users/me?_t=1756970501081 - 127.0.0.1
+[2025-09-04T07:21:41.184Z] INFO: GET /api/users/me?_t=1756970501081 - 127.0.0.1
+[2025-09-04T07:21:41.928Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:21:49.552Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:21:50.743Z] INFO: GET /api/auth/me?_t=1756970510737 - 127.0.0.1
+[2025-09-04T07:21:50.829Z] INFO: GET /api/auth/me?_t=1756970510737 - 127.0.0.1
+[2025-09-04T07:21:50.855Z] INFO: GET /api/users/me?_t=1756970510852 - 127.0.0.1
+[2025-09-04T07:21:51.027Z] INFO: GET /api/users/me?_t=1756970510852 - 127.0.0.1
+[2025-09-04T07:21:51.460Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:21:56.743Z] INFO: PUT /api/profile/update - 127.0.0.1
+[2025-09-04T07:21:57.786Z] INFO: GET /api/auth/me?_t=1756970517780 - 127.0.0.1
+[2025-09-04T07:21:57.871Z] INFO: GET /api/auth/me?_t=1756970517780 - 127.0.0.1
+[2025-09-04T07:21:57.992Z] INFO: GET /api/users/me?_t=1756970517895 - 127.0.0.1
+[2025-09-04T07:21:58.080Z] INFO: GET /api/users/me?_t=1756970517895 - 127.0.0.1
+[2025-09-04T07:21:58.504Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:25:52.372Z] INFO: GET /api/auth/me?_t=1756970752051 - 127.0.0.1
+[2025-09-04T07:25:52.472Z] INFO: GET /api/auth/me?_t=1756970752051 - 127.0.0.1
+[2025-09-04T07:25:52.556Z] INFO: GET /api/users/me?_t=1756970752549 - 127.0.0.1
+[2025-09-04T07:25:52.636Z] INFO: GET /api/users/me?_t=1756970752549 - 127.0.0.1
+[2025-09-04T07:25:53.168Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:34:10.996Z] INFO: GET /api/users/me?_t=1756971250681 - 127.0.0.1
+[2025-09-04T07:34:11.115Z] INFO: GET /api/users/me?_t=1756971250681 - 127.0.0.1
+[2025-09-04T07:34:11.590Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:39:39.590Z] INFO: POST /api/users/me/password - 127.0.0.1
+[2025-09-04T07:40:13.939Z] INFO: POST /api/users/me/password - 127.0.0.1
+[2025-09-04T07:40:27.337Z] INFO: GET /api/users/me?_t=1756971627020 - 127.0.0.1
+[2025-09-04T07:40:27.345Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756971627018&_t=1756971627020 - 127.0.0.1
+[2025-09-04T07:40:27.353Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756971627020&_t=1756971627020 - 127.0.0.1
+[2025-09-04T07:40:27.447Z] INFO: GET /api/users/me?_t=1756971627020 - 127.0.0.1
+[2025-09-04T07:40:27.535Z] INFO: GET /api/rides/user?status=all&_t=1756971627529&_t=1756971627529 - 127.0.0.1
+[2025-09-04T07:40:27.559Z] INFO: GET /api/rides/user?status=all&_t=1756971627552&_t=1756971627552 - 127.0.0.1
+[2025-09-04T07:40:29.893Z] INFO: GET /api/users/me?_t=1756971629885 - 127.0.0.1
+[2025-09-04T07:40:50.136Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-04T07:40:50.161Z] INFO: Login attempt for email: 123456@gmail.com
+[2025-09-04T07:40:50.580Z] WARN: Login failed - invalid password: 123456@gmail.com
+[2025-09-04T07:40:59.103Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-04T07:40:59.109Z] INFO: Login attempt for email: 123456@gmail.com
+[2025-09-04T07:40:59.583Z] WARN: Login failed - invalid password: 123456@gmail.com
+[2025-09-04T07:41:33.054Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-04T07:41:33.059Z] INFO: Login attempt for email: 123456@gmail.com
+[2025-09-04T07:41:33.491Z] WARN: Login failed - invalid password: 123456@gmail.com
+[2025-09-04T07:41:45.381Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-04T07:41:45.385Z] INFO: Login attempt for email: 123456@gmail.com
+[2025-09-04T07:41:45.749Z] WARN: Login failed - invalid password: 123456@gmail.com
+[2025-09-04T07:42:53.216Z] INFO: POST /api/auth/register - 127.0.0.1
+[2025-09-04T07:42:53.222Z] INFO: Registration attempt for email: dem0123@gmail.com
+[2025-09-04T07:42:53.821Z] INFO: GET /api/auth/me?_t=1756971773783 - 127.0.0.1
+[2025-09-04T07:42:55.255Z] INFO: GET /api/users/me?_t=1756971775246 - 127.0.0.1
+[2025-09-04T07:42:56.358Z] INFO: GET /api/users/me?_t=1756971776334 - 127.0.0.1
+[2025-09-04T07:42:56.369Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756971776323&_t=1756971776334 - 127.0.0.1
+[2025-09-04T07:42:56.533Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756971776334&_t=1756971776334 - 127.0.0.1
+[2025-09-04T07:42:56.605Z] INFO: GET /api/users/me?_t=1756971776334 - 127.0.0.1
+[2025-09-04T07:42:56.668Z] INFO: GET /api/rides/user?status=all&_t=1756971776606&_t=1756971776606 - 127.0.0.1
+[2025-09-04T07:42:56.700Z] INFO: GET /api/rides/user?status=all&_t=1756971776692&_t=1756971776692 - 127.0.0.1
+[2025-09-04T07:42:59.882Z] INFO: GET /api/users/me?_t=1756971779845 - 127.0.0.1
+[2025-09-04T07:42:59.983Z] INFO: GET /api/users/me?_t=1756971779845 - 127.0.0.1
+[2025-09-04T07:43:00.454Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T07:43:29.185Z] INFO: POST /api/users/me/password - 127.0.0.1
+[2025-09-04T07:43:34.648Z] INFO: GET /api/users/me?_t=1756971814614 - 127.0.0.1
+[2025-09-04T07:43:34.658Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756971814610&_t=1756971814614 - 127.0.0.1
+[2025-09-04T07:43:34.664Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756971814614&_t=1756971814614 - 127.0.0.1
+[2025-09-04T07:43:34.736Z] INFO: GET /api/users/me?_t=1756971814614 - 127.0.0.1
+[2025-09-04T07:43:34.870Z] INFO: GET /api/rides/user?status=all&_t=1756971814860&_t=1756971814861 - 127.0.0.1
+[2025-09-04T07:43:34.880Z] INFO: GET /api/rides/user?status=all&_t=1756971814862&_t=1756971814862 - 127.0.0.1
+[2025-09-04T07:43:41.322Z] INFO: GET /api/users/me?_t=1756971821312 - 127.0.0.1
+[2025-09-04T07:43:55.881Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-04T07:43:55.884Z] INFO: Login attempt for email: dem0123@gmail.com
+[2025-09-04T07:43:56.333Z] WARN: Login failed - invalid password: dem0123@gmail.com
+[2025-09-04T07:44:05.302Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-04T07:44:05.305Z] INFO: Login attempt for email: dem0123@gmail.com
+[2025-09-04T07:44:05.714Z] WARN: Login failed - invalid password: dem0123@gmail.com
+[2025-09-04T08:03:30.712Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-04T08:03:30.714Z] INFO: Database Name: rideshare
+[2025-09-04T08:03:30.725Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-09-04T08:03:30.726Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-09-04T08:03:30.727Z] INFO: 📱 Phone Health:  http://192.168.1.4:5000/api/health
+[2025-09-04T08:03:30.727Z] INFO: 🔌 WebSocket: Active
+[2025-09-04T08:03:30.728Z] INFO: 🌍 Environment: development
+[2025-09-04T08:03:30.729Z] INFO: 🌐 CORS Origins: (any - dev)
+[2025-09-04T08:03:34.987Z] INFO: MongoDB Connected: ac-axtossa-shard-00-02.zdprcoy.mongodb.net
+[2025-09-04T08:03:34.990Z] INFO: Database Name: rideshare
+[2025-09-04T08:03:35.004Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-09-04T08:03:35.005Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-09-04T08:03:35.005Z] INFO: 📱 Phone Health:  http://192.168.1.4:5000/api/health
+[2025-09-04T08:03:35.006Z] INFO: 🔌 WebSocket: Active
+[2025-09-04T08:03:35.007Z] INFO: 🌍 Environment: development
+[2025-09-04T08:03:35.007Z] INFO: 🌐 CORS Origins: (any - dev)
+[2025-09-04T08:03:37.822Z] INFO: MongoDB Connected: ac-axtossa-shard-00-02.zdprcoy.mongodb.net
+[2025-09-04T08:03:37.825Z] INFO: Database Name: rideshare
+[2025-09-04T08:03:37.850Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-09-04T08:03:37.852Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-09-04T08:03:37.853Z] INFO: 📱 Phone Health:  http://192.168.1.4:5000/api/health
+[2025-09-04T08:03:37.854Z] INFO: 🔌 WebSocket: Active
+[2025-09-04T08:03:37.855Z] INFO: 🌍 Environment: development
+[2025-09-04T08:03:37.857Z] INFO: 🌐 CORS Origins: (any - dev)
+[2025-09-04T08:09:05.172Z] INFO: POST /api/auth/register - 127.0.0.1
+[2025-09-04T08:09:05.189Z] INFO: Registration attempt for email: adian@gmail.com
+[2025-09-04T08:09:05.691Z] INFO: GET /api/auth/me?_t=1756973345656 - 127.0.0.1
+[2025-09-04T08:23:21.752Z] INFO: MongoDB Connected: ac-axtossa-shard-00-00.zdprcoy.mongodb.net
+[2025-09-04T08:23:21.754Z] INFO: Database Name: rideshare
+[2025-09-04T08:23:21.770Z] INFO: 🚗 RideShare Pro Server running on port 5000
+[2025-09-04T08:23:21.771Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-09-04T08:23:21.772Z] INFO: 📱 Phone Health:  http://192.168.1.4:5000/api/health
+[2025-09-04T08:23:21.772Z] INFO: 🔌 WebSocket: Active
+[2025-09-04T08:23:21.773Z] INFO: 🌍 Environment: development
+[2025-09-04T08:23:21.774Z] INFO: 🌐 CORS Origins: (any - dev)
+[2025-09-04T08:23:53.939Z] INFO: GET /api/auth/me?_t=1756974233609 - 127.0.0.1
+[2025-09-04T08:24:12.612Z] INFO: GET /api/auth/me?_t=1756974252605 - 127.0.0.1
+[2025-09-04T08:53:21.062Z] INFO: GET /api/users/me?_t=1756976000734 - 127.0.0.1
+[2025-09-04T08:53:22.172Z] INFO: GET /api/users/me?_t=1756976002148 - 127.0.0.1
+[2025-09-04T08:53:22.179Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756976002137&_t=1756976002148 - 127.0.0.1
+[2025-09-04T08:53:22.249Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756976002147&_t=1756976002148 - 127.0.0.1
+[2025-09-04T08:53:22.346Z] INFO: GET /api/users/me?_t=1756976002148 - 127.0.0.1
+[2025-09-04T08:53:22.404Z] INFO: GET /api/rides/user?status=all&_t=1756976002346&_t=1756976002347 - 127.0.0.1
+[2025-09-04T08:53:22.428Z] INFO: GET /api/rides/user?status=all&_t=1756976002396&_t=1756976002396 - 127.0.0.1
+[2025-09-04T08:53:26.367Z] INFO: GET /api/users/me?_t=1756976006336 - 127.0.0.1
+[2025-09-04T08:53:26.458Z] INFO: GET /api/users/me?_t=1756976006336 - 127.0.0.1
+[2025-09-04T08:53:26.985Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T08:54:07.593Z] INFO: GET /api/users/me?_t=1756976047589 - 127.0.0.1
+[2025-09-04T08:54:07.684Z] INFO: GET /api/users/me?_t=1756976047589 - 127.0.0.1
+[2025-09-04T08:54:08.591Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-04T08:54:41.969Z] INFO: POST /api/users/me/password - 127.0.0.1
+[2025-09-04T08:54:44.750Z] INFO: GET /api/users/me?_t=1756976084716 - 127.0.0.1
+[2025-09-04T08:54:44.760Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756976084713&_t=1756976084716 - 127.0.0.1
+[2025-09-04T08:54:44.847Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1756976084716&_t=1756976084716 - 127.0.0.1
+[2025-09-04T08:54:45.014Z] INFO: GET /api/users/me?_t=1756976084716 - 127.0.0.1
+[2025-09-04T08:54:45.059Z] INFO: GET /api/rides/user?status=all&_t=1756976085015&_t=1756976085015 - 127.0.0.1
+[2025-09-04T08:54:45.221Z] INFO: GET /api/rides/user?status=all&_t=1756976085213&_t=1756976085214 - 127.0.0.1
+[2025-09-04T08:54:47.273Z] INFO: GET /api/users/me?_t=1756976087264 - 127.0.0.1
+[2025-09-04T08:55:13.423Z] INFO: POST /api/auth/login - 127.0.0.1
+[2025-09-04T08:55:13.452Z] INFO: Login attempt for email: adian@gmail.com
+[2025-09-04T08:55:13.910Z] WARN: Login failed - invalid password: adian@gmail.com

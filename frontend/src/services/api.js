@@ -1,4 +1,3 @@
-// src/services/api.js
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -11,7 +10,7 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 30000,
-  withCredentials: false, // tokens via Authorization header
+  withCredentials: false,
 });
 
 // Inject auth + cache-buster
@@ -61,11 +60,12 @@ const API = {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
     },
+    // ✅ Canonical change password endpoint used by Settings
     updatePassword: (currentPassword, newPassword) =>
       apiClient.post('/users/me/password', { currentPassword, newPassword }),
+
     changePassword: (payload) => apiClient.post('/users/me/password', payload),
 
-    // ✅ Delete account matches backend route
     deleteMe: () => apiClient.delete('/users/me'),
   },
 
