@@ -9,7 +9,7 @@ const NotificationToast = ({ notification, onClose }) => {
       const timer = setTimeout(() => {
         setIsVisible(false);
         setTimeout(onClose, 300); // Wait for animation to complete
-      }, 5000);
+      }, 5001);
 
       return () => clearTimeout(timer);
     }
