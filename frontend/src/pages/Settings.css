@@ -15,6 +15,7 @@ html, body {
   --danger-600: #dc2626;
   --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
 }
+
 :root[data-theme="dark"] {
   --bg: #0d0f13;
   --surface: #12161c;
@@ -28,31 +29,75 @@ html, body {
   --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 28px rgba(0,0,0,.45);
 }
 
-/* ===== Layout: full screen ===== */
+/* ===== Layout: Improved scaling ===== */
 .settings-page.settings-layout {
   display: grid;
-  grid-template-columns: 288px minmax(0, 1fr);
+  grid-template-columns: 280px minmax(0, 1fr);
   height: 100vh;
   width: 100vw;
   background: var(--bg);
   color: var(--text);
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  font-size: 14px;
 }
 
 /* Sidebar */
 .settings-page .side {
-  position: sticky; top: 0; align-self: start;
+  position: sticky;
+  top: 0;
+  align-self: start;
   height: 100vh;
-  padding: 28px 20px;
+  padding: 24px 20px;
   border-right: 1px solid var(--line);
   background: var(--surface);
+  overflow-y: auto;
 }
-.settings-page .side-title { font-size: 1.5rem; font-weight: 800; margin: 6px 8px 20px; }
-.settings-page .side-list { margin: 0; padding: 6px; list-style: none; display: flex; flex-direction: column; gap: 6px; }
-.settings-page .side-item { display: grid; grid-template-columns: 24px 1fr; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; cursor: pointer; }
-.settings-page .side-item:hover { background: color-mix(in oklab, var(--surface) 85%, var(--line) 15%); }
-.settings-page .side-item.active { background: color-mix(in oklab, var(--surface) 80%, var(--line) 20%); border: 1px solid var(--line-strong); }
-.settings-page .icon { font-size: 1.1rem; }
+
+.settings-page .side-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 0 0 24px;
+  color: var(--text);
+}
+
+.settings-page .side-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-page .side-item {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.settings-page .side-item:hover {
+  background: color-mix(in oklab, var(--surface) 85%, var(--line) 15%);
+  transform: translateX(2px);
+}
+
+.settings-page .side-item.active {
+  background: color-mix(in oklab, var(--ring) 15%, var(--surface));
+  border: 1px solid var(--ring);
+  color: var(--ring);
+  font-weight: 600;
+}
+
+.settings-page .icon {
+  font-size: 1.1rem;
+  text-align: center;
+}
 
 /* Main area */
 .settings-page .main {
@@ -62,16 +107,29 @@ html, body {
   height: 100vh;
   padding: 0;
   overflow: hidden;
+  background: var(--bg);
 }
 
 /* Header in main */
 .settings-page .main-header {
-  padding: 24px 32px;
+  padding: 24px 32px 20px;
   border-bottom: 1px solid var(--line);
   flex: 0 0 auto;
+  background: var(--surface);
 }
-.settings-page .main-header h3 { font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; }
-.settings-page .sub { color: var(--muted); font-size: .95rem; }
+
+.settings-page .main-header h3 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0 0 6px;
+  color: var(--text);
+}
+
+.settings-page .sub {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin: 0;
+}
 
 /* Card fills remainder */
 .settings-page .card {
@@ -79,12 +137,15 @@ html, body {
   min-height: 0;
   width: 100%;
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-left: none;
-  border-right: none;
+  border: none;
   border-radius: 0;
-  box-shadow: var(--shadow);
+  box-shadow: none;
   overflow: hidden;
+}
+
+.settings-page .card.fullscreen {
+  border-radius: 0;
+  border: none;
 }
 
 /* Inner scroll area */
@@ -95,233 +156,979 @@ html, body {
   overflow: auto;
 }
 
-/* Original row layout (kept for other tabs) */
+/* Original row layout (for notifications and accessibility) */
 .settings-page .row {
   display: grid;
-  grid-template-columns: 1fr 360px;
-  gap: 24px;
+  grid-template-columns: 1fr 200px;
+  gap: 32px;
   align-items: center;
-  padding: 20px 24px;
+  padding: 18px 32px;
   border-bottom: 1px solid var(--line);
 }
-.settings-page .row:last-child { border-bottom: none; }
-.settings-page .row-label { display: grid; gap: 6px; }
-.settings-page .title { font-weight: 700; }
-.settings-page .hint { color: var(--muted); font-size: .92rem; }
-.settings-page .row-control { display: flex; justify-content: end; align-items: center; }
 
-/* Actions bar fixed bottom inside card */
+.settings-page .row:last-child {
+  border-bottom: none;
+}
+
+.settings-page .row-label {
+  display: grid;
+  gap: 4px;
+}
+
+.settings-page .title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.settings-page .hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.settings-page .row-control {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Actions bar */
 .settings-page .card-actions {
-  display: flex; justify-content: flex-end; gap: 12px;
-  padding: 16px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 20px 32px;
   border-top: 1px solid var(--line);
   flex: 0 0 auto;
   background: var(--surface);
 }
 
-/* Inputs */
-.settings-page .card select,
-.settings-page .card input,
+/* ===== IMPROVED FORM LAYOUT FOR GENERAL & ACCOUNT ===== */
+.settings-page .form-grid-two {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  padding: 32px;
+  max-width: 1000px;
+}
+
+.settings-page .fg {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.settings-page .fg > label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+  padding-top: 12px;
+  text-align: right;
+  padding-right: 8px;
+}
+
+.settings-page .fg-control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: start;
+}
+
+/* Special styling for switch controls */
+.settings-page .fg-control .switch {
+  align-self: start;
+  margin-bottom: 0;
+}
+
+/* Hint text positioning for form grids - properly aligned under inputs */
+.settings-page .fg-control .hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-top: 0;
+  margin-left: 0;
+  align-self: start;
+  width: 100%;
+  max-width: 350px;
+}
+
+/* ===== BETTER INPUT SIZING ===== */
 .settings-page .fg-control select,
 .settings-page .fg-control input {
   width: 100%;
-  min-height: 44px;
-  padding: 10px 12px;
+  min-height: 42px;
+  padding: 10px 14px;
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--line-strong);
-  border-radius: 10px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
 }
+
+/* Same width for all input types to maintain consistency */
+.settings-page .fg-control select,
+.settings-page .fg-control input[type="email"],
+.settings-page .fg-control input[type="text"],
+.settings-page .fg-control input[type="tel"] {
+  max-width: 350px;
+}
+
 .settings-page .card select:focus-visible,
 .settings-page .card input:focus-visible,
 .settings-page .fg-control select:focus-visible,
 .settings-page .fg-control input:focus-visible {
   border-color: var(--ring);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 20%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 20%, transparent);
+  outline: none;
 }
 
-/* Toggle */
-.settings-page .switch { position: relative; display: inline-block; width: 56px; height: 30px; }
-.settings-page .switch input { opacity: 0; width: 0; height: 0; }
-.settings-page .slider { position: absolute; inset: 0; background: #cfd4dc; border-radius: 999px; transition: .3s; }
-.settings-page .slider:before { content: ""; position: absolute; left: 3px; top: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: .3s; }
-.settings-page input:checked + .slider { background: var(--ring); }
-.settings-page input:checked + .slider:before { transform: translateX(26px); }
-
-/* Buttons */
-.settings-page .btn { padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: 600; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); }
-.settings-page .btn.primary { background: var(--ring); border: 1px solid var(--ring); color: #fff; }
-.settings-page .btn.ghost { background: transparent; border: 1px solid var(--line-strong); color: var(--text); }
-.settings-page .btn.danger { background: var(--danger); border: 1px solid var(--danger-600); color: #fff; }
-.settings-page .btn.tiny { padding: 6px 10px; border-radius: 8px; font-size: .88rem; }
-
-/* Vehicles */
-.settings-page .vehicle-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
-.settings-page .vehicle-grid .field { display: grid; gap: 6px; }
-.settings-page .vehicle-grid label { color: var(--muted); font-size: .88rem; }
-
-/* Notice */
-.settings-page .notice {
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-  padding: 12px;
-  background: color-mix(in oklab, var(--surface) 85%, var(--line) 15%);
-}
-
-/* Modal */
-.settings-page .modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,.55);
-  display: grid; place-items: center; z-index: 9999;
-}
-.settings-page .modal {
-  background: var(--surface);
-  border: 1px solid var(--line-strong);
-  border-radius: 14px;
-  width: min(720px, 92vw);
-  max-height: 92vh;
-  box-shadow: var(--shadow);
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-}
-.settings-page .modal-appear { animation: modalIn .18s ease-out; }
-@keyframes modalIn { from { transform: translateY(6px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.settings-page .modal-header { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; padding: 18px 20px 8px 20px; border-bottom: 1px solid var(--line); }
-.settings-page .warn-icon { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; background: color-mix(in oklab, var(--ring) 12%, var(--surface)); color: var(--ring); font-weight: 800; font-size: 1.1rem; border: 1px solid color-mix(in oklab, var(--ring) 35%, transparent); }
-.settings-page .header-text h4 { margin: 0; font-size: 1.1rem; }
-.settings-page .muted { color: var(--muted); margin: 4px 0 0; }
-.settings-page .modal-body { padding: 14px 20px 6px 20px; overflow: auto; }
-.settings-page .modal-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px 18px 20px; border-top: 1px solid var(--line); }
-.settings-page .bullet { margin: 0; padding-left: 18px; display: grid; gap: 8px; }
-.settings-page .bullet li { line-height: 1.5; }
-
-/* Section helpers */
-.settings-page .section-title { font-weight: 800; font-size: 1.02rem; color: var(--text); padding: 16px 24px 8px; }
-.settings-page .grid-2 { display: grid; grid-template-columns: 1fr 1fr; }
-.settings-page .grid-2 .col { display: flex; flex-direction: column; }
-
-/* Billing */
-.settings-page .billing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 18px; }
-.settings-page .billing-col { display: grid; gap: 18px; }
-.settings-page .billing-card { border: 1px solid var(--line-strong); border-radius: 14px; box-shadow: var(--shadow); background: var(--surface); overflow: visible; }
-.settings-page .billing-card-header { padding: 14px 16px; border-bottom: 1px solid var(--line); background: color-mix(in oklab, var(--surface) 96%, var(--line) 4%); }
-.settings-page .billing-card-header h4 { margin: 0; font-size: 1.05rem; font-weight: 800; }
-.settings-page .billing-card-body { padding: 14px 16px; }
-.settings-page .row-like { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; padding: 8px 0; }
-.settings-page .pm-list { display: grid; gap: 10px; margin-bottom: 12px; }
-.settings-page .pm-card { display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--line-strong); border-radius: 12px; padding: 10px 12px; background: color-mix(in oklab, var(--surface) 98%, var(--line) 2%); }
-.settings-page .pm-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.settings-page .brand-pill { font-weight: 800; font-size: .88rem; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line-strong); }
-.settings-page .pm-digits { font-weight: 700; letter-spacing: 1px; }
-.settings-page .pm-exp { color: var(--muted); font-size: .9rem; }
-.settings-page .badge.default { background: color-mix(in oklab, var(--ring) 18%, transparent); border: 1px solid var(--ring); color: var(--ring); padding: 2px 8px; border-radius: 999px; font-size: .78rem; font-weight: 700; }
-.settings-page .pm-actions { display: flex; gap: 8px; }
-.settings-page .add-method { width: fit-content; display: inline-flex; align-items: center; gap: 8px; }
-.settings-page .add-plus { font-size: 1.1rem; line-height: 1; }
-
-/* Plans modal */
-.settings-page .plans-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.settings-page .plan-card { border: 1px solid var(--line-strong); border-radius: 14px; padding: 14px; display: grid; grid-template-rows: auto 1fr auto; gap: 12px; background: color-mix(in oklab, var(--surface) 98%, var(--line) 2%); }
-.settings-page .plan-card.highlight { outline: 2px solid var(--ring); background: color-mix(in oklab, var(--ring) 8%, var(--surface)); }
-.settings-page .plan-head { display: flex; justify-content: space-between; align-items: baseline; }
-.settings-page .plan-head h5 { margin: 0; font-size: 1.04rem; }
-.settings-page .plan-price { font-weight: 800; }
-.settings-page .plan-perks { margin: 0; padding-left: 18px; display: grid; gap: 6px; color: var(--text); }
-
-/* Password inputs */
-.settings-page .pw-field { display: grid; gap: 6px; }
-.settings-page .pw-input { display: grid; grid-template-columns: 1fr auto; align-items: center; border: 1px solid var(--line-strong); border-radius: 10px; overflow: hidden; }
-.settings-page .pw-input input { background: var(--surface); color: var(--text); border: none; padding: 10px 12px; min-height: 44px; }
-.settings-page .pw-input input:focus-visible { outline: none; box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 15%, transparent); }
-.settings-page .eye-btn { border: none; background: transparent; padding: 0 10px; min-height: 44px; cursor: pointer; transition: color .15s ease; }
-.settings-page .eye-btn:hover { color: var(--ring); }
-.settings-page .inline-note.ok { color: #16a34a; font-weight: 600; }
-.settings-page .inline-note.err { color: var(--danger-600); font-weight: 600; }
-
-/* Recovery inputs */
-.settings-page .rc-field { display: grid; gap: 6px; }
-.settings-page .rc-input { display: grid; grid-template-columns: 32px 1fr; align-items: center; border: 1px solid var(--line-strong); border-radius: 10px; overflow: hidden; }
-.settings-page .rc-icon { display: grid; place-items: center; height: 44px; border-right: 1px solid var(--line-strong); background: color-mix(in oklab, var(--surface) 96%, var(--line) 4%); }
-.settings-page .rc-input input { border: none; padding: 10px 12px; height: 44px; background: var(--surface); color: var(--text); }
-.settings-page .rc-input input:focus-visible { outline: none; box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 15%, transparent); }
-.settings-page .rc-hint { font-size: .9rem; margin-top: 2px; }
-
-/* ✅ Security symmetric grid cards */
-.settings-page .sec-grid {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 16px;
-  padding: 18px;
-}
-.settings-page .sec-card {
-  grid-column: span 6;
-  border: 1px solid var(--line-strong);
-  border-radius: 14px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  display: grid;
-  grid-template-rows: auto 1fr;
-  min-height: 240px;
-}
-.settings-page .sec-card-header {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in oklab, var(--surface) 96%, var(--line) 4%);
-}
-.settings-page .sec-card-header h4 { margin: 0; font-size: 1.05rem; font-weight: 800; }
-.settings-page .sec-card-body { padding: 6px 0; display: flex; flex-direction: column; }
-.settings-page .row-compact { padding: 14px 16px; grid-template-columns: 1fr auto; }
-
-/* ✅ New: two-column, full-width, left-aligned forms for General & Account */
-.settings-page .form-grid-two {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 18px 28px;
-  padding: 24px;
-  align-items: start;
-}
-.settings-page .fg {
-  display: contents; /* label + control share the same grid row */
-}
-.settings-page .fg > label {
-  font-weight: 700;
-  align-self: center;
-}
-.settings-page .fg-control {
-  display: grid;
-  gap: 6px;
-}
+/* ===== VEHICLE SECTION IMPROVEMENTS ===== */
 .settings-page .vehicle-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-}
-.settings-page .vehicle-row {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
-  padding: 8px 0;
-}
-.settings-page .vfield { display: grid; gap: 4px; }
-.settings-page .vlabel { color: var(--muted); font-size: .88rem; }
-.settings-page .delete-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
-/* Responsive */
+.settings-page .vehicle-row {
+  display: grid;
+  grid-template-columns: 120px 180px 140px 80px auto;
+  gap: 16px;
+  padding: 16px 20px;
+  background: color-mix(in oklab, var(--surface) 98%, var(--line) 2%);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  align-items: end;
+}
+
+.settings-page .vfield {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-page .vlabel {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.settings-page .vfield input {
+  min-height: 36px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.settings-page .vactions {
+  align-self: end;
+}
+
+.settings-page .delete-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: color-mix(in oklab, var(--danger) 5%, var(--surface));
+  border: 1px solid color-mix(in oklab, var(--danger) 20%, var(--line));
+  border-radius: 10px;
+}
+
+/* ===== TOGGLE SWITCH ===== */
+.settings-page .switch {
+  position: relative;
+  display: inline-block;
+  width: 56px;
+  height: 30px;
+}
+
+.settings-page .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.settings-page .slider {
+  position: absolute;
+  inset: 0;
+  background: #d1d5db;
+  border-radius: 999px;
+  transition: .3s;
+  cursor: pointer;
+}
+
+.settings-page .slider:before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  transition: .3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.settings-page input:checked + .slider {
+  background: var(--ring);
+}
+
+.settings-page input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* ===== BUTTONS ===== */
+.settings-page .btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--text);
+  transition: all 0.2s ease;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-page .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.settings-page .btn.primary {
+  background: var(--ring);
+  border: 1px solid var(--ring);
+  color: #fff;
+}
+
+.settings-page .btn.ghost {
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+}
+
+.settings-page .btn.danger {
+  background: var(--danger);
+  border: 1px solid var(--danger-600);
+  color: #fff;
+}
+
+.settings-page .btn.tiny {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  min-height: 32px;
+}
+
+/* ===== SECTION HELPERS ===== */
+.settings-page .section-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+  padding: 20px 32px 10px;
+  margin: 0;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in oklab, var(--surface) 98%, var(--line) 2%);
+}
+
+.settings-page .grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.settings-page .grid-2 .col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== BILLING LAYOUT ===== */
+.settings-page .billing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 20px;
+}
+
+.settings-page .billing-col {
+  display: grid;
+  gap: 16px;
+}
+
+.settings-page .billing-card {
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.settings-page .billing-card-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in oklab, var(--surface) 96%, var(--line) 4%);
+}
+
+.settings-page .billing-card-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.settings-page .billing-card-body {
+  padding: 18px;
+}
+
+/* Fix for Transcriptions input field */
+.settings-page .billing-card-body input[type="text"] {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.settings-page .row-like {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+}
+
+/* Better spacing for subscription plan controls */
+.settings-page .row-like .row-control {
+  display: flex;
+  gap: 10px;
+  padding-right: 4px;
+}
+
+.settings-page .pm-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.settings-page .pm-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 14px;
+  background: color-mix(in oklab, var(--surface) 98%, var(--line) 2%);
+}
+
+.settings-page .pm-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.settings-page .brand-pill {
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+}
+
+.settings-page .pm-digits {
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+}
+
+.settings-page .pm-exp {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.settings-page .badge.default {
+  background: color-mix(in oklab, var(--ring) 18%, transparent);
+  border: 1px solid var(--ring);
+  color: var(--ring);
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.settings-page .pm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-page .add-method {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-page .add-plus {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* Plan details styling - improved alignment */
+.settings-page .plan-detail-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 4px 12px 0;
+}
+
+.settings-page .plan-info {
+  display: grid;
+  gap: 4px;
+}
+
+.settings-page .plan-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.settings-page .plan-status {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.settings-page .plan-price {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--ring);
+  text-align: right;
+  padding-right: 4px;
+}
+
+/* ===== SECURITY GRID ===== */
+.settings-page .sec-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 20px;
+}
+
+.settings-page .sec-card {
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 180px;
+}
+
+.settings-page .sec-card-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in oklab, var(--surface) 96%, var(--line) 4%);
+}
+
+.settings-page .sec-card-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.settings-page .sec-card-body {
+  padding: 6px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-page .row-compact {
+  padding: 14px 18px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+/* ===== NOTICE ===== */
+.settings-page .notice {
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 12px;
+  background: color-mix(in oklab, var(--surface) 85%, var(--line) 15%);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ===== MODAL STYLES ===== */
+.settings-page .modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.settings-page .modal {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  width: min(700px, 95vw);
+  max-height: 90vh;
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.settings-page .modal-appear {
+  animation: modalIn .2s ease-out;
+}
+
+@keyframes modalIn {
+  from {
+    transform: translateY(20px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.settings-page .modal-header {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.settings-page .warn-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--ring) 12%, var(--surface));
+  color: var(--ring);
+  font-weight: 700;
+  font-size: 1.2rem;
+  border: 1px solid color-mix(in oklab, var(--ring) 35%, transparent);
+}
+
+.settings-page .header-text h4 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.settings-page .muted {
+  color: var(--muted);
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+}
+
+.settings-page .modal-body {
+  padding: 20px;
+  overflow: auto;
+}
+
+.settings-page .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--line);
+}
+
+.settings-page .bullet {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.settings-page .bullet li {
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+/* Password field styling */
+.settings-page .form-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.settings-page .pw-field {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-page .pw-field > label {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.settings-page .pw-input {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.settings-page .pw-input:focus-within {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 20%, transparent);
+}
+
+.settings-page .pw-input input {
+  background: var(--surface);
+  color: var(--text);
+  border: none;
+  padding: 10px 14px;
+  min-height: 42px;
+  font-size: 0.95rem;
+}
+
+.settings-page .pw-input input:focus-visible {
+  outline: none;
+}
+
+.settings-page .eye-btn {
+  border: none;
+  background: transparent;
+  padding: 0 14px;
+  min-height: 42px;
+  cursor: pointer;
+  transition: color .2s ease;
+  font-size: 1rem;
+}
+
+.settings-page .eye-btn:hover {
+  color: var(--ring);
+}
+
+.settings-page .inline-note.ok {
+  color: #16a34a;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.settings-page .inline-note.err {
+  color: var(--danger-600);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Recovery field styling */
+.settings-page .rc-field {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-page .rc-field > label {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.settings-page .rc-input {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.settings-page .rc-input:focus-within {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 20%, transparent);
+}
+
+.settings-page .rc-icon {
+  display: grid;
+  place-items: center;
+  height: 42px;
+  border-right: 1px solid var(--line-strong);
+  background: color-mix(in oklab, var(--surface) 96%, var(--line) 4%);
+  font-size: 1rem;
+}
+
+.settings-page .rc-input input {
+  border: none;
+  padding: 10px 14px;
+  height: 42px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.settings-page .rc-input input:focus-visible {
+  outline: none;
+}
+
+.settings-page .rc-hint {
+  font-size: 0.85rem;
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+/* Plans modal styling */
+.settings-page .plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.settings-page .plan-card {
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 18px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  background: color-mix(in oklab, var(--surface) 98%, var(--line) 2%);
+  transition: all 0.2s ease;
+}
+
+.settings-page .plan-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.settings-page .plan-card.highlight {
+  outline: 2px solid var(--ring);
+  background: color-mix(in oklab, var(--ring) 8%, var(--surface));
+}
+
+.settings-page .plan-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.settings-page .plan-head h5 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.settings-page .plan-price {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--ring);
+}
+
+.settings-page .plan-perks {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+/* Payment method form */
+.settings-page .pm-form {
+  display: grid;
+  gap: 16px;
+}
+
+.settings-page .pm-form label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.settings-page .pm-form input {
+  min-height: 42px;
+  padding: 10px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.settings-page .pm-inline {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1400px) {
+  .settings-page .form-grid-two {
+    max-width: 900px;
+  }
+}
+
 @media (max-width: 1200px) {
-  .settings-page .vehicle-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .settings-page .vehicle-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .settings-page .sec-grid {
+    gap: 14px;
+  }
 }
+
 @media (max-width: 1024px) {
-  .settings-page .row { grid-template-columns: 1fr; }
-  .settings-page .grid-2 { grid-template-columns: 1fr; }
-  .settings-page .billing-grid { grid-template-columns: 1fr; }
-  .settings-page .plans-grid { grid-template-columns: 1fr; }
-  .settings-page .sec-card { grid-column: span 12; }
-  .settings-page .form-grid-two { grid-template-columns: 1fr; }
-  .settings-page .vehicle-row { grid-template-columns: 1fr 1fr; }
+  .settings-page .row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .settings-page .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .settings-page .billing-grid {
+    grid-template-columns: 1fr;
+  }
+  .settings-page .plans-grid {
+    grid-template-columns: 1fr;
+  }
+  .settings-page .sec-grid {
+    grid-template-columns: 1fr;
+  }
+  .settings-page .fg {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .settings-page .fg > label {
+    text-align: left;
+    padding-right: 0;
+    padding-top: 0;
+  }
+  .settings-page .fg-control .hint {
+    max-width: none;
+  }
+  .settings-page .vehicle-row {
+    grid-template-columns: 1fr 1fr;
+  }
 }
+
 @media (max-width: 860px) {
-  .settings-page.settings-layout { grid-template-columns: 1fr; }
-  .settings-page .vehicle-row { grid-template-columns: 1fr; }
+  .settings-page.settings-layout {
+    grid-template-columns: 1fr;
+  }
+  .settings-page .side {
+    height: auto;
+    padding: 16px;
+  }
+  .settings-page .main-header {
+    padding: 16px;
+  }
+  .settings-page .form-grid-two {
+    padding: 16px;
+  }
+  .settings-page .rows {
+    padding: 16px;
+  }
+  .settings-page .vehicle-row {
+    grid-template-columns: 1fr;
+  }
+  .settings-page .pm-inline {
+    grid-template-columns: 1fr;
+  }
+  .settings-page .billing-grid {
+    padding: 16px;
+    gap: 16px;
+  }
+  .settings-page .sec-grid {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .settings-page .side-title {
+    font-size: 1.2rem;
+  }
+  .settings-page .main-header h3 {
+    font-size: 1.4rem;
+  }
+  .settings-page .form-grid-two {
+    padding: 16px;
+  }
+  .settings-page .modal {
+    width: 95vw;
+    margin: 16px;
+  }
+  .settings-page .side-list {
+    gap: 4px;
+  }
+  .settings-page .side-item {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+  .settings-page .section-title {
+    padding: 16px 20px 8px;
+    font-size: 0.95rem;
+  }
+  .settings-page .row {
+    padding: 14px 20px;
+  }
+  .settings-page .card-actions {
+    padding: 16px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-page.settings-layout {
+    font-size: 13px;
+  }
+  .settings-page .side {
+    padding: 12px;
+  }
+  .settings-page .main-header {
+    padding: 12px;
+  }
+  .settings-page .main-header h3 {
+    font-size: 1.3rem;
+  }
+  .settings-page .form-grid-two {
+    padding: 12px;
+  }
+  .settings-page .billing-grid,
+  .settings-page .sec-grid {
+    padding: 12px;
+  }
+  .settings-page .modal-header {
+    padding: 16px;
+  }
+  .settings-page .modal-body {
+    padding: 16px;
+  }
+  .settings-page .modal-actions {
+    padding: 12px 16px;
+  }
+  .settings-page .vehicle-row {
+    padding: 12px 16px;
+  }
+  .settings-page .pm-card {
+    padding: 12px;
+  }
+  .settings-page .billing-card-body {
+    padding: 14px;
+  }
+  .settings-page .sec-card-body .row-compact {
+    padding: 12px 14px;
+  }
 }
