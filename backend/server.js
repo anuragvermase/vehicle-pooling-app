@@ -20,6 +20,7 @@ import chatRoutes from './routes/chat.js';
 import auth from './middleware/auth.js';
 import { initializeSocket } from './Socket/socketHandlers.js';
 import { logger } from './utils/logger.js';
+import Ride from './models/Ride.js';
 
 dotenv.config();
 
@@ -30,8 +31,8 @@ const app = express();
 const server = createServer(app);
 const isProd = process.env.NODE_ENV === 'production';
 
-/* ----------------- IMPORTANT: listen on 5000 (not 5001) ------------------ */
-const PORT = Number(process.env.PORT) || 5000;
+/* ----------------- IMPORTANT: listen on 5001 (not 5001) ------------------ */
+const PORT = Number(process.env.PORT) || 5001;
 const HOST = '0.0.0.0';
 
 /* ------------------------------- Hardening ------------------------------- */
@@ -46,7 +47,7 @@ for (const key of ['JWT_SECRET', 'MONGODB_URI']) {
 
 /* ------------------------- CORS origin resolution ------------------------- */
 const frontends =
-  process.env.FRONTEND_URLS?.split(',').map(s => s.trim()).filter(Boolean) ||
+  process.env.FRONTEND_URLS?.split(',').map((s) => s.trim()).filter(Boolean) ||
   (process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []);
 
 const expressCorsOrigin = isProd ? frontends : true; // true = reflect request origin in dev
@@ -220,6 +221,14 @@ const startServer = async () => {
   try {
     await connectDB();
 
+    // ✅ sync model indexes once after connecting
+    try {
+      await Ride.syncIndexes();
+      console.log('✅ Ride indexes synced');
+    } catch (err) {
+      console.error('Failed to sync Ride indexes:', err);
+    }
+
     // helpful error if port is busy (or other errors)
     server.on('error', (err) => {
       if (err.code === 'EADDRINUSE') {
@@ -230,6 +239,7 @@ const startServer = async () => {
       process.exit(1);
     });
 
+    // Bind to 0.0.0.0 so phones on your LAN can reach it
     server.listen(PORT, HOST, () => {
       const ip = getLanIPv4();
       const origins = expressCorsOrigin === true ? '(any - dev)' : JSON.stringify(frontends);

@@ -23,9 +23,15 @@ const RUNTIME = (process.env.EXPO_PUBLIC_API_BASE_URL as string | undefined) || 
 const EXTRA   = (((Constants?.expoConfig?.extra as any) || {}).EXPO_PUBLIC_API_BASE_URL as string | undefined) || "";
 
 export const API_BASE_URL: string =
+<<<<<<< HEAD
   normalizeBase(RUNTIME) ||
   normalizeBase(EXTRA)   ||
   (Platform.OS === "android" ? "http://10.0.2.2:5000/api" : "http://localhost:5000/api");
+=======
+  ((Constants?.expoConfig?.extra as any)?.API_BASE_URL as string) ||
+  process.env.EXPO_PUBLIC_API_BASE_URL ||
+  "http://10.0.2.2:5001/api"; // emulator-safe fallback
+>>>>>>> 49da7f3afa688b6b73d8649320a99b3cb4523c4e
 
 const BASE = API_BASE_URL.replace(/\/$/, "");
 

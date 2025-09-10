@@ -1,7 +1,7 @@
 // src/services/api.js
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
 
 // Axios instance
 const apiClient = axios.create({
@@ -24,29 +24,37 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
-);
+  (error) => Promise.reject(error));
 
-// Normalize errors + auto-redirect on 401
+// Normalize errors + auto-redirect on 401 (BUT NOT for password change)
 apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (!error.response) {
       return Promise.reject(new Error('Network error. Please check your connection.'));
     }
+    
     const status = error.response.status;
     const msg =
       error.response.data?.message ||
       error.response.data?.error ||
       'Something went wrong';
 
+    // ✅ FIXED: Don't auto-logout on 401 for password change endpoint
     if (status === 401) {
-      localStorage.removeItem('token');
-      if (window.location.pathname !== '/login') window.location.href = '/login';
+      const isPasswordChange = error.config?.url?.includes('/users/me/password');
+      
+      if (!isPasswordChange) {
+        localStorage.removeItem('token');
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+      }
+      // For password change, let the component handle the error
     }
+    
     return Promise.reject(new Error(msg));
-  }
-);
+  });
 
 const API = {
   raw: apiClient,
@@ -61,7 +69,7 @@ const API = {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
     },
-    // Canonical change password endpoint used by Settings
+    // ✅ MAIN METHOD: Canonical change password endpoint used by Settings
     updatePassword: (currentPassword, newPassword) =>
       apiClient.post('/users/me/password', { currentPassword, newPassword }),
     changePassword: (payload) => apiClient.post('/users/me/password', payload),
