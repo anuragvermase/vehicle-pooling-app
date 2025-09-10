@@ -16,6 +16,7 @@ import Settings from "../screens/Settings";
 import CreateRide from "../screens/CreateRide";
 import MyRides from "../screens/MyRides";
 import Profile from "../screens/Profile";
+import MarketingLanding from "../screens/MarketingLanding";
 
 export type RootParams = {
   Splash: undefined;
@@ -28,6 +29,7 @@ export type RootParams = {
   MyRides: undefined;
   Profile: undefined;
   Settings: undefined;
+  MarketingLanding: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootParams>();
@@ -93,6 +95,8 @@ export default function RootNavigator() {
       <Stack.Screen name="MyRides" component={withSafeArea(MyRides)} options={{ title: "My Rides" }} />
       <Stack.Screen name="Profile" component={withSafeArea(Profile)} options={{ headerShown: false }} />
       <Stack.Screen name="Settings" component={withSafeArea(Settings)} options={{ title: "Settings" }} />
+      <Stack.Screen name="MarketingLanding" component={withSafeArea(MarketingLanding)} options={{ headerShown: false }} />
+
     </Stack.Navigator>
   );
 }

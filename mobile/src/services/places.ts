@@ -1,4 +1,4 @@
-// src/services/places.ts
+// mobile/src/services/places.ts
 import Constants from "expo-constants";
 
 export type PlaceLite = {
@@ -18,22 +18,38 @@ type Prediction = {
   };
 };
 
+/**
+ * Use the JS runtime key for web APIs (Places, Geocoding, Directions).
+ * Prefer env (EXPO_PUBLIC_*) first, then fall back to expoConfig.extra.
+ */
 const KEY: string =
-  ((Constants?.expoConfig?.extra as any)?.GOOGLE_MAPS_API_KEY as string) || "";
+  process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY ||
+  ((Constants?.expoConfig?.extra as any)?.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY as string) ||
+  "";
 
+// Base endpoints
 const PLACE_BASE = "https://maps.googleapis.com/maps/api/place";
 const GEOCODE_BASE = "https://maps.googleapis.com/maps/api/geocode";
 
+// Simple session token for Places requests (recommended by Google)
 const makeSessionToken = () =>
   Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
 
+/**
+ * Autocomplete for addresses/places.
+ * - Keeps your sessionToken and location bias support.
+ * - When KEY is missing, still returns a "typed" option so UX doesn't break.
+ */
 export async function autocomplete(
   input: string,
   sessionToken?: string,
   bias?: { lat: number; lng: number } | null
 ) {
   if (!input.trim()) return [];
-  if (!KEY) return [{ description: input, place_id: `typed:${input}` }];
+  if (!KEY) {
+    // No key at runtime -> provide a fallback "typed" suggestion
+    return [{ description: input, place_id: `typed:${input}` }];
+  }
 
   const params = new URLSearchParams({
     input,
@@ -67,9 +83,14 @@ export async function autocomplete(
   }
 }
 
+/**
+ * Place details to resolve lat/lng.
+ * - Supports "typed:" synthetic IDs by geocoding the typed string.
+ */
 export async function details(placeId: string, sessionToken?: string) {
   if (placeId.startsWith("typed:")) {
     const text = placeId.slice("typed:".length);
+    // Return minimal object; caller may geocode if needed.
     return { text } as PlaceLite;
   }
   if (!KEY) return null;
@@ -96,7 +117,7 @@ export async function details(placeId: string, sessionToken?: string) {
   }
 }
 
-// Geocode a free-typed address into lat/lng
+/** Geocode a free-typed address to lat/lng */
 export async function geocodeText(query: string) {
   if (!KEY || !query.trim()) return null;
   const url = `${GEOCODE_BASE}/json?address=${encodeURIComponent(query)}&key=${KEY}`;
@@ -117,7 +138,7 @@ export async function geocodeText(query: string) {
   }
 }
 
-// Reverse geocode lat/lng -> address/name
+/** Reverse geocode lat/lng -> address/name */
 export async function reverseGeocode(lat: number, lng: number): Promise<PlaceLite | null> {
   if (!KEY) return null;
   const url = `${GEOCODE_BASE}/json?latlng=${lat},${lng}&key=${KEY}`;

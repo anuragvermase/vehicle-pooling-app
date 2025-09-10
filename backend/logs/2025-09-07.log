@@ -201,3 +201,106 @@ Data: querySrv ECONNREFUSED _mongodb._tcp.carpool.zdprcoy.mongodb.net
 [2025-09-07T18:57:20.323Z] INFO: GET /api/users/me?_t=1757271440313 - 127.0.0.1
 [2025-09-07T18:57:20.493Z] INFO: GET /api/users/me?_t=1757271440313 - 127.0.0.1
 [2025-09-07T18:57:20.942Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-07T19:40:20.241Z] INFO: GET /api/auth/me?_t=1757274019931 - 127.0.0.1
+[2025-09-07T19:40:20.415Z] INFO: GET /api/auth/me?_t=1757274019931 - 127.0.0.1
+[2025-09-07T19:40:28.846Z] INFO: GET /api/users/me?_t=1757274028840 - 127.0.0.1
+[2025-09-07T19:40:46.947Z] INFO: POST /api/auth/google - 127.0.0.1
+[2025-09-07T19:40:47.874Z] INFO: GET /api/auth/me?_t=1757274047868 - 127.0.0.1
+[2025-09-07T19:50:19.125Z] INFO: GET /api/auth/me?_t=1757274618818 - 127.0.0.1
+[2025-09-07T19:50:30.048Z] INFO: GET /api/auth/me?_t=1757274630042 - 127.0.0.1
+[2025-09-07T19:50:30.226Z] INFO: GET /api/auth/me?_t=1757274630042 - 127.0.0.1
+[2025-09-07T19:50:33.102Z] INFO: GET /api/auth/me?_t=1757274633097 - 127.0.0.1
+[2025-09-07T19:50:33.272Z] INFO: GET /api/auth/me?_t=1757274633097 - 127.0.0.1
+[2025-09-07T20:05:59.165Z] INFO: MongoDB Connected: ac-axtossa-shard-00-02.zdprcoy.mongodb.net
+[2025-09-07T20:05:59.167Z] INFO: Database Name: rideshare
+[2025-09-07T20:05:59.181Z] INFO: 🚗 RideShare Pro Server running on http://0.0.0.0:5000
+[2025-09-07T20:05:59.182Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-09-07T20:05:59.183Z] INFO: 📱 Phone Health:  http://192.168.132.193:5000/api/health
+[2025-09-07T20:05:59.184Z] INFO: 🔌 WebSocket: Active
+[2025-09-07T20:05:59.185Z] INFO: 🌍 Environment: development
+[2025-09-07T20:05:59.185Z] INFO: 🌐 CORS Origins: (any - dev)
+[2025-09-07T20:09:22.525Z] INFO: GET /api/auth/me?_t=1757275762205 - 127.0.0.1
+[2025-09-07T20:09:22.704Z] INFO: GET /api/auth/me?_t=1757275762205 - 127.0.0.1
+[2025-09-07T20:11:31.633Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-07T20:11:42.086Z] INFO: Mongoose connected to MongoDB
+[2025-09-07T20:17:15.108Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-07T20:17:25.464Z] INFO: Mongoose connected to MongoDB
+[2025-09-07T20:22:58.388Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-07T20:23:08.634Z] INFO: Mongoose connected to MongoDB
+[2025-09-07T20:23:18.486Z] INFO: GET /api/users/me?_t=1757276598179 - 127.0.0.1
+[2025-09-07T20:23:19.366Z] INFO: GET /api/users/me?_t=1757276599352 - 127.0.0.1
+[2025-09-07T20:23:19.374Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757276599345&_t=1757276599352 - 127.0.0.1
+[2025-09-07T20:23:19.577Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757276599352&_t=1757276599352 - 127.0.0.1
+[2025-09-07T20:23:19.664Z] INFO: GET /api/users/me?_t=1757276599352 - 127.0.0.1
+[2025-09-07T20:23:19.928Z] INFO: GET /api/rides/user?status=all&_t=1757276599925&_t=1757276599925 - 127.0.0.1
+[2025-09-07T20:23:20.032Z] INFO: GET /api/rides/user?status=all&_t=1757276600028&_t=1757276600028 - 127.0.0.1
+[2025-09-07T20:23:23.115Z] INFO: GET /api/users/me?_t=1757276603110 - 127.0.0.1
+[2025-09-07T20:23:23.256Z] INFO: GET /api/users/me?_t=1757276603110 - 127.0.0.1
+[2025-09-07T20:23:23.746Z] INFO: PUT /api/profile/preferences - 127.0.0.1
+[2025-09-07T20:24:34.058Z] INFO: GET /api/users/me?_t=1757276673744 - 127.0.0.1
+[2025-09-07T20:24:34.063Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757276673729&_t=1757276673744 - 127.0.0.1
+[2025-09-07T20:24:34.067Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757276673744&_t=1757276673744 - 127.0.0.1
+[2025-09-07T20:24:34.253Z] INFO: GET /api/users/me?_t=1757276673744 - 127.0.0.1
+[2025-09-07T20:24:34.389Z] INFO: GET /api/rides/user?status=all&_t=1757276674386&_t=1757276674386 - 127.0.0.1
+[2025-09-07T20:24:34.417Z] INFO: GET /api/rides/user?status=all&_t=1757276674410&_t=1757276674410 - 127.0.0.1
+[2025-09-07T20:26:24.316Z] INFO: POST /api/rides/create - 127.0.0.1
+[2025-09-07T20:26:24.988Z] ERROR: Route calculation error:
+Data: Google API request denied (check key, referrer, or restrictions)
+[2025-09-07T20:26:24.990Z] WARN: Directions API unavailable — using Haversine fallback
+Data: {
+  "distanceKm": 146,
+  "durationMin": 219
+}
+[2025-09-07T20:26:25.224Z] INFO: New ride created by user 68bdd6e2292444df93221ab0: 68bdea70592c4860e1356201
+[2025-09-07T20:26:25.266Z] INFO: GET /api/rides/68bdea70592c4860e1356201?_t=1757276785255 - 127.0.0.1
+[2025-09-07T20:26:25.529Z] INFO: GET /api/rides/68bdea70592c4860e1356201?_t=1757276785255 - 127.0.0.1
+[2025-09-07T20:27:19.180Z] INFO: GET /api/users/me?_t=1757276838869 - 127.0.0.1
+[2025-09-07T20:27:23.238Z] INFO: User connected: Anurag Verma (68bdd6e2292444df93221ab0)
+[2025-09-07T20:27:57.857Z] INFO: GET /api/rides/search?from=Mathura%2C+Uttar+Pradesh%2C+India&to=Delhi%2C+India&via=&date=2025-09-09&time=&passengers=2&radius=10&fromLat=27.4924134&fromLng=77.673673&toLat=28.7040592&toLng=77.10249019999999&viaLat=undefined&viaLng=undefined&trustCoordinates=true&_t=1757276877850 - 127.0.0.1
+[2025-09-07T20:27:57.994Z] ERROR: Search rides error:
+Data: {
+  "name": "MongoServerError",
+  "message": "Too many geoNear expressions",
+  "stack": "MongoServerError: Too many geoNear expressions\n    at Connection.onMessage (C:\\Users\\anura\\OneDrive\\Desktop\\vehicle-pooling-app\\backend\\node_modules\\mongodb\\lib\\cmap\\connection.js:202:26)\n    at MessageStream.<anonymous> (C:\\Users\\anura\\OneDrive\\Desktop\\vehicle-pooling-app\\backend\\node_modules\\mongodb\\lib\\cmap\\connection.js:61:60)\n    at MessageStream.emit (node:events:518:28)\n    at processIncomingData (C:\\Users\\anura\\OneDrive\\Desktop\\vehicle-pooling-app\\backend\\node_modules\\mongodb\\lib\\cmap\\message_stream.js:124:16)\n    at MessageStream._write (C:\\Users\\anura\\OneDrive\\Desktop\\vehicle-pooling-app\\backend\\node_modules\\mongodb\\lib\\cmap\\message_stream.js:33:9)\n    at writeOrBuffer (node:internal/streams/writable:572:12)\n    at _write (node:internal/streams/writable:501:10)\n    at Writable.write (node:internal/streams/writable:510:10)\n    at TLSSocket.ondata (node:internal/streams/readable:1009:22)\n    at TLSSocket.emit (node:events:518:28)",
+  "ok": 0,
+  "code": 2,
+  "codeName": "BadValue",
+  "$clusterTime": {
+    "clusterTime": {
+      "$timestamp": "7547446712437047314"
+    },
+    "signature": {
+      "hash": "ciJgQUa2USFIaUAGCbGSWtHDqRo=",
+      "keyId": {
+        "low": 8,
+        "high": 1747856224,
+        "unsigned": false
+      }
+    }
+  },
+  "operationTime": {
+    "$timestamp": "7547446712437047314"
+  }
+}
+[2025-09-07T20:28:51.603Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-07T20:29:01.972Z] INFO: Mongoose connected to MongoDB
+[2025-09-07T20:34:34.932Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-07T20:34:45.275Z] INFO: Mongoose connected to MongoDB
+[2025-09-07T20:40:18.232Z] WARN: Mongoose disconnected from MongoDB
+[2025-09-07T20:40:28.600Z] INFO: Mongoose connected to MongoDB
+[2025-09-07T20:55:07.016Z] INFO: User disconnected: Anurag Verma (68bdd6e2292444df93221ab0)
+[2025-09-07T20:55:08.813Z] INFO: GET /api/users/me?_t=1757278508502 - 127.0.0.1
+[2025-09-07T20:55:10.123Z] INFO: GET /api/users/me?_t=1757278510115 - 127.0.0.1
+[2025-09-07T20:55:10.129Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757278510114&_t=1757278510115 - 127.0.0.1
+[2025-09-07T20:55:10.327Z] INFO: GET /api/bookings?status=all&page=1&limit=12&_t=1757278510115&_t=1757278510115 - 127.0.0.1
+[2025-09-07T20:55:10.423Z] INFO: GET /api/users/me?_t=1757278510115 - 127.0.0.1
+[2025-09-07T20:55:10.740Z] INFO: GET /api/rides/user?status=all&_t=1757278510737&_t=1757278510737 - 127.0.0.1
+[2025-09-07T20:55:11.265Z] INFO: GET /api/rides/user?status=all&_t=1757278511261&_t=1757278511261 - 127.0.0.1
+[2025-09-07T23:15:56.391Z] INFO: MongoDB Connected: ac-axtossa-shard-00-01.zdprcoy.mongodb.net
+[2025-09-07T23:15:56.393Z] INFO: Database Name: rideshare
+[2025-09-07T23:15:56.409Z] INFO: 🚗 RideShare Pro Server running on http://0.0.0.0:5000
+[2025-09-07T23:15:56.411Z] INFO: 🔗 Local Health:  http://localhost:5000/api/health
+[2025-09-07T23:15:56.412Z] INFO: 📱 Phone Health:  http://192.168.132.193:5000/api/health
+[2025-09-07T23:15:56.413Z] INFO: 🔌 WebSocket: Active
+[2025-09-07T23:15:56.414Z] INFO: 🌍 Environment: development
+[2025-09-07T23:15:56.415Z] INFO: 🌐 CORS Origins: (any - dev)

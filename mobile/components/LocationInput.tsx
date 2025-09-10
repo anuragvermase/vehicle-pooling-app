@@ -1,12 +1,6 @@
-// src/components/LocationInput.tsx
+// mobile/src/components/LocationInput.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  View,
-  TextInput,
-  FlatList,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { View, TextInput, FlatList, Text, TouchableOpacity } from "react-native";
 import * as ExpoLocation from "expo-location";
 import type { PlaceLite } from "../src/services/places";
 import {
@@ -33,9 +27,7 @@ export default function LocationInput({
   enableCurrentLocation = true,
 }: Props) {
   const [text, setText] = useState(value?.text ?? "");
-  const [items, setItems] = useState<
-    Array<{ description: string; place_id: string }>
-  >([]);
+  const [items, setItems] = useState<Array<{ description: string; place_id: string }>>([]);
   const [open, setOpen] = useState(false);
   const [session, setSession] = useState<string>(PlacesSession.new());
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -49,7 +41,7 @@ export default function LocationInput({
     if (!open) return;
     if (timer.current) clearTimeout(timer.current);
 
-    // Always push a "Use current location" and "Use typed text" option
+    // "Use current location" always first for great UX
     const base = enableCurrentLocation
       ? [{ description: "📍 Use Current Location", place_id: "use:current" }]
       : [];
@@ -81,21 +73,13 @@ export default function LocationInput({
   async function pickCurrent() {
     const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
     if (status !== "granted") {
-      setItems([
-        { description: "Permission denied. Type location instead.", place_id: "perm:denied" },
-      ]);
+      setItems([{ description: "Permission denied. Type location instead.", place_id: "perm:denied" }]);
       return;
     }
-    const pos = await ExpoLocation.getCurrentPositionAsync({
-      accuracy: ExpoLocation.Accuracy.Balanced,
-    });
+    const pos = await ExpoLocation.getCurrentPositionAsync({ accuracy: ExpoLocation.Accuracy.Balanced });
     const full = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
     const chosen: PlaceLite =
-      full ?? {
-        text: "Current location",
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude,
-      };
+      full ?? { text: "Current location", lat: pos.coords.latitude, lng: pos.coords.longitude };
     onChange(chosen);
     setText(chosen.text);
     setOpen(false);
@@ -108,14 +92,14 @@ export default function LocationInput({
       return;
     }
     let chosen = await details(item.place_id, session);
-    // If user picked "Use “text”", geocode it to get lat/lng
+
+    // If "Use “text”" was picked, geocode to lat/lng
     if (!chosen && item.place_id.startsWith("typed:")) {
       const q = item.place_id.slice("typed:".length);
       chosen = (await geocodeText(q)) ?? { text: q };
     }
-    const final: PlaceLite =
-      chosen ?? { place_id: item.place_id, text: item.description };
 
+    const final: PlaceLite = chosen ?? { place_id: item.place_id, text: item.description };
     onChange(final);
     setText(final.text);
     setOpen(false);
@@ -154,7 +138,6 @@ export default function LocationInput({
             borderWidth: 1,
             borderColor: "#23314a",
             maxHeight: 260,
-            // Make sure it sits above the map on Android + iOS
             zIndex: 999,
             elevation: 24,
             overflow: "hidden",
@@ -166,17 +149,11 @@ export default function LocationInput({
             data={items}
             keyExtractor={(i) => i.place_id + i.description}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => choose(item)}
-                activeOpacity={0.7}
-                style={{ padding: 12 }}
-              >
+              <TouchableOpacity onPress={() => choose(item)} activeOpacity={0.7} style={{ padding: 12 }}>
                 <Text style={{ color: "#e5e7eb" }}>{item.description}</Text>
               </TouchableOpacity>
             )}
-            ListEmptyComponent={
-              <Text style={{ color: "#93a3b8", padding: 12 }}>No suggestions</Text>
-            }
+            ListEmptyComponent={<Text style={{ color: "#93a3b8", padding: 12 }}>No suggestions</Text>}
           />
         </View>
       )}

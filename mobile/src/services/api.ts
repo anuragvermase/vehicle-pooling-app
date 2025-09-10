@@ -1,13 +1,31 @@
-// mobile/src/services/api.ts
 import axios, { AxiosError } from "axios";
 import Constants from "expo-constants";
+import { Platform } from "react-native";
 import { Storage } from "./storage";
 
-/** Base URL (prefer app.config.ts -> extra.API_BASE_URL) */
+/** Normalize localhost for Android emulator */
+function normalizeBase(url: string) {
+  if (!url) return url;
+  // If someone puts localhost/127.0.0.1, map it to 10.0.2.2 on Android
+  if (Platform.OS === "android") {
+    const m = url.match(/^http:\/\/(localhost|127\.0\.0\.1)(?::(\d+))?(\/.*)?$/i);
+    if (m) {
+      const port = m[2] || "5000";
+      const rest = m[3] || "/api";
+      return `http://10.0.2.2:${port}${rest}`;
+    }
+  }
+  return url;
+}
+
+/** Base URL: prefer runtime env, then app config, then safe fallback */
+const RUNTIME = (process.env.EXPO_PUBLIC_API_BASE_URL as string | undefined) || "";
+const EXTRA   = (((Constants?.expoConfig?.extra as any) || {}).EXPO_PUBLIC_API_BASE_URL as string | undefined) || "";
+
 export const API_BASE_URL: string =
-  ((Constants?.expoConfig?.extra as any)?.API_BASE_URL as string) ||
-  process.env.EXPO_PUBLIC_API_BASE_URL ||
-  "http://10.0.2.2:5000/api"; // emulator-safe fallback
+  normalizeBase(RUNTIME) ||
+  normalizeBase(EXTRA)   ||
+  (Platform.OS === "android" ? "http://10.0.2.2:5000/api" : "http://localhost:5000/api");
 
 const BASE = API_BASE_URL.replace(/\/$/, "");
 
@@ -39,7 +57,7 @@ http.interceptors.request.use(async (config) => {
   if (token) {
     config.headers = config.headers ?? {};
     (config.headers as any).Authorization = `Bearer ${token}`;
-    (config.headers as any)["x-auth-token"] = token; // some servers use this
+    (config.headers as any)["x-auth-token"] = token;
   }
   return config;
 });
@@ -59,12 +77,27 @@ export function asMessage(err: unknown) {
 }
 
 /** GET with fallbacks */
-async function getWithFallback<T>(paths: string[]): Promise<T> {
+async function getWithFallback<T>(paths: string[], params?: any): Promise<T> {
   let lastErr: any;
   for (const p of paths) {
     try {
-      return await unwrap<T>(http.get(p));
-    } catch (e) { lastErr = e; }
+      return await unwrap<T>(http.get(p, { params }));
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr;
+}
+
+/** POST with fallbacks */
+async function postWithFallback<T>(paths: string[], body?: any): Promise<T> {
+  let lastErr: any;
+  for (const p of paths) {
+    try {
+      return await unwrap<T>(http.post(p, body));
+    } catch (e) {
+      lastErr = e;
+    }
   }
   throw lastErr;
 }
@@ -115,8 +148,6 @@ export const UserAPI = {
 /* =========================
    RIDES API
    ========================= */
-
-// Minimal shape used by FindRides UI
 export type RideDto = {
   _id: string;
   startLocation?: { name?: string };
@@ -127,32 +158,15 @@ export type RideDto = {
   driver?: { name?: string };
 };
 
-// helper: GET with params across multiple paths
 async function getFirst<T>(paths: string[], params?: any): Promise<T> {
-  let lastErr: any;
-  for (const p of paths) {
-    try {
-      return await unwrap<T>(http.get(p, { params }));
-    } catch (e) { lastErr = e; }
-  }
-  throw lastErr;
+  return getWithFallback<T>(paths, params);
 }
-
-// helper: POST with same params (fallback if server expects body)
 async function postFirst<T>(paths: string[], body?: any): Promise<T> {
-  let lastErr: any;
-  for (const p of paths) {
-    try {
-      return await unwrap<T>(http.post(p, body));
-    } catch (e) { lastErr = e; }
-  }
-  throw lastErr;
+  return postWithFallback<T>(paths, body);
 }
 
 export const RideAPI = {
-  /**
-   * q can include: from, to, fromLat, fromLng, toLat, toLng, date, seats, etc.
-   */
+  /** Search rides (GET first, fallback to POST) */
   async list(q: any): Promise<RideDto[]> {
     const getPaths = ["/rides/search", "/rides", "/rides/list"];
     try {
@@ -162,10 +176,19 @@ export const RideAPI = {
       return await postFirst<RideDto[]>(postPaths, q);
     }
   },
+
+  /** Create/offer a ride (with graceful path fallbacks) */
+  async create(body: any): Promise<any> {
+    const postPaths = ["/rides/create", "/rides", "/rides/new"];
+    return await postFirst<any>(postPaths, body);
+  },
+
   async upcomingMe(): Promise<any | null> {
     try {
       const { data } = await http.get("/rides/upcoming/me");
       return data?.ride ?? data ?? null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   },
 };

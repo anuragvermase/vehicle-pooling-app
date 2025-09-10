@@ -1,73 +1,138 @@
-// src/screens/FindRides.tsx
+// mobile/src/screens/FindRides.tsx
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
-  View,
-  Text,
-  Pressable,
-  FlatList,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Dimensions,
+  View, Text, Pressable, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform, Dimensions,
 } from "react-native";
-import Constants from "expo-constants";
-import { RideAPI, asMessage, RideDto } from "../services/api";
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
+import { RideAPI, asMessage } from "../services/api";
 import LocationInput from "../../components/LocationInput";
-import { PlaceLite, geocodeText } from "../services/places";
-import EnhancedMap from "../../components/EnhancedMap";
+import { PlaceLite } from "../services/places";
+import * as Location from "expo-location";
 
 const SCREEN = Dimensions.get("window");
 const MAP_HEIGHT = Math.min(320, SCREEN.height * 0.4);
 
-// Ensure a PlaceLite has lat/lng (for typed text without selection)
-async function ensureCoords(p: PlaceLite | null): Promise<PlaceLite | null> {
-  if (!p) return null;
-  if (typeof p.lat === "number" && typeof p.lng === "number") return p;
-  const g = await geocodeText(p.text);
-  return g ?? p;
+// Use runtime env for JS calls (Directions API)
+const GMAPS_KEY = process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY || "";
+
+/* -------- helpers -------- */
+type LatLng = { latitude: number; longitude: number };
+
+function toLatLng(p?: PlaceLite | null): LatLng | null {
+  if (p && typeof p.lat === "number" && typeof p.lng === "number") {
+    return { latitude: p.lat, longitude: p.lng };
+  }
+  return null;
 }
 
-// ---- component -------------------------------------------------------------
+// tiny polyline decoder
+function decodePolyline(encoded: string): LatLng[] {
+  let index = 0, lat = 0, lng = 0, points: LatLng[] = [];
+  while (index < encoded.length) {
+    let b, shift = 0, result = 0;
+    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+    const dlat = (result & 1) ? ~(result >> 1) : (result >> 1);
+    lat += dlat;
+    shift = 0; result = 0;
+    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+    const dlng = (result & 1) ? ~(result >> 1) : (result >> 1);
+    lng += dlng;
+    points.push({ latitude: lat / 1e5, longitude: lng / 1e5 });
+  }
+  return points;
+}
+
+async function getDirections(a: LatLng, b: LatLng) {
+  if (!GMAPS_KEY) return null;
+  const url =
+    `https://maps.googleapis.com/maps/api/directions/json` +
+    `?origin=${a.latitude},${a.longitude}&destination=${b.latitude},${b.longitude}` +
+    `&mode=driving&key=${GMAPS_KEY}`;
+  const res = await fetch(url);
+  const json = await res.json();
+  const route = json?.routes?.[0];
+  if (!route) return null;
+  const leg = route.legs?.[0];
+  return {
+    coords: decodePolyline(route.overview_polyline?.points || ""),
+    distanceText: leg?.distance?.text || "",
+    durationText: leg?.duration?.text || "",
+  };
+}
+
+/* -------- screen -------- */
 export default function FindRides({ route }: any) {
-  // Expecting full objects from Landing; but we’ll harden here too
   const initialFrom = route?.params?.from as PlaceLite | undefined;
   const initialTo = route?.params?.to as PlaceLite | undefined;
 
   const [from, setFrom] = useState<PlaceLite | null>(initialFrom ?? null);
   const [to, setTo] = useState<PlaceLite | null>(initialTo ?? null);
-
   const [loading, setLoading] = useState(false);
-  const [list, setList] = useState<RideDto[] | null>(null);
+  const [list, setList] = useState<any[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [routeCoords, setRouteCoords] = useState<LatLng[]>([]);
   const [distanceText, setDistanceText] = useState("");
   const [durationText, setDurationText] = useState("");
-  const resolvingRef = useRef(false); // prevent loops while geocoding
 
-  const initialRegion = useMemo(
-    () => ({ latitude: 28.6139, longitude: 77.2090, latitudeDelta: 0.5, longitudeDelta: 0.5 }),
-    []
-  );
+  const mapRef = useRef<MapView | null>(null);
 
-  // 1) If user typed only text, geocode to get lat/lng
+  const [initialRegion, setInitialRegion] = useState({
+    latitude: 28.6139, longitude: 77.2090, latitudeDelta: 0.5, longitudeDelta: 0.5,
+  });
+
+  // Center map on user if permitted
   useEffect(() => {
     (async () => {
-      if (resolvingRef.current) return;
-      let changed = false;
-      if (from && (from.lat == null || from.lng == null)) {
-        resolvingRef.current = true;
-        const g = await ensureCoords(from);
-        if (g && (g.lat != null && g.lng != null)) { setFrom(g); changed = true; }
-        resolvingRef.current = false;
-      }
-      if (to && (to.lat == null || to.lng == null)) {
-        resolvingRef.current = true;
-        const g = await ensureCoords(to);
-        if (g && (g.lat != null && g.lng != null)) { setTo(g); changed = true; }
-        resolvingRef.current = false;
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === "granted") {
+          const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+          setInitialRegion({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            latitudeDelta: 0.08,
+            longitudeDelta: 0.08,
+          });
+        }
+      } catch {}
+    })();
+  }, []);
+
+  const fitMap = useCallback((A?: LatLng | null, B?: LatLng | null) => {
+    const a = A ?? toLatLng(from);
+    const b = B ?? toLatLng(to);
+    if (a && b && mapRef.current) {
+      mapRef.current.fitToCoordinates([a, b], {
+        edgePadding: { top: 60, right: 60, bottom: 60, left: 60 },
+        animated: true,
+      });
+    } else if (a && mapRef.current) {
+      mapRef.current.animateToRegion({ ...a, latitudeDelta: 0.08, longitudeDelta: 0.08 });
+    }
+  }, [from, to]);
+
+  // when both sides available -> draw route
+  useEffect(() => {
+    (async () => {
+      const A = toLatLng(from);
+      const B = toLatLng(to);
+      setRouteCoords([]); setDistanceText(""); setDurationText("");
+      if (A && B) {
+        try {
+          const r = await getDirections(A, B);
+          if (r) {
+            setRouteCoords(r.coords);
+            setDistanceText(r.distanceText);
+            setDurationText(r.durationText);
+            fitMap(A, B);
+          }
+        } catch {}
+      } else if (A) {
+        fitMap(A, null);
       }
     })();
-  }, [from?.text, to?.text]);
+  }, [from?.lat, from?.lng, to?.lat, to?.lng, fitMap]);
 
   const search = async () => {
     setError(null); setList(null);
@@ -87,29 +152,36 @@ export default function FindRides({ route }: any) {
     }
   };
 
+  const pin = (p: PlaceLite | null, color: string) =>
+    p && typeof p.lat === "number" && typeof p.lng === "number" ? (
+      <Marker coordinate={{ latitude: p.lat!, longitude: p.lng! }} pinColor={color} />
+    ) : null;
+
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: "#0B0F14" }}
-      behavior={Platform.select({ ios: "padding", android: undefined })}>
-      <EnhancedMap
-        height={MAP_HEIGHT}
-        center={{ lat: initialRegion.latitude, lng: initialRegion.longitude }}
-        showDirections={!!(from?.lat != null && from?.lng != null && to?.lat != null && to?.lng != null)}
-        origin={from?.lat != null && from?.lng != null ? { lat: from.lat!, lng: from.lng! } : null}
-        destination={to?.lat != null && to?.lng != null ? { lat: to.lat!, lng: to.lng! } : null}
-        onRouteInfo={(info) => {
-          setDistanceText(info?.distanceText || "");
-          setDurationText(info?.durationText || "");
-        }}
-      />
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: "#0B0F14" }}
+      behavior={Platform.select({ ios: "padding", android: undefined })}
+    >
+      {/* Map */}
+      <MapView
+        ref={mapRef}
+        provider={PROVIDER_GOOGLE}
+        style={{ width: "100%", height: MAP_HEIGHT }}
+        initialRegion={initialRegion}
+        onMapReady={() => fitMap()}
+      >
+        {routeCoords.length > 0 && <Polyline coordinates={routeCoords} strokeWidth={5} />}
+        {pin(from, "#22c55e")}
+        {pin(to, "#3b82f6")}
+      </MapView>
 
+      {/* Panel */}
       <View style={{ flex: 1, padding: 16 }}>
-        <Text style={{ color: "white", fontSize: 22, fontWeight: "800", marginBottom: 12 }}>
-          Plan your trip
-        </Text>
+        <Text style={{ color: "white", fontSize: 22, fontWeight: "800", marginBottom: 12 }}>Plan your trip</Text>
 
-        <LocationInput value={from} onChange={setFrom} placeholder="From" />
+        <LocationInput value={from} onChange={setFrom} placeholder="From" dark />
         <View style={{ height: 10 }} />
-        <LocationInput value={to} onChange={setTo} placeholder="To" />
+        <LocationInput value={to} onChange={setTo} placeholder="To" dark />
 
         {distanceText || durationText ? (
           <Text style={{ color: "#c7d2fe", marginTop: 8 }}>
@@ -117,8 +189,17 @@ export default function FindRides({ route }: any) {
           </Text>
         ) : null}
 
-        <Pressable onPress={search} disabled={!from || !to}
-          style={{ backgroundColor: !from || !to ? "#3A4B63" : "#22c55e", padding: 16, borderRadius: 30, marginTop: 14, alignItems: "center" }}>
+        <Pressable
+          onPress={search}
+          disabled={!from || !to}
+          style={{
+            backgroundColor: !from || !to ? "#3A4B63" : "#22c55e",
+            padding: 16,
+            borderRadius: 30,
+            marginTop: 14,
+            alignItems: "center",
+          }}
+        >
           {loading ? <ActivityIndicator color="#0B0F14" /> : <Text style={{ color: "#0B0F14", fontWeight: "800", fontSize: 16 }}>🚀 Search Ride</Text>}
         </Pressable>
 
@@ -138,15 +219,9 @@ export default function FindRides({ route }: any) {
                 <Text style={{ color: "white", fontWeight: "700" }}>
                   {item.startLocation?.name} → {item.endLocation?.name}
                 </Text>
-                <Text style={{ color: "#c7d2fe", marginTop: 4 }}>
-                  {new Date(item.departureTime).toLocaleString()}
-                </Text>
-                <Text style={{ color: "#c7d2fe", marginTop: 4 }}>
-                  ₹ {item.pricePerSeat} • {item.availableSeats} seat(s)
-                </Text>
-                {item.driver?.name ? (
-                  <Text style={{ color: "#9ca3af", marginTop: 2 }}>Driver: {item.driver.name}</Text>
-                ) : null}
+                <Text style={{ color: "#c7d2fe", marginTop: 4 }}>{new Date(item.departureTime).toLocaleString()}</Text>
+                <Text style={{ color: "#c7d2fe", marginTop: 4 }}>₹ {item.pricePerSeat} • {item.availableSeats} seat(s)</Text>
+                {item.driver?.name ? <Text style={{ color: "#9ca3af", marginTop: 2 }}>Driver: {item.driver.name}</Text> : null}
               </View>
             )}
           />

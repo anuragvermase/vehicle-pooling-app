@@ -320,22 +320,25 @@ export default function Landing({ navigation }: any) {
   /* ----------- appended marketing (always visible below) ----------- */
   const renderMarketing = useCallback(() => (
     <>
-      <Accordion title="Why Choose PoolRide? 🚀" subtitle="Future of commuting: safe, affordable, convenient.">
+      {/* <Accordion title="Why Choose PoolRide? 🚀" subtitle="Future of commuting: safe, affordable, convenient.">
         <MemoFeatureGrid />
-      </Accordion>
+      </Accordion> */}
+
       <LinearGradient colors={["#5B7CFA", "#8B5CF6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={S.trustBanner}>
-        <Text style={S.trustTitle}>Trusted by Thousands ✨</Text>
+        <Text style={S.trustTitle}>Trusted by You & Thousands</Text>
         <View style={S.trustGrid}>
           <TrustItem value="50,000+" label="Happy Users" />
           <TrustItem value="1M+" label="Rides Completed" />
           <TrustItem value="₹10L+" label="Money Saved" />
-          <TrustItem value="4.8/5" label="User Rating" />
+          <TrustItem value="4.9/5" label="User Rating" />
         </View>
       </LinearGradient>
-      <Accordion title="How PoolRide Works 🚀">
+
+      {/* <Accordion title="How PoolRide Works 🚀">
         <MemoSteps />
-      </Accordion>
-      <LinearGradient colors={["#6D7EF7", "#6C3CF6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={S.finalCtaWrap}>
+      </Accordion> */}
+
+      {/* <LinearGradient colors={["#6D7EF7", "#6C3CF6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={S.finalCtaWrap}>
         <Text style={S.finalCtaTitle}>Ready to Start Your Journey? ✨</Text>
         <View style={S.finalCtaRow}>
           <Pressable onPress={async () => { try { await Haptics.selectionAsync(); } catch {} navigation.navigate("Register"); }} accessibilityRole="button" accessibilityLabel="Start now, it is free" style={S.finalCtaPrimary}>
@@ -349,7 +352,7 @@ export default function Landing({ navigation }: any) {
             <Text style={S.finalCtaGhostText}>Download App</Text>
           </Pressable>
         </View>
-      </LinearGradient>
+      </LinearGradient> */}
     </>
   ), [navigation]);
 
