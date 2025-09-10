@@ -1,4 +1,3 @@
-// backend/middleware/auth.js
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { logger } from '../utils/logger.js';
@@ -39,7 +38,8 @@ export const protect = async (req, res, next) => {
         });
       }
 
-      const user = await User.findById(decodedId).select('+isActive +isLocked');
+      // include role/isBanned in selection so Admin guard works
+      const user = await User.findById(decodedId).select('+isActive +isLocked role isBanned');
       if (!user) {
         return res.status(401).json({
           success: false,
@@ -58,6 +58,13 @@ export const protect = async (req, res, next) => {
         return res.status(401).json({
           success: false,
           message: 'Account is temporarily locked due to multiple failed login attempts.',
+        });
+      }
+
+      if (user.isBanned) {
+        return res.status(403).json({
+          success: false,
+          message: 'Your account is banned. Contact support.',
         });
       }
 
