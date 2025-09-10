@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useState, useEffect } from 'react';
 import {
   BrowserRouter as Router,
@@ -36,6 +35,10 @@ import Settings from './pages/Settings';
 
 // Ride details (after publish)
 import RidePublished from './pages/RidePublished';
+
+/* ✅ Admin components */
+import AdminDashboard from './pages/AdminDashboard';
+import AdminRoute from './components/AdminRoute';
 
 /**
  * RouteStyleLoader
@@ -316,6 +319,16 @@ function AppContent() {
         <Route path="/profile" element={user ? <Profile /> : <Navigate to="/" replace />} />
         <Route path="/overview" element={user ? <Overview /> : <Navigate to="/" replace />} />
         <Route path="/settings" element={user ? <Settings /> : <Navigate to="/" replace />} />
+
+        {/* ✅ Admin route (guarded) */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
 
         {/* Public footer pages */}
         <Route path="/about" element={<AboutUs />} />

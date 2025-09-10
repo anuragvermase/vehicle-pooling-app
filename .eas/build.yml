@@ -1,0 +1,12 @@
+build:
+name: Build mobile (subdir)
+steps:
+- eas/checkout
+- run:
+name: Use mobile as working directory
+working_directory: mobile
+command: echo "Using $(pwd) for install/build"
+- eas/install_dependencies
+- eas/prebuild
+- eas/build
+- eas/release

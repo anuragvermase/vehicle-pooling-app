@@ -1,4 +1,3 @@
-// backend/models/User.js
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -37,7 +36,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
-  avatarUrl: {                 // ✅ added so updates to avatarUrl persist
+  avatarUrl: {                 // ✅ persists uploaded avatar URL
     type: String,
     default: null
   },
@@ -63,17 +62,27 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  // Enhanced verification
-  verification: {
-    email: { type: Boolean, default: false },
-    phone: { type: Boolean, default: false },
-    identity: { type: Boolean, default: false },
-    driving: { type: Boolean, default: false }
+
+  /* ------------------------ ✅ Admin/RBAC additions ------------------------ */
+  role: {
+    type: String,
+    enum: ['user', 'driver', 'admin', 'superadmin'],
+    default: 'user',
+    index: true
   },
-  rating: {
-    average: { type: Number, default: 0, min: 0, max: 5 },
-    count: { type: Number, default: 0 }
+  isBanned: {
+    type: Boolean,
+    default: false,
+    index: true
   },
+  kycStatus: {
+    type: String,
+    enum: ['none', 'pending', 'approved', 'rejected'],
+    default: 'none',
+    index: true
+  },
+  kycNote: { type: String },
+
   // Security fields
   loginAttempts: {
     type: Number,
@@ -84,6 +93,17 @@ const userSchema = new mongoose.Schema({
   },
   lastLogin: {
     type: Date
+  },
+  // Enhanced verification
+  verification: {
+    email: { type: Boolean, default: false },
+    phone: { type: Boolean, default: false },
+    identity: { type: Boolean, default: false },
+    driving: { type: Boolean, default: false }
+  },
+  rating: {
+    average: { type: Number, default: 0, min: 0, max: 5 },
+    count: { type: Number, default: 0 }
   },
   // Enhanced preferences
   preferences: {
@@ -182,6 +202,9 @@ const userSchema = new mongoose.Schema({
 userSchema.index({ email: 1 });
 userSchema.index({ phone: 1 });
 userSchema.index({ googleId: 1 });
+userSchema.index({ role: 1 });
+userSchema.index({ isBanned: 1 });
+userSchema.index({ kycStatus: 1 });
 userSchema.index({ 'rating.average': -1 });
 userSchema.index({ 'location.current': '2dsphere' });
 
