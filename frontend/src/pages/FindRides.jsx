@@ -61,7 +61,7 @@ const FindRides = ({ user, onLogout }) => {
   const resetFilters = () => {
     setFilters({
       maxPrice: '',
-      minRating: 4.0,
+      minRating: 0,
       vehicleType: '',
       amenities: [],
       instantBooking: false,
@@ -80,7 +80,7 @@ const FindRides = ({ user, onLogout }) => {
   // ---------- Derived rides (filters + sort) ----------
   const [filters, setFilters] = useState({
     maxPrice: '',
-    minRating: 4.0,
+    minRating: 0,
     vehicleType: '',
     amenities: [],
     instantBooking: false,
@@ -261,7 +261,6 @@ const FindRides = ({ user, onLogout }) => {
       if (params.fromLat && params.fromLng && params.toLat && params.toLng) {
         params.trustCoordinates = true;     // tell backend to skip geocoding and use geo search
       }
-
 
       lastSearchParamsRef.current = params;
 
@@ -728,31 +727,6 @@ const FindRides = ({ user, onLogout }) => {
                   <div className="rs-mapoverlay">
                     {locationData.from && <span className="rs-tag sm">Start pinned</span>}
                     {locationData.to && <span className="rs-tag sm">Destination set</span>}
-                  </div>
-                </div>
-
-                {/* NEW: Helpful tips */}
-                <div className="rs-tips">
-                  <div className="rs-tip">
-                    <span>🛡</span>
-                    <div>
-                      <b>Verified drivers</b>
-                      <small>KYC & vehicle checks on all drivers</small>
-                    </div>
-                  </div>
-                  <div className="rs-tip">
-                    <span>⚡</span>
-                    <div>
-                      <b>Instant booking</b>
-                      <small>Book seats in one tap—no calls needed</small>
-                    </div>
-                  </div>
-                  <div className="rs-tip">
-                    <span>📍</span>
-                    <div>
-                      <b>Live route view</b>
-                      <small>Preview distance and ETA before you search</small>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1267,90 +1241,108 @@ const StyleChunk = () => (
   }
   *{box-sizing:border-box}
   body{margin:0; width:100%; overflow-x:hidden}
-  .rs-page{min-height:100vh; width:100%; background: radial-gradient(1200px 600px at 20% 10%, rgba(177,70,243,.35), transparent),
-                                 radial-gradient(1200px 600px at 80% 80%, rgba(91,62,241,.35), transparent),
-                                 linear-gradient(135deg, #3d2aa6 0%, #7a36d0 60%, #ae44f2 100%);
-           color:var(--text); padding:28px 0; margin:0}
+  .rs-page{
+    min-height:100vh; width:100%;
+    background:
+      radial-gradient(1200px 700px at 15% 10%, rgba(177,70,243,.28), transparent),
+      radial-gradient(1000px 600px at 85% 85%, rgba(91,62,241,.25), transparent),
+      linear-gradient(135deg, #3b2aa6 0%, #7a36d0 55%, #b244f2 100%);
+    color:var(--text); padding:32px 0; margin:0
+  }
   .rs-center{display:grid; place-items:center; text-align:center; padding:64px}
   .rs-spinner{width:38px; height:38px; border-radius:50%; border:3px solid rgba(255,255,255,.25); border-top-color:#fff; animation:spin 1s linear infinite; margin-bottom:12px}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  .rs-header{width:100%; max-width:1100px; margin:0 auto 8px; display:flex; align-items:center; justify-content:space-between; padding:0 20px}
+  .rs-header{width:100%; max-width:1280px; margin:0 auto 12px; display:flex; align-items:center; justify-content:space-between; padding:0 20px}
   .rs-brand{display:flex; align-items:center; gap:12px}
   .rs-logo{font-size:22px}
-  .rs-title{font-weight:700; font-size:20px}
-  .rs-chip{background:rgba(255,255,255,.12); padding:8px 14px; border-radius:999px; border:none; color:#fff; cursor:pointer}
+  .rs-title{font-weight:800; font-size:22px; letter-spacing:.2px}
+  .rs-chip{background:rgba(255,255,255,.12); padding:8px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.18); color:#fff; cursor:pointer}
   .rs-chip.active{background:rgba(255,255,255,.22)}
   .rs-right{display:flex; align-items:center; gap:12px}
   .rs-hello{background:#5b6ef5; color:#fff; width:36px; height:36px; border-radius:999px; display:grid; place-items:center; font-weight:700}
   .rs-logout{background:#111; color:#fff; border:1px solid rgba(255,255,255,.2); padding:8px 12px; border-radius:12px; cursor:pointer}
 
-  /* NEW: Stats strip */
-  .rs-stats{max-width:1100px; margin:0 auto 16px; padding:0 20px; display:flex; gap:12px; flex-wrap:wrap}
-  .rs-stat{background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:8px 12px; display:flex; align-items:center; gap:8px}
+  /* Stats row */
+  .rs-stats{max-width:1280px; margin:0 auto 18px; padding:0 20px; display:flex; gap:12px; flex-wrap:wrap}
+  .rs-stat{background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.08)); border:1px solid rgba(255,255,255,.18); border-radius:12px; padding:8px 12px; display:flex; align-items:center; gap:8px; backdrop-filter:blur(8px)}
   .rs-stat b{font-size:16px}
   .rs-stat small{color:var(--muted)}
 
-  .rs-main{max-width:1100px; margin:0 auto; width:100%; padding:0 20px}
-  .rs-card {background: rgba(255,255,255,.08); backdrop-filter: blur(20px); border-radius:28px; box-shadow:0 20px 50px rgba(0,0,0,.25); padding:48px; width:100%; min-height: 75vh; display:flex; flex-direction:column; justify-content:center;}
+  /* Main container */
+  .rs-main{max-width:1280px; margin:0 auto; width:100%; padding:0 20px}
+
+  /* Card as a premium glass panel */
+  .rs-card {
+    background:
+      radial-gradient(1000px 700px at -20% -20%, rgba(255,255,255,.08), transparent),
+      rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(14px);
+    border-radius:28px;
+    box-shadow:0 30px 80px rgba(0,0,0,.35);
+    padding:40px;
+    width:100%;
+    min-height:88vh;
+    display:flex; flex-direction:column; justify-content:center;
+  }
 
   /* HERO */
-  .rs-hero-grid { display:grid; grid-template-columns: 1.2fr 1fr; gap:36px; align-items:center; height:100%;}
-  .rs-h1{font-size:44px; line-height:1.1; margin:0 0 8px}
-  .rs-sub{margin:0 0 18px; color:var(--muted)}
-  .rs-form{display:flex; flex-direction:column; gap:14px}
-  .rs-row{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  .rs-hero-grid{display:grid; grid-template-columns: 1.15fr 1fr; gap:40px; align-items:stretch; height:100%}
+  .rs-h1{font-size:48px; line-height:1.08; margin:0 0 10px; font-weight:900; letter-spacing:.3px}
+  .rs-sub{margin:0 0 16px; color:var(--muted)}
+
+  .rs-form{display:flex; flex-direction:column; gap:12px}
+  .rs-row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
   .rs-minirow{display:flex; gap:10px; align-items:center}
-  .rs-input{background:#fff; border-radius:16px; padding:12px 14px; color:#111; display:flex; align-items:center; gap:8px; position:relative; box-shadow:0 6px 22px rgba(17,24,39,.08)}
-  .rs-input input, .rs-input select{border:none; outline:none; width:100%; font-size:15px; padding-right:30px}
+  .rs-input{
+    background:#fff; border-radius:16px; padding:14px 16px; color:#111; display:flex; align-items:center; gap:8px;
+    position:relative; box-shadow:0 8px 24px rgba(17,24,39,.10); border:1px solid rgba(0,0,0,0);
+  }
+  .rs-input input, .rs-input select{border:none; outline:none; width:100%; font-size:16px; padding-right:30px; background:transparent}
+  .rs-input:focus-within{outline:0; box-shadow:0 0 0 3px rgba(99,102,241,.35)}
   .rs-pin-icon{position:absolute; right:14px; top:50%; transform:translateY(-50%); color:#666; z-index:1}
   .rs-via{position:relative}
   .rs-x{background:transparent; border:none; color:#333; cursor:pointer; position:absolute; right:8px; top:8px; z-index:2}
-  .rs-primary{background: linear-gradient(135deg, #ff4694, #b146f3); color:#fff; font-weight:700; border:none; padding:16px 18px; border-radius:16px; cursor:pointer; box-shadow:0 10px 28px rgba(177,70,243,.35)}
+
+  .rs-primary{
+    background: linear-gradient(135deg, #ff4694, #b146f3);
+    color:#fff; font-weight:800; border:none; padding:18px 20px; border-radius:16px; cursor:pointer;
+    box-shadow:0 16px 38px rgba(177,70,243,.35); transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .rs-primary:hover{ transform:translateY(-1px); box-shadow:0 22px 48px rgba(177,70,243,.45) }
   .rs-primary.small{padding:10px 14px}
   .rs-primary.disabled{opacity:.6; cursor:not-allowed}
-  .rs-secondary{background:#fff; color:#111; border:none; padding:12px 16px; border-radius:14px; cursor:pointer}
-  .rs-ghost{background:rgba(255,255,255,.14); color:#fff; border:none; padding:8px 12px; border-radius:999px; cursor:pointer}
+  .rs-secondary{background:#fff; color:#111; border:1px solid #eee; padding:12px 16px; border-radius:14px; cursor:pointer; box-shadow:0 10px 22px rgba(17,24,39,.08)}
+  .rs-ghost{background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.28); padding:8px 12px; border-radius:999px; cursor:pointer}
 
-  .rs-preview{display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,.12); padding:10px 12px; border-radius:12px; color:#fff}
-  .rs-price{font-weight:700}
+  .rs-preview{display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,.12); padding:12px 14px; border-radius:12px; color:#fff}
+  .rs-price{font-weight:800}
 
-  /* NEW: quick routes + recent on form page */
+  /* quick routes & recent */
   .rs-quick{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px}
   .rs-recent{margin-top:12px}
-  .rs-recent-toggle{background:rgba(255,255,255,.1); color:#fff; border:none; padding:8px 10px; border-radius:10px; cursor:pointer}
+  .rs-recent-toggle{background:rgba(255,255,255,.1); color:#fff; border:1px solid rgba(255,255,255,.25); padding:8px 10px; border-radius:10px; cursor:pointer}
   .rs-recent-list{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+  .rs-chip{background:#fff; color:#111; border:none; border-radius:999px; padding:8px 12px; box-shadow:0 6px 18px rgba(17,24,39,.10)}
 
-  .rs-mapwrap { height: 520px; border-radius:18px; overflow:hidden; background:#0a0a2a; border:1px solid rgba(255,255,255,.1); position:relative;}
+  /* map */
+  .rs-mapwrap{height:760px; border-radius:18px; overflow:hidden; background:#0a0a2a; border:1px solid rgba(255,255,255,.12); position:relative; box-shadow:0 20px 60px rgba(0,0,0,.28)}
   .rs-mapoverlay{position:absolute; left:10px; top:10px; display:flex; gap:6px; pointer-events:none}
   .rs-tag{background:rgba(255,255,255,.18); padding:6px 10px; border-radius:999px; font-size:12px}
   .rs-tag.sm{font-size:11px; padding:4px 8px}
 
-  .rs-teaser{margin-top:12px; background:#f8f9ff; border-radius:14px; padding:10px; display:flex; flex-direction:column; gap:8px; box-shadow:0 8px 22px rgba(17,24,39,.08)}
-  .rs-teaser-row{height:46px; border-radius:12px; background:#fff}
-  .skeleton{position:relative; overflow:hidden}
-  .skeleton::after{content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(0,0,0,0), rgba(17,24,39,.06), rgba(0,0,0,0)); transform:translateX(-100%); animation:shimmer 1.4s infinite}
-  @keyframes shimmer{to{transform:translateX(100%)}}
-
-  /* NEW: tips below the map */
-  .rs-tips{margin-top:12px; display:flex; flex-direction:column; gap:8px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:12px}
-  .rs-tip{display:flex; gap:10px; align-items:flex-start}
-  .rs-tip b{display:block}
-  .rs-tip small{color:var(--muted)}
-
-  /* RESULTS */
+  /* Results */
   .rs-results-bar{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:28px}
-  .rs-h2{font-size:34px; margin:0 0 2px}
+  .rs-h2{font-size:32px; margin:0 0 2px; font-weight:900}
   .rs-line{font-size:16px}
   .rs-dim{color:var(--muted)}
   .rs-tabs{display:flex; gap:8px; align-items:center}
   .rs-tab{background:#fff; color:#111; border:none; padding:8px 12px; border-radius:12px; cursor:pointer; box-shadow:0 6px 18px rgba(17,24,39,.1)}
   .rs-tab.active{outline:3px solid rgba(255,255,255,.35)}
 
-  /* (legacy inline filters kept out; we now use modal) */
+  /* Filters modal */
   .rs-filters{display:none}
-
-  /* ===== Filters modal ===== */
   .rs-filters-modal{
     position: fixed; inset: 0; z-index: 60;
     background: rgba(10,12,28,.45);
@@ -1367,12 +1359,7 @@ const StyleChunk = () => (
     padding: 18px 18px 14px;
     color: var(--text);
   }
-  .rs-fhead{
-    display:flex; align-items:center; justify-content:space-between;
-    padding: 4px 4px 10px;
-    border-bottom: 1px solid rgba(255,255,255,.12);
-    margin-bottom: 14px;
-  }
+  .rs-fhead{display:flex; align-items:center; justify-content:space-between; padding: 4px 4px 10px; border-bottom: 1px solid rgba(255,255,255,.12); margin-bottom: 14px;}
   .rs-fhead h3{ margin:0; font-size:20px; font-weight:800 }
   .rs-fgrid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px 18px; }
   .rs-filter{ display:flex; flex-direction:column; gap:8px }
@@ -1380,30 +1367,56 @@ const StyleChunk = () => (
   .rs-timebox{ display:flex; align-items:center; gap:8px }
   .rs-sep{ opacity:.7 }
   .rs-factions{ display:flex; justify-content:flex-end; gap:10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.12); }
-  .rs-filters-card select, .rs-filters-card input[type="time"], .rs-filters-card input[type="range"]{
-    background:#fff; color:#111; border:none; border-radius:10px; padding:8px 10px;
-    box-shadow:0 6px 18px rgba(17,24,39,.10);
-  }
+  .rs-filters-card select, .rs-filters-card input[type="time"], .rs-filters-card input[type="range"]{ background:#fff; color:#111; border:none; border-radius:10px; padding:8px 10px; box-shadow:0 6px 18px rgba(17,24,39,.10); }
   .rs-filters-card input[type="range"]{ padding:0 }
   .rs-filters-card .rs-chip{ background:#fff; color:#111; border:none; border-radius:999px; padding:8px 12px; box-shadow:0 6px 18px rgba(17,24,39,.10); }
   .rs-filters-card .rs-chip.active{ outline:3px solid rgba(255,255,255,.35) }
 
-  /* Empty state polish */
-  .rs-empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:60px 20px; gap:14px; background:rgba(255,255,255,.06); border-radius:16px; margin-top:30px; }
+  /* Empty state */
+  .rs-empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:70px 20px; gap:14px; background:rgba(255,255,255,.06); border-radius:16px; margin-top:30px; box-shadow:0 14px 36px rgba(0,0,0,.20)}
   .rs-empty h3{ font-size:22px; margin:6px 0; }
   .rs-empty .rs-emoji{ font-size:56px; margin-bottom:4px; }
   .rs-cta-row{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:14px; }
 
-  /* Responsive adjustments */
+  /* List rows */
+  .rs-list{display:flex; flex-direction:column; gap:12px; min-height:200px}
+  .rs-rowcard{background:#fff; color:#111; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; box-shadow:0 12px 28px rgba(17,24,39,.10); animation:fadeIn .25s ease both}
+  .rs-rowcard.selected{outline:3px solid #7b5cf3}
+  .rs-row-left{display:flex; align-items:center; gap:10px}
+  .rs-avatar{width:44px; height:44px; border-radius:999px}
+  .rs-avatar.sm{width:36px; height:36px}
+  .rs-row-name{font-weight:800}
+  .rs-row-sub{display:flex; align-items:center; gap:6px; color:#6b7280; font-size:13px}
+  .rs-star{color:#f59e0b}
+  .rs-dotsep{opacity:.6}
+  .rs-row-right{text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:2px}
+  .rs-price-lg{font-size:20px; font-weight:900}
+  .rs-mini-book{background:#111; color:#fff; border:none; padding:6px 10px; border-radius:999px; cursor:pointer; font-size:12px; display:none}
+  .rs-rowcard:hover .rs-mini-book{display:inline-block}
+  .rs-rowcard.unavailable{opacity:.7}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none)}
+
+  /* Toasts */
+  .rs-toast{position:fixed; right:18px; bottom:18px; background:#fff; color:#111; padding:12px 14px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.25); display:flex; gap:10px; align-items:flex-start}
+  .rs-toast.error{border-left:6px solid #ef4444}
+  .rs-toast.success{border-left:6px solid #22c55e}
+  .rs-toast .rs-x{position:static; color:#333}
+
+  /* Responsive */
+  @media (max-width: 1024px){
+    .rs-card{min-height: auto; padding:28px}
+    .rs-mapwrap{height:480px}
+  }
+  @media (max-width: 900px) {
+    .rs-hero-grid { grid-template-columns: 1fr; }
+  }
   @media (max-width: 768px) {
     .rs-page { padding: 16px 0; }
     .rs-main { padding: 0 16px; }
     .rs-header { padding: 0 16px; }
-    .rs-h1 { font-size: 32px; }
-    .rs-h2 { font-size: 28px; }
+    .rs-h1 { font-size: 34px; }
+    .rs-h2 { font-size: 26px; }
     .rs-results-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .rs-hero-grid { grid-template-columns: 1fr; }
-    .rs-split.split { grid-template-columns: 1fr; }
     .rs-fgrid{ grid-template-columns: 1fr; }
   }
   `}</style>
