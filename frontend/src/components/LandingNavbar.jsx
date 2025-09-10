@@ -1,4 +1,3 @@
-// frontend/src/components/LandingNavbar.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./LandingNavbar.css";
@@ -18,7 +17,8 @@ function LandingNavbar({ onShowLogin, onShowRegister, user: userProp, onLogout }
     if (!open) return;
     (async () => {
       try {
-        const res = await API.users?.me?.();
+        // Prefer auth.me which now includes role/isBanned
+        const res = await API.auth.getCurrentUser();
         if (res?.user) setMe(res.user);
       } catch {}
     })();
@@ -40,6 +40,7 @@ function LandingNavbar({ onShowLogin, onShowRegister, user: userProp, onLogout }
   const displayName = (me?.username || me?.name || "User").trim();
   const email = me?.email || "";
   const avatar = me?.avatarUrl || me?.profilePicture || "";
+  const role = me?.role;
 
   const initials = displayName
     .split(" ")
@@ -129,11 +130,17 @@ function LandingNavbar({ onShowLogin, onShowRegister, user: userProp, onLogout }
 
                     <hr className="userdd__sep" />
 
+                    {/* ✅ Admin entry shows only for admin/superadmin */}
+                    {(role === 'admin' || role === 'superadmin') && (
+                      <button className="userdd__item" onClick={() => navigate("/admin")}>
+                        Admin Dashboard
+                      </button>
+                    )}
+
                     <button className="userdd__item" onClick={() => navigate("/profile")}>
                       View Profile
                     </button>
 
-                    {/* ✅ fixed classes here */}
                     <button className="userdd__item userdd__logout" onClick={handleLogoutClick}>
                       Logout
                     </button>
@@ -149,4 +156,3 @@ function LandingNavbar({ onShowLogin, onShowRegister, user: userProp, onLogout }
 }
 
 export default LandingNavbar;
-

@@ -1,4 +1,3 @@
-// backend/server.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -21,6 +20,9 @@ import auth from './middleware/auth.js';
 import { initializeSocket } from './Socket/socketHandlers.js';
 import { logger } from './utils/logger.js';
 import Ride from './models/Ride.js';
+
+/* ✅ Admin additions */
+import adminRoutes from './routes/admin.js';
 
 dotenv.config();
 
@@ -146,6 +148,9 @@ app.use('/api/rides', rideRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/chat', chatRoutes);
 
+/* ✅ Mount Admin APIs (RBAC is inside the route) */
+app.use('/api/admin', adminRoutes);
+
 // Current user (profile basics)
 app.get('/api/auth/me', auth, async (req, res, next) => {
   try {
@@ -153,8 +158,9 @@ app.get('/api/auth/me', auth, async (req, res, next) => {
     if (!uid) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
     const User = (await import('./models/User.js')).default;
+    // ✅ include role/isBanned so the front-end can show Admin link
     const user = await User.findById(uid).select(
-      'name fullName username firstName lastName email avatarUrl profilePicture avatar'
+      'name fullName username firstName lastName email avatarUrl profilePicture avatar role isBanned'
     );
 
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
@@ -178,7 +184,7 @@ app.post('/api/auth/avatar', auth, uploadAvatar.single('avatar'), async (req, re
       uid,
       { avatarUrl: fileUrl, profilePicture: fileUrl, avatar: fileUrl },
       { new: true }
-    ).select('name email avatarUrl profilePicture avatar');
+    ).select('name email avatarUrl profilePicture avatar role isBanned');
 
     res.json({ url: fileUrl, user });
   } catch (e) {
